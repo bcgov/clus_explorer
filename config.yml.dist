@@ -1,0 +1,9 @@
+default:
+  db:
+    host: IP address of the DB server
+    dbname: CLUS db name
+    port: Port of the DB server
+    user: username
+    password: password
+production:
+dev:
