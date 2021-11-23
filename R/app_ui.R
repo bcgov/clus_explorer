@@ -23,12 +23,12 @@
 #' @import purrr
 app_ui <- function(request) {
 
+  golem_add_external_resources()
+
   add_class <- function(x, class) {
     x$attribs <- append(x$attribs, list(class = class))
     x
   }
-
-  availStudyAreas<-unlist(getTableQuery("Select nspname from pg_catalog.pg_namespace WHERE nspname NOT IN ('pg_toast', 'pg_temp_1', 'pg_toast_temp_1', 'pg_catalog','information_schema', 'topology', 'public')"), use.names = FALSE)
 
   valueBoxSpark <- function(value = NULL, title = NULL, sparkobj = NULL, subtitle =NULL, info = NULL,
                             icon = NULL, color = "aqua", width = 4, href = NULL){
@@ -80,7 +80,6 @@ app_ui <- function(request) {
   )
   shiny::tagList(
     # Leave this function for adding external resources
-    golem_add_external_resources(),
     dashboardPage(skin = "black",
 
                   dashboardHeader(title = title),
@@ -145,7 +144,7 @@ app_ui <- function(request) {
 
                                                            selectInput(inputId = "schema", label = NULL,
                                                                        selected = "" ,
-                                                                       choices = c("",availStudyAreas), selectize=FALSE
+                                                                       choices = c("", data_global$available_study_areas), selectize=FALSE
                                                            ),
                                                            bsTooltip("schema", "Select an area of interest",
                                                                      "right", options = list(container = "body")
@@ -417,7 +416,7 @@ app_ui <- function(request) {
 golem_add_external_resources <- function(){
 
   golem::add_resource_path(
-    'www', app_sys('app/www')
+    'www', app_sys('inst/app/www')
   )
 
   shiny::tags$head(
