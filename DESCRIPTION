@@ -15,7 +15,7 @@ Imports:
     htmltools
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 URL: https://github.com/bcgov/clus_explorer
 BugReports: https://github.com/bcgov/clus_explorer/issues
 Suggests: 

@@ -25,36 +25,6 @@ app_server <- function( input, output, session ) {
 
   config <- config::get()
 
-  get_db_connection <- function(config) {
-    conn <- DBI::dbConnect(
-      dbDriver("PostgreSQL"),
-      host = config$db$host,
-      dbname = config$db$dbname,
-      port = config$db$port,
-      user = config$db$user,
-      password = config$db$password
-    )
-  }
-
-  getTableQuery <- function(sql){
-    conn <- get_db_connection(config)
-    dbGetQuery(conn, sql)
-    dbDisconnect(conn)
-  }
-
-  getSpatialQuery<-function(sql){
-    conn<-get_db_connection(config)
-    st_read(conn, query = sql)
-    dbDisconnect(conn)
-  }
-
-
-  getRasterQuery<-function(srcRaster){
-    conn <- get_db_connection(config)
-    pgGetRast(conn, srcRaster)
-    dbDisconnect(conn)
-  }
-
   #---Reactive
   queryColumnNames <- reactive({
     data.table(getTableQuery(paste0("SELECT column_name FROM information_schema.columns

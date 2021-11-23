@@ -23,26 +23,6 @@
 #' @import purrr
 app_ui <- function(request) {
 
-  getTableQuery <- function(sql){
-    conn <- DBI::dbConnect(
-      dbDriver("PostgreSQL"), host = '206.12.91.188', dbname = 'clus', port='5432', user='appuser', password='sHcL5w9RTn8ZN3kc')
-    on.exit(dbDisconnect(conn))
-    dbGetQuery(conn, sql)
-  }
-
-  getSpatialQuery<-function(sql){
-    conn<-DBI::dbConnect(dbDriver("PostgreSQL"), host='206.12.91.188', dbname = 'clus', port='5432', user='appuser', password='sHcL5w9RTn8ZN3kc')
-    on.exit(dbDisconnect(conn))
-    st_read(conn, query = sql)
-  }
-
-
-  getRasterQuery<-function(srcRaster){
-    conn<-DBI::dbConnect(dbDriver("PostgreSQL"), host='206.12.91.188', dbname = 'clus', port='5432', user='appuser', password='sHcL5w9RTn8ZN3kc')
-    on.exit(dbDisconnect(conn))
-    pgGetRast(conn, srcRaster)
-  }
-
   add_class <- function(x, class) {
     x$attribs <- append(x$attribs, list(class = class))
     x
