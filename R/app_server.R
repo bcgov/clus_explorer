@@ -18,6 +18,7 @@
 #' @import rintrojs
 #' @import purrr
 #' @import config
+#' @import ggplot2
 #' @param input,output,session Internal parameters for {shiny}.
 #'     DO NOT REMOVE.
 app_server <- function( input, output, session ) {
@@ -25,13 +26,15 @@ app_server <- function( input, output, session ) {
 
   config <- config::get()
 
-  #---Reactive
+  # Reactives ----
+  # .. column names ----
   queryColumnNames <- reactive({
     data.table(getTableQuery(paste0("SELECT column_name FROM information_schema.columns
           WHERE table_schema = '", input$schema , "' ", "
           AND table_name   = '",input$queryTable,"'")))
   })
 
+  # .. available column names ----
   availableMapLayers <- reactive({
     req(input$schema)
     req(input$scenario)
@@ -40,11 +43,13 @@ app_server <- function( input, output, session ) {
     getTableQuery(paste0("SELECT r_table_name FROM public.raster_columns WHERE r_table_schema = '", input$schema , "' ;"))$r_table_name
   })
 
+  # .. available scenarios ----
   scenariosList<-reactive({
     req(input$schema)
     data.table(getTableQuery(paste0("SELECT * FROM ", input$schema, ".scenarios")))
   })
 
+  # .. status data ----
   statusData<-reactive({
     req(input$schema)
 
@@ -60,6 +65,7 @@ ON c.compartment = a.compartment;")))
 
   })
 
+  # .. report list ----
   reportList<-reactive({
     req(input$schema)
     req(input$scenario)
@@ -146,6 +152,7 @@ ON c.compartment = a.compartment;")))
          abundance = data.abundance)
   })
 
+  # .. fisher points filter ----
   fisherPointsFilter<-reactive({
     req(reportList())
     req(input$fisheryear)
@@ -153,6 +160,7 @@ ON c.compartment = a.compartment;")))
     merge(reportList()$fisherPts[,c('zone', 'reference_zone', 'size', 'x', 'y')], reportList()$fisher[timeperiod == input$fisheryear & scenario == input$fisher_scenario_selected, c('zone', 'reference_zone', 'rel_prob_occup')], by.x =c('zone', 'reference_zone'), by.y = c('zone', 'reference_zone'), all.y=TRUE )
   })
 
+  # .. radar list ----
   radarList<-reactive({
     DT.h<- reportList()$harvest[, sum(volume)/sum(target), by = c("scenario", "timeperiod")][ V1 > 0.9, .N, by = c("scenario")][,N:=N/100]
     setnames(DT.h, "N", "Timber")
@@ -167,6 +175,7 @@ ON (foo1.scenario = foo2.scenario) )")))
     merge(DT.all, DT.g, by.x = "scenario", by.y = "scenario")
   })
 
+  # .. steps ----
   steps <- reactive(
     data.frame(
       element=c(".sidebar-menu", ".settings", ".treeview",  ".querybuilder", ".mapviewer"),
@@ -181,6 +190,7 @@ ON (foo1.scenario = foo2.scenario) )")))
     )
   )
 
+  # Observers ----
   observeEvent(input$getMapLayersButton, {
     withProgress(message = 'Loading layers', value = 0.1, {
       mapLayersStack <-getRasterQuery(c(input$schema, tolower(input$maplayers)))
@@ -270,7 +280,7 @@ ON (foo1.scenario = foo2.scenario) )")))
                       selected = character(0))
   })
 
-  #---Outputs
+  # Outputs ----
 
   output$scenarioDescription<-renderTable({
     as.data.frame(scenariosList())

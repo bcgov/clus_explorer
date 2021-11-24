@@ -23,66 +23,20 @@
 #' @import purrr
 app_ui <- function(request) {
 
-  golem_add_external_resources()
 
-  add_class <- function(x, class) {
-    x$attribs <- append(x$attribs, list(class = class))
-    x
-  }
 
-  valueBoxSpark <- function(value = NULL, title = NULL, sparkobj = NULL, subtitle =NULL, info = NULL,
-                            icon = NULL, color = "aqua", width = 4, href = NULL){
-
-    shinydashboard:::validateColor(color)
-
-    if (!is.null(icon))
-      shinydashboard:::tagAssert(icon, type = "i")
-
-    info_icon <- tags$small(
-      tags$i(
-        class = "fa fa-info-circle fa-lg",
-        title = info,
-        `data-toggle` = "tooltip",
-        style = "color: rgba(255, 255, 255, 0.75);"
-      ),
-      # bs3 pull-right
-      # bs4 float-right
-      class = "pull-right float-right"
-    )
-
-    boxContent <- div(
-      class = paste0("small-box bg-", color),
-      div(
-        class = "inner",
-        tags$small(title),
-        if (!is.null(sparkobj)) info_icon,
-        h3(value),
-        if (!is.null(sparkobj)) sparkobj,
-        p(subtitle)
-      ),
-      # bs3 icon-large
-      # bs4 icon
-      if (!is.null(icon)) div(class = "icon-large icon", icon, style = "z-index; 0")
-    )
-
-    if (!is.null(href))
-      boxContent <- a(href = href, boxContent)
-
-    div(
-      class = if (!is.null(width)) paste0("col-sm-", width),
-      boxContent
-    )
-  }
-
-  title <- tags$span(
-    tags$img(src = 'www/img/gov3_bc_logo.png'),
-    'CLUS: Explorer Tool'
-  )
   shiny::tagList(
+    golem_add_external_resources(),
+
     # Leave this function for adding external resources
     dashboardPage(skin = "black",
-
-                  dashboardHeader(title = title),
+                  dashboardHeader(
+                    title = tags$span(
+                      tags$img(src = 'www/img/gov3_bc_logo.png'),
+                      'CLUS Explorer Tool'
+                    ),
+                    titleWidth = 400
+                  ),
                   dashboardSidebar(
                     tags$style("@import url(https://use.fontawesome.com/releases/v5.15.3/css/all.css);"),
                     introjsUI(),
@@ -119,7 +73,7 @@ app_ui <- function(request) {
                                     column(width = 10,
                                            p("This app was designed to interactively compare outputs from the caribou and landuse simulator (CLUS) model. Outputs are formely organized by scenario; represnting a plausible future projection of the landscape.")),
                                     column(width = 2, align = "center",
-                                           img(src="clus-logo.png", width =100))
+                                           img(src="www/img/clus-logo.png", width =100))
                                   )
                               ),
                               fluidRow(
@@ -140,11 +94,13 @@ app_ui <- function(request) {
                                               fluidRow(
 
                                                 column(width =12,
-                                                       box(title = "Area of interest", width = 12, background = "black", solidHeader = TRUE,
+                                                       box(title = "Area of interest", width = 12, solidHeader = TRUE,
 
-                                                           selectInput(inputId = "schema", label = NULL,
-                                                                       selected = "" ,
-                                                                       choices = c("", data_global$available_study_areas), selectize=FALSE
+                                                           selectInput(
+                                                             inputId = "schema", label = NULL,
+                                                             selected = "" ,
+                                                             choices = c(list("Select an area" = ""), data_global$available_study_areas),
+                                                             selectize = TRUE
                                                            ),
                                                            bsTooltip("schema", "Select an area of interest",
                                                                      "right", options = list(container = "body")
@@ -154,7 +110,7 @@ app_ui <- function(request) {
                                               ),
                                               fluidRow(
                                                 column(width =12,
-                                                       box(title = "Scenarios", width = 12, background = "black", solidHeader = TRUE,
+                                                       box(title = "Scenarios", width = 12, solidHeader = TRUE,
                                                            checkboxGroupInput(inputId ="scenario", label = NULL, selected = NULL, choiceNames = NULL ),
                                                            bsTooltip("scenario", "Select the scenarios you wish to compare. See Dashboard for indicators.",
                                                                      "right", options = list(container = "body"))
@@ -167,7 +123,7 @@ app_ui <- function(request) {
                                 ,
                                 mainPanel( width = 6,
                                            conditionalPanel(condition = "!input.schema == ''",
-                                                            box(title = "Current State", width = 12, background = "black", solidHeader = FALSE,
+                                                            box(title = "Current State", width = 12, solidHeader = FALSE,
                                                                 fluidRow(
                                                                   box(title = "Landbase", solidHeader = TRUE,background = "green", width =12,
                                                                       fluidRow(width = 12,
@@ -401,6 +357,32 @@ app_ui <- function(request) {
                       )
                     )
                       )
+    ),
+    tags$footer(
+      class = 'footer',
+      tags$div(
+        class = 'container',
+        tags$ul(
+          tags$li(
+            tags$a(href = '.', 'Home'),
+          ),
+          tags$li(
+            tags$a(href = 'https://www2.gov.bc.ca/gov/content/home/disclaimer', 'Disclaimer'),
+          ),
+          tags$li(
+            tags$a(href = 'https://www2.gov.bc.ca/gov/content/home/privacy', 'Privacy'),
+          ),
+          tags$li(
+            tags$a(href = 'https://www2.gov.bc.ca/gov/content/home/accessibility', 'Accessibility'),
+          ),
+          tags$li(
+            tags$a(href = 'https://www2.gov.bc.ca/gov/content/home/copyright', 'Copyright'),
+          ),
+          tags$li(
+            tags$a(href = 'https://github.com/bcgov/devhub-app-web/issues', 'Contact Us'),
+          )
+        )
+      )
     )
   )
 }
@@ -415,18 +397,19 @@ app_ui <- function(request) {
 #' @noRd
 golem_add_external_resources <- function(){
 
-  golem::add_resource_path(
-    'www', app_sys('inst/app/www')
+  add_resource_path(
+    'www', app_sys('app/www')
   )
 
   shiny::tags$head(
     golem::favicon(),
     golem::bundle_resources(
       path = app_sys('app/www'),
-      app_title = 'clus_explorer'
-    )
+      app_title = 'CLUS Explorer'
+    ),
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()
+    golem::activate_js(),
+    golem::favicon()
   )
 }
-
