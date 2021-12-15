@@ -28,11 +28,11 @@
 /* General ------------ */
 body {
   font-family: 'BCSans', 'Noto Sans', Verdana, Arial, sans-serif;
-  color: #585858;
+  color: #313132;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: #1a5a96;
+  color: #003366;
 }
 
 /* Header ------------- */
@@ -105,6 +105,49 @@ h1, h2, h3, h4, h5, h6 {
 
 .skin-black .sidebar-menu .treeview-menu>li.active>a, .skin-black .sidebar-menu .treeview-menu>li>a:hover {
   color: #23527c;
+}
+
+/* Chart elements ------------- */
+p.chart-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
+p.chart-subtitle {
+  font-size: 13px;
+  font-weight: 400;
+  margin-bottom: 10px;
+}
+
+/* Scenarios table ------------- */
+table.clus-explorer-table {
+  margin-top: 25px;
+  padding: 20px;
+  width: 100%;
+}
+
+table.clus-explorer-table tr {
+  border-bottom: 1px solid #e6e6e6;
+}
+
+table.clus-explorer-table td {
+  padding: 10px 27px 10px 0;
+}
+
+table.clus-explorer-table td.checkbox-container {
+  padding: 10px;
+}
+
+/* Tooltips ------------- */
+.tooltip .tooltiptext,
+.tooltip .tooltip-inner {
+  background-color: #1A5A96;
+}
+
+/* Miscellaneous ------------- */
+.fa-info-circle {
+  color: #1A5A96;
 }
 
 /* Footer ------------- */

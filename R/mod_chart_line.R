@@ -4,19 +4,19 @@
 #'
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
-#' @noRd 
+#' @noRd
 #'
-#' @importFrom shiny NS tagList 
+#' @importFrom shiny NS tagList
 #' @import plotly
-#' 
+#'
 #' @export
-mod_mod_chart_line_ui <- function(id, chart_height = '450px'){
+mod_chart_line_ui <- function(id, chart_height = '450px'){
   ns <- NS(id)
   tagList(
     plotly::plotlyOutput(ns('chart_line'), height = chart_height)
   )
 }
-    
+
 #' mod_chart_line Server Function for plotly line chart
 #'
 #' @param input Shiny input
@@ -49,11 +49,11 @@ mod_mod_chart_line_ui <- function(id, chart_height = '450px'){
 #' @param loess_frequency LOESS smoothing frequency
 #' @param loess_mean_colour LOESS mean colour
 #' @param loess_ribbon_colour LOESS ribbon colour
-#' 
+#'
 #' @import stats
 #' @importFrom lubridate year
 #' @rdname mod_chart_line
-mod_mod_chart_line_server <- function(
+mod_chart_line_server <- function(
   id, dataset, x, y, trace_name = '', chart_type = 'scatter',
   chart_mode = 'marker+lines', traces = list(), marker_color = '#F29B9B',
   line_shape = 'linear', line_fill = 'none', line_fillcolor = 'rgba(160, 129, 217, 0.25)',
@@ -64,7 +64,7 @@ mod_mod_chart_line_server <- function(
 ){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
- 
+
     # Chart formatting ----
     x_tick_format <- ''
     exponentformat = 'B'
@@ -89,15 +89,15 @@ mod_mod_chart_line_server <- function(
     x_axis_format <- plotly_presets$axis_x
     x_axis_format$tickformat = x_tick_format
     x_axis_format$tickprefix = x_axis_tick_prefix
-    
+
     y_axis_format <- plotly_presets$axis_y
     y_axis_format$tickformat = y_tick_format
     y_axis_format$tickprefix = y_axis_tick_prefix
-    
+
     # Get variable names ----
     x <- rlang::enquo(x)
     y <- rlang::enquo(y)
-    
+
     # Create initial trace ----
     if (add_loess) {
       # Add LOESS smoothing ----
@@ -105,18 +105,18 @@ mod_mod_chart_line_server <- function(
         top_n({{x}}, n = -1) %>%
         pull({{x}}) %>%
         lubridate::year()
-      
+
       date_col <- dataset %>% pull({{x}})
       dataset <- dataset %>% pull({{y}})
-      
+
       dataset_ts <- ts(dataset, start = c(min_ts, 1), frequency = loess_frequency)
       x.info <- attr(dataset_ts, "tsp")
       tt <- seq(from = x.info[1], to = x.info[2], by = 1/x.info[3])
-      
+
       p <- plotly::plot_ly(
         x = date_col,
         y = dataset_ts,
-        
+
         name = trace_name,
         type = chart_type,
         mode = 'lines',
@@ -178,7 +178,7 @@ mod_mod_chart_line_server <- function(
         )
       }
     }
-    
+
     if (add_annotations) {
       p <- p %>%
         add_text(
@@ -189,7 +189,7 @@ mod_mod_chart_line_server <- function(
           hovertext = ''
         )
     }
-    
+
     if (add_loess) {
       ll.smooth = loess(dataset_ts ~ tt, span = 0.75)
       ll.pred = predict(ll.smooth, se = TRUE)
@@ -201,7 +201,7 @@ mod_mod_chart_line_server <- function(
         ub = round(ll.pred$fit + (1.96 * ll.pred$se), 2)
       )
       # ll.df = ll.df[order(ll.df$tt), ]
-      
+
       p <- p %>%
         plotly::add_lines(
           x = date_col,
@@ -218,16 +218,10 @@ mod_mod_chart_line_server <- function(
           fillcolor = loess_ribbon_colour
         )
     }
-    
+
     output$chart_line <- plotly::renderPlotly({
       p
     })
-    
+
   })
 }
-    
-## To be copied in the UI
-# mod_mod_chart_line_ui("mod_chart_line_ui_1")
-    
-## To be copied in the server
-# mod_mod_chart_line_server("mod_chart_line_ui_1")

@@ -4,7 +4,7 @@
 \alias{getTableQuery}
 \title{Get the results of an SQL query from the database}
 \usage{
-getTableQuery(sql, params = list())
+getTableQuery(sql, params = list(), conn = NULL)
 }
 \arguments{
 \item{sql}{The SQL query}

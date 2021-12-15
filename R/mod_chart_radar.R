@@ -8,7 +8,7 @@
 #' @noRd
 #'
 #' @importFrom shiny NS tagList
-mod_mod_chart_radar_ui <- function(id, chart_height = '450px'){
+mod_chart_radar_ui <- function(id, chart_height = '450px'){
   ns <- NS(id)
   tagList(
     plotly::plotlyOutput(ns('chart_radar'), height = chart_height)
@@ -25,7 +25,7 @@ mod_mod_chart_radar_ui <- function(id, chart_height = '450px'){
 #' @param traces List of traces to add
 #'
 #' @noRd
-mod_mod_chart_radar_server <- function(id, data, r, theta, traces = list()){
+mod_chart_radar_server <- function(id, data, r, theta, traces = list()){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 

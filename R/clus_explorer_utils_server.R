@@ -23,8 +23,10 @@ getDbConnection <- function() {
 #'
 #' @return
 #' @export
-getTableQuery <- function(sql, params = list()) {
-  conn <- getDbConnection()
+getTableQuery <- function(sql, params = list(), conn = NULL) {
+  if (is.null(conn)) {
+    conn <- getDbConnection()
+  }
   data <- dbGetQuery(conn = conn, statement = sql, params = params)
   dbDisconnect(conn)
   data

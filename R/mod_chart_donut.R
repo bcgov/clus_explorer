@@ -4,34 +4,35 @@
 #'
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
-#' @noRd 
+#' @noRd
 #'
-#' @importFrom shiny NS tagList 
-mod_mod_chart_donut_ui <- function(id, chart_height = '450px'){
+#' @importFrom shiny NS tagList
+mod_chart_donut_ui <- function(id, chart_height = '450px'){
   ns <- NS(id)
   tagList(
     plotly::plotlyOutput(ns('chart_donut'), height = chart_height)
   )
 }
-    
+
 #' mod_chart_donut Server Function for plotly donut chart
 #'
-#' @noRd 
-mod_mod_chart_donut_server <- function(
-  id, dataset, x, y, trace_name = '', traces = list(),
-  label = NULL, add_auto_text = TRUE, marker_colors, sort = TRUE
+#' @noRd
+mod_chart_donut_server <- function(
+  id, dataset, labels, values, trace_name = '', marker_colors, traces = list(),
+  label = NULL, add_auto_text = TRUE, sort = TRUE
 ){
   moduleServer( id, function(input, output, session){
+    # browser()
     ns <- session$ns
- 
-    x <- rlang::enquo(x)
-    y <- rlang::enquo(y)
+
+    labels <- rlang::enquo(labels)
+    values <- rlang::enquo(values)
     label <- rlang::enquo(label)
-    
+
     p <- plotly::plot_ly(
       dataset,
-      labels = x,
-      values = y,
+      labels = labels,
+      values = values,
       textinfo = 'percent',
       hovertemplate = paste0("%{label}<br>%{text:,} (<b>%{value:.1%f}</b>)<extra></extra>"),
       text = label,
@@ -56,16 +57,10 @@ mod_mod_chart_donut_server <- function(
         displaylogo = FALSE,
         modeBarButtonsToRemove = plotly_presets$remove_buttons
       )
-    
+
     output$chart_donut <- plotly::renderPlotly({
       p
     })
-    
+
   })
 }
-    
-## To be copied in the UI
-# mod_mod_chart_donut_ui("mod_chart_donut_ui_1")
-    
-## To be copied in the server
-# mod_mod_chart_donut_server("mod_chart_donut_ui_1")

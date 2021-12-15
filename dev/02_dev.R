@@ -21,7 +21,16 @@ usethis::use_package( "thinkr" )
 ## Create a module infrastructure in R/
 golem::add_module( name = "clus_explorer_utils_server" ) # Name of the module
 golem::add_module( name = "clus_explorer_utils_server" ) # Name of the module
+# Chart modules
 golem::add_module( name = "chart_bar" ) # Name of the module
+golem::add_module( name = "chart_treemap" ) # Name of the module
+golem::add_module( name = "chart_sankey" ) # Name of the module
+# Tabs
+golem::add_module( name = "page_home" ) # Name of the module
+golem::add_module( name = "page_scenarios" ) # Name of the module
+golem::add_module( name = "page_dashboard" ) # Name of the module
+golem::add_module( name = "page_query_builder" ) # Name of the module
+golem::add_module( name = "page_map_viewer" ) # Name of the module
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*

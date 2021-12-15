@@ -1,20 +1,3 @@
-# Detach all loaded packages and clean the environment
-golem::detach_all_attached()
-rm(list=ls(all.names = TRUE))
-
-# Document and reload the package
-golem::document_and_reload()
-
-# schema_tables <- getInformationSchemaTables()
-
-data_global <- list()
-
-# Seection for "Area of interest" dropdown
-data_global$available_study_areas <- getAvailableStudyAreas()
-
-usethis::use_data(data_global, overwrite = TRUE)
-
-
 # Set global variables into list and save in data directory to be available in the app ----
 plotly_presets <- list()
 
@@ -99,18 +82,18 @@ plotly_presets$tick$exponent_format = 'B'
 
 # Axes format
 plotly_presets$axis_x <- list(
-  title = "",
-  showticklabels = TRUE,
-  tickfont = plotly_presets$tick$font,
-  color = plotly_presets$colour_palette$greys$grey_30,
+  title = "", 
+  showticklabels = TRUE, 
+  tickfont = plotly_presets$tick$font, 
+  color = plotly_presets$colour_palette$greys$grey_30, 
   tickformat = plotly_presets$tick$format
 )
 
 plotly_presets$axis_y <- list(
   title = "",
   showticklabels = TRUE,
-  tickfont = plotly_presets$tick$font,
-  color = plotly_presets$colour_palette$greys$grey_30,
+  tickfont = plotly_presets$tick$font, 
+  color = plotly_presets$colour_palette$greys$grey_30, 
   tickformat = plotly_presets$tick$format,
   rangemode = 'tozero'
 )
@@ -141,7 +124,7 @@ plotly_presets$legend_format <- list(
 plotly_presets$legend_format$bottom <- plotly_presets$legend_format
 plotly_presets$legend_format$bottom$x <- 0
 plotly_presets$legend_format$bottom$y <- -0.2
-
+  
 plotly_presets$legend_format$right <- plotly_presets$legend_format
 plotly_presets$legend_format$right$x <- 1.2
 plotly_presets$legend_format$right$y <- 0
@@ -152,5 +135,3 @@ plotly_presets$remove_buttons <- c(
 )
 
 rm(font_family)
-
-usethis::use_data(plotly_presets, overwrite = TRUE)
