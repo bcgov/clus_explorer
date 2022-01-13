@@ -135,6 +135,7 @@ mod_page_scenarios_ui <- function(id){
         width = 6,
         box(
           title = tagList(
+
             span("Scenarios"),
             icon('info-circle') %>%
               bsplus::bs_embed_tooltip(
@@ -153,14 +154,17 @@ mod_page_scenarios_ui <- function(id){
             " correspond to the cubic meter of harvested volume per area of caribou
               critical habitat disturbed. Scenarios with larger rank values are potentially better."
           ),
-          uiOutput(ns("scenarios"))
-          # checkboxGroupInput(
-          #   inputId = ns("scenario"),
-          #   label = NULL,
-          #   selected = NULL,
-          #   choiceNames = NULL
+          # uiOutput(ns('selected_scenarios_list')),
+          # DT::dataTableOutput(ns('scenarios')),
+          # uiOutput(ns("scenarios"))
+          checkboxGroupInput(
+            inputId = ns("scenario"), label = NULL, selected = NULL, choiceNames = NULL
+          )#,
+          # actionButton(
+          #   "bind",
+          #   "Apply scenarios",
+          #   onclick = "Shiny.bindAll();"
           # )
-          #tableOutput("scenarioDescription")
         )
       )
     )
@@ -178,6 +182,7 @@ mod_page_scenarios_server <- function(id){
     # .. available scenarios ----
     scenariosList <- reactive({
       req(input$schema)
+      s <- input$schema
       # data.table(
         getTableQuery(
           paste0(
@@ -226,50 +231,120 @@ ON c.compartment = a.compartment;"
       )
     })
 
+    # sls <- reactive({
+    #   tagList(
+    #     list_to_li(input$scenario)
+    #   )
+    # })
+
+    # observe({
+    #   req(input$scenario)
+    #   updateSelectInput(
+    #     session,
+    #     "scenarios_selected",
+    #     choices = sls(),
+    #     selected = sls()
+    #   )
+    # })
+
+    # Render data table ----
+#    observe({
+#     sl <- scenariosList()
+#     sl <- sl %>%
+#       mutate(
+#         selection = sprintf('<input type="checkbox" name="scenario_cbg" value="%s"/>', scenario),
+#         rank = round(rank, 2),
+#         tooltip = sprintf('
+# <i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon" title="" data-toggle="tooltip" data-placement="top" data-delay="5s" data-original-title="%s"></i>
+#         ', description)
+#       ) %>%
+#       select(selection, scenario, rank, tooltip)
+#
+#     output$scenarios = DT::renderDataTable(
+#         sl, escape = FALSE, selection = 'none', server = FALSE,
+#         colnames = c('', 'Scenario', 'Rank', 'Description'),
+#         options = list(dom = 't', paging = FALSE, ordering = FALSE, rownames = FALSE),
+#         callback = JS("table.rows().every(function(i, tab, row) {
+#             var $this = $(this.node());
+#             $this.attr('id', this.data()[0]);
+#             $this.addClass('shiny-input-checkboxgroup');
+#             $this.addClass('shiny-options-group');
+#           });")
+#           # Shiny.unbindAll(table.table().node());
+#           # Shiny.bindAll(table.table().node());
+#       )
+#   })
+
     # .. render scenarios table ----
-    observe({
-      output$scenarios <- renderUI({
-        scenarios <- scenariosList()
+#     observe({
+#       output$scenarios <- renderUI({
+#         scenarios <- scenariosList()
+#
+#         # Generate table rows
+#         trows <- unlist(
+#           lapply(1:nrow(scenarios), function(i) {
+#             paste0('
+#               <tr class="shiny-input-checkboxgroup shiny-bound-input">
+#                 <td class="checkbox-container">', tags$input(type = "checkbox", name = ns("scenario"), value = scenarios[i, 1]), '</td>
+#                 <td>', scenarios[i, 1], '</td>
+#                 <td>', round(scenarios[i, 3], 2), '</td>
+#                 <td class="description">',
+#                   icon('info-circle') %>%
+#                     bsplus::bs_embed_tooltip(scenarios[i, 2], "top", delay = "5s"),
+#                 '</td>
+#               </tr>'
+#             )
+#           })
+#         )
+#
+#         # Table header
+#         scenarios_table <- paste0('
+#           <table id="scenario-list" class="clus-explorer-table">
+#             <thead>
+#               <tr>
+#           		  <th></th>
+#           		  <th>Scenario</th>
+#           		  <th>Rank</th>
+#           		  <th>Description</th>
+#           	  </tr>
+#             </thead>' ,
+#             paste(trows, collapse=" "), '
+#           </table>'
+# 	      )
+#
+#       	div(
+#       	  id = "scenario-list-container",
+#       	  class="form-group shiny-input-checkboxgroup shiny-input-container",
+#       		HTML(scenarios_table)
+#       	)
+#       })
+#     })
 
-        # Generate table rows
-        trows <- unlist(
-          lapply(1:nrow(scenarios), function(i) {
-            paste0('
-              <tr>
-                <td class="checkbox-container">', tags$input(type = "checkbox", name = "scenario", value = scenarios[i, 1]), '</td>
-                <td>', scenarios[i, 1], '</td>
-                <td>', round(scenarios[i, 3], 2), '</td>
-                <td class="description">',
-                  icon('info-circle') %>%
-                    bsplus::bs_embed_tooltip(scenarios[i, 2], "top", delay = "5s"),
-                '</td>
-              </tr>'
-            )
-          })
-        )
 
-        # Table header
-        scenarios_table <- paste0('
-          <table id="scenario-list" class="clus-explorer-table">
-            <thead>
-              <tr>
-          		  <th></th>
-          		  <th>Scenario</th>
-          		  <th>Rank</th>
-          		  <th>Description</th>
-          	  </tr>
-            </thead>' ,
-            paste(trows, collapse=" "), '
-          </table>'
-	      )
-
-      	div(
-      	  id = "scenario-list-container",
-      	  class="form-group shiny-input-checkboxgroup shiny-input-container",
-      		HTML(scenarios_table)
-      	)
-      })
+   # Update Checkbox Group ----
+    observe({ #Scenarios based on the area of interest selected
+      updateCheckboxGroupInput(session, "scenario",
+                               # label = sprintf(
+                               #   '%s (Rank %s) $s',
+                               #   scenariosList()$scenario,
+                               #   round(scenariosList()$rank, 2),
+                               #   '<i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon" title="" data-toggle="tooltip" data-placement="top" data-delay="5s" data-original-title="%s"></i>'
+                               # ),
+                               # choices = scenariosList()$scenario,
+                               choiceValues = scenariosList()$scenario,
+                               choiceNames = sprintf(
+                                       '%s (Rank %s)',
+                                       scenariosList()$scenario,
+                                       round(scenariosList()$rank, 2)
+                                    # ),
+                                 #  ),
+                                 # icon('info-circle') %>%
+                                 #   bsplus::bs_embed_tooltip(scenariosList()$description, "top", delay = "5s")
+                               ),
+                               selected = character(0)
+      )
     })
+
 
     # .. render treemap chart ----
     observeEvent(
@@ -309,28 +384,30 @@ ON c.compartment = a.compartment;"
       }
     )
 
-    # output$statusPlot <- renderPlotly({
-    #   data <- statusData()[compartment %in% input$tsa_selected, ]
-    #   data <-
-    #     data.table(reshape2::melt(
-    #       data[, c("compartment", "early", "mature", "old")],
-    #       id.vars = "compartment",
-    #       measure.vars = c("early", "mature", "old")
-    #     ))
-    #   data <- data[, sum(value), by = list(variable)]
-    #   plot_ly(
-    #     data = data,
-    #     labels = ~ variable,
-    #     values = ~ V1,
-    #     marker = list(line = list(color = "black", width = 1))
-    #   ) %>% add_pie(hole = 0.6) %>%
-    #     layout(
-    #       plot_bgcolor = '#00000000',
-    #       legend = list(orientation = 'v'),
-    #       paper_bgcolor = '#00000000',
-    #       title = "Seral Stage",
-    #       font = list(color = 'White')
+   # Render selection headers ----
+    # observe({
+    #   schema_name <- input$schema
+    #   schema_label <- stringr::str_to_sentence(
+    #     stringr::str_replace_all(input$schema, pattern = '_', ' ')
+    #   )
+    #
+    #   output$selected_scenarios_list <- renderUI(
+    #     tagList(
+    #       shiny::tags$h3(paste('Summary for', schema_label)),
+    #       shiny::tags$h4('TSA selected:'),
+    #       shiny::tags$ul(
+    #         list_to_li(input$tsa_selected)
+    #       ),
+    #       shiny::tags$h4('Scenarios:'),
+    #       shiny::tags$ul(
+    #         list_to_li(input$scenario)
+    #       ),
+    #       shiny::tags$h4('Scenarios CBG:'),
+    #       shiny::tags$ul(
+    #         list_to_li(input$scenario_cbg)
+    #       )
     #     )
+    #   )
     # })
 
     # .. render info boxes ----
@@ -376,9 +453,13 @@ ON c.compartment = a.compartment;"
 
     # Return reactive values ----
     # to be used in other modules
-    list(
-      tsa_selected = reactive({ input$tsa_selected }),
-      scenario = reactive({ input$scenario })
+    return(
+      list(
+        schema = reactive({input$schema}),
+        tsa_selected = reactive({input$tsa_selected}),
+        scenario = reactive({input$scenario})#,
+        # report_list = reportList
+      )
     )
 
   })

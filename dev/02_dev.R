@@ -19,18 +19,29 @@ usethis::use_package( "thinkr" )
 
 ## Add modules ----
 ## Create a module infrastructure in R/
-golem::add_module( name = "clus_explorer_utils_server" ) # Name of the module
-golem::add_module( name = "clus_explorer_utils_server" ) # Name of the module
+golem::add_module( name = "clus_explorer_utils_server" )
+golem::add_module( name = "clus_explorer_utils_server" )
 # Chart modules
-golem::add_module( name = "chart_bar" ) # Name of the module
-golem::add_module( name = "chart_treemap" ) # Name of the module
-golem::add_module( name = "chart_sankey" ) # Name of the module
+golem::add_module( name = "chart_bar" )
+golem::add_module( name = "chart_treemap" )
+golem::add_module( name = "chart_sankey" )
 # Tabs
-golem::add_module( name = "page_home" ) # Name of the module
-golem::add_module( name = "page_scenarios" ) # Name of the module
-golem::add_module( name = "page_dashboard" ) # Name of the module
-golem::add_module( name = "page_query_builder" ) # Name of the module
-golem::add_module( name = "page_map_viewer" ) # Name of the module
+golem::add_module( name = "page_home" )
+golem::add_module( name = "page_scenarios" )
+golem::add_module( name = "page_dashboard" )
+golem::add_module( name = "page_query_builder" )
+golem::add_module( name = "page_map_viewer" )
+golem::add_module( name = "page_dashboard_summary" )
+golem::add_module( name = "page_dashboard_caribou" )
+golem::add_module( name = "page_dashboard_climate" )
+golem::add_module( name = "page_dashboard_fire" )
+golem::add_module( name = "page_dashboard_fisher" )
+golem::add_module( name = "page_dashboard_forestry" )
+golem::add_module( name = "page_dashboard_grizzly" )
+golem::add_module( name = "page_dashboard_insects" )
+golem::add_module( name = "page_dashboard_mining" )
+golem::add_module( name = "page_dashboard_oil_and_gas" )
+golem::add_module( name = "page_dashboard_recreation" )
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*
