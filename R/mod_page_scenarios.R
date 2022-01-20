@@ -159,12 +159,7 @@ mod_page_scenarios_ui <- function(id){
           # uiOutput(ns("scenarios"))
           checkboxGroupInput(
             inputId = ns("scenario"), label = NULL, selected = NULL, choiceNames = NULL
-          )#,
-          # actionButton(
-          #   "bind",
-          #   "Apply scenarios",
-          #   onclick = "Shiny.bindAll();"
-          # )
+          )
         )
       )
     )
@@ -230,22 +225,6 @@ ON c.compartment = a.compartment;"
         selected = statusData()$compartment
       )
     })
-
-    # sls <- reactive({
-    #   tagList(
-    #     list_to_li(input$scenario)
-    #   )
-    # })
-
-    # observe({
-    #   req(input$scenario)
-    #   updateSelectInput(
-    #     session,
-    #     "scenarios_selected",
-    #     choices = sls(),
-    #     selected = sls()
-    #   )
-    # })
 
     # Render data table ----
 #    observe({
@@ -323,28 +302,28 @@ ON c.compartment = a.compartment;"
 
    # Update Checkbox Group ----
     observe({ #Scenarios based on the area of interest selected
-      updateCheckboxGroupInput(session, "scenario",
-                               # label = sprintf(
-                               #   '%s (Rank %s) $s',
-                               #   scenariosList()$scenario,
-                               #   round(scenariosList()$rank, 2),
-                               #   '<i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon" title="" data-toggle="tooltip" data-placement="top" data-delay="5s" data-original-title="%s"></i>'
-                               # ),
-                               # choices = scenariosList()$scenario,
-                               choiceValues = scenariosList()$scenario,
-                               choiceNames = sprintf(
-                                       '%s (Rank %s)',
-                                       scenariosList()$scenario,
-                                       round(scenariosList()$rank, 2)
-                                    # ),
-                                 #  ),
-                                 # icon('info-circle') %>%
-                                 #   bsplus::bs_embed_tooltip(scenariosList()$description, "top", delay = "5s")
-                               ),
-                               selected = character(0)
+      updateCheckboxGroupInput(
+        session, "scenario",
+        # label = sprintf(
+        #   '%s (Rank %s) $s',
+        #   scenariosList()$scenario,
+        #   round(scenariosList()$rank, 2),
+        #   '<i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon" title="" data-toggle="tooltip" data-placement="top" data-delay="5s" data-original-title="%s"></i>'
+        # ),
+        # choices = scenariosList()$scenario,
+        choiceValues = scenariosList()$scenario,
+        choiceNames = sprintf(
+          '%s (Rank %s)',
+          scenariosList()$scenario,
+          round(scenariosList()$rank, 2)
+            # ),
+         #  ),
+         # icon('info-circle') %>%
+         #   bsplus::bs_embed_tooltip(scenariosList()$description, "top", delay = "5s")
+        ),
+        selected = character(0)
       )
     })
-
 
     # .. render treemap chart ----
     observeEvent(
@@ -383,32 +362,6 @@ ON c.compartment = a.compartment;"
         )
       }
     )
-
-   # Render selection headers ----
-    # observe({
-    #   schema_name <- input$schema
-    #   schema_label <- stringr::str_to_sentence(
-    #     stringr::str_replace_all(input$schema, pattern = '_', ' ')
-    #   )
-    #
-    #   output$selected_scenarios_list <- renderUI(
-    #     tagList(
-    #       shiny::tags$h3(paste('Summary for', schema_label)),
-    #       shiny::tags$h4('TSA selected:'),
-    #       shiny::tags$ul(
-    #         list_to_li(input$tsa_selected)
-    #       ),
-    #       shiny::tags$h4('Scenarios:'),
-    #       shiny::tags$ul(
-    #         list_to_li(input$scenario)
-    #       ),
-    #       shiny::tags$h4('Scenarios CBG:'),
-    #       shiny::tags$ul(
-    #         list_to_li(input$scenario_cbg)
-    #       )
-    #     )
-    #   )
-    # })
 
     # .. render info boxes ----
     output$statusTHLB <- renderInfoBox({
@@ -457,8 +410,7 @@ ON c.compartment = a.compartment;"
       list(
         schema = reactive({input$schema}),
         tsa_selected = reactive({input$tsa_selected}),
-        scenario = reactive({input$scenario})#,
-        # report_list = reportList
+        scenario = reactive({input$scenario})
       )
     )
 

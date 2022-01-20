@@ -12,14 +12,14 @@ mod_page_dashboard_summary_ui <- function(id){
   tagList(
     uiOutput(ns("heading")),
     fluidRow(
-      selectizeInput(ns("baseline_scenario"), label = "Baseline scenario", choices = NULL),
       column(
         width = 6,
+        selectizeInput(ns("baseline_scenario"), label = "Baseline scenario", choices = NULL),
         div("Baseline chart here...")
       ),
       column(
         width = 6,
-        plotlyOutput(outputId = ns("radar"), height = "400px") %>%
+        plotlyOutput(outputId = ns("radar"), height = "750px") %>%
           withSpinner(color.background = '#ecf0f5', color = '#ffffff')
       )
     )
@@ -39,17 +39,23 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
       stringr::str_replace_all(schema_scenarios$schema(), pattern = '_', ' ')
     )
 
+    updateSelectizeInput(
+      session = getDefaultReactiveDomain(),
+      inputId = "baseline_scenario",
+      choices = c(NULL, schema_scenarios$scenario())
+    )
+
     output$heading <- renderUI(
       tagList(
         shiny::tags$h3(paste('Summary for', schema_label)),
         shiny::tags$h4('TSA selected:'),
         shiny::tags$ul(
           list_to_li(schema_scenarios$tsa_selected())
-        ),
-        shiny::tags$h4('Scenarios:'),
-        shiny::tags$ul(
-          list_to_li(schema_scenarios$scenario())
-        )
+        )#,
+        # shiny::tags$h4('Scenarios:'),
+        # shiny::tags$ul(
+        #   list_to_li(schema_scenarios$scenario())
+        # )
       )
     )
 
@@ -57,6 +63,7 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
     radarList <- reactive({
       req(reportList()$harvest)
       req(reportList()$survival)
+      req(schema_scenarios$scenario())
       # browser()
       DT.h <-
         reportList()$harvest[, sum(volume) / sum(target), by = c("scenario", "timeperiod")][V1 > 0.9, .N, by = c("scenario")][, N :=
@@ -130,7 +137,9 @@ ON (foo1.scenario = foo2.scenario) )"
         visible = T,
         range = c(0,1.2)
       )
-    )
+    ),
+    legend = list (orientation = 'h'),
+    margin = list(t = 50, r = 50, b = 50, l = 50)
   ) "
           )
         ))

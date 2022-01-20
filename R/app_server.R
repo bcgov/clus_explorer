@@ -897,7 +897,7 @@ app_server <- function(input, output, session) {
     req(schema_scenarios$schema())
     req(schema_scenarios$scenario())
 
-
+    # .... abundance ----
     if (nrow(getTableQuery(
       paste0(
         "SELECT * FROM information_schema.tables
@@ -941,6 +941,7 @@ app_server <- function(input, output, session) {
       data.abundance <- NULL
     }
 
+    # .... survival ----
     if (nrow(getTableQuery(
       paste0(
         "SELECT * FROM information_schema.tables
@@ -980,6 +981,7 @@ app_server <- function(input, output, session) {
       data.survival <- NULL
     }
 
+    # .... disturbance ----
          if (nrow(getTableQuery(
            paste0(
              "SELECT * FROM information_schema.tables
@@ -1019,117 +1021,120 @@ app_server <- function(input, output, session) {
            data.disturbance <- NULL
          }
 
-         if (nrow(getTableQuery(
-           paste0(
-             "SELECT * FROM information_schema.tables
-          WHERE table_schema = '",
-          schema_scenarios$schema() ,
-          "' and table_name = 'grizzly_survival'"
-           )
-         )) > 0) {
-           if (nrow(getTableQuery(
-             paste0(
-               "SELECT * FROM ",
-               schema_scenarios$schema(),
-               ".grizzly_survival where scenario IN ('",
-               paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-               "') limit 1"
-             )
-           )) > 0) {
-             data.grizzly_survival <-
-               data.table(getTableQuery(
-                 paste0(
-                   "SELECT * FROM ",
-                   schema_scenarios$schema(),
-                   ".grizzly_survival where scenario IN ('",
-                   paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-                   "') order by scenario, gbpu_name, timeperiod;"
-                 )
-               ))
-             data.grizzly_survival <-
-               data.grizzly_survival[, lapply(.SD, weighted.mean, w = total_area), by =
-                                       c("scenario",  "gbpu_name", "timeperiod"), .SDcols = c("road_density", "survival_rate")]
-           } else{
-             data.grizzly_survival <- NULL
-           }
-         } else{
-           data.grizzly_survival <- NULL
-         }
+    # .... grizzly survival ----
+         # if (nrow(getTableQuery(
+         #   paste0(
+         #     "SELECT * FROM information_schema.tables
+         #  WHERE table_schema = '",
+         #  schema_scenarios$schema() ,
+         #  "' and table_name = 'grizzly_survival'"
+         #   )
+         # )) > 0) {
+         #   if (nrow(getTableQuery(
+         #     paste0(
+         #       "SELECT * FROM ",
+         #       schema_scenarios$schema(),
+         #       ".grizzly_survival where scenario IN ('",
+         #       paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+         #       "') limit 1"
+         #     )
+         #   )) > 0) {
+         #     data.grizzly_survival <-
+         #       data.table(getTableQuery(
+         #         paste0(
+         #           "SELECT * FROM ",
+         #           schema_scenarios$schema(),
+         #           ".grizzly_survival where scenario IN ('",
+         #           paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+         #           "') order by scenario, gbpu_name, timeperiod;"
+         #         )
+         #       ))
+         #     data.grizzly_survival <-
+         #       data.grizzly_survival[, lapply(.SD, weighted.mean, w = total_area), by =
+         #                               c("scenario",  "gbpu_name", "timeperiod"), .SDcols = c("road_density", "survival_rate")]
+         #   } else{
+         #     data.grizzly_survival <- NULL
+         #   }
+         # } else{
+         #   data.grizzly_survival <- NULL
+         # }
 
-         data.fire <-
-           getTableQuery(paste0(
-             "SELECT * FROM fire where herd_bounds IN ('",
-             paste(
-               unique(data.survival$herd_bounds),
-               sep =  "' '",
-               collapse = "', '"
-             ),
-             "');"
-           ))
-         data.fire2 <-
-           getTableQuery(
-             paste0(
-               "SELECT herd_name, habitat,  round(cast(mean_ha2 as numeric),1) as mean,  round(cast(mean_area_percent as numeric),1) as percent,
-    round(cast(max_ha2 as numeric),1) as max,  round(cast(min_ha2 as numeric),1) as min, round(cast(cummulative_area_ha2 as numeric),1) as cummulative, round(cast(cummulative_area_percent as numeric),1) as cummul_percent FROM firesummary where herd_bounds IN ('",
-    paste(
-      unique(data.survival$herd_bounds),
-      sep =  "' '",
-      collapse = "', '"
-    ),
-    "');"
-             )
-           )
+    # .... fire ----
+    #      data.fire <-
+    #        getTableQuery(paste0(
+    #          "SELECT * FROM fire where herd_bounds IN ('",
+    #          paste(
+    #            unique(data.survival$herd_bounds),
+    #            sep =  "' '",
+    #            collapse = "', '"
+    #          ),
+    #          "');"
+    #        ))
+    #      data.fire2 <-
+    #        getTableQuery(
+    #          paste0(
+    #            "SELECT herd_name, habitat,  round(cast(mean_ha2 as numeric),1) as mean,  round(cast(mean_area_percent as numeric),1) as percent,
+    # round(cast(max_ha2 as numeric),1) as max,  round(cast(min_ha2 as numeric),1) as min, round(cast(cummulative_area_ha2 as numeric),1) as cummulative, round(cast(cummulative_area_percent as numeric),1) as cummul_percent FROM firesummary where herd_bounds IN ('",
+    # paste(
+    #   unique(data.survival$herd_bounds),
+    #   sep =  "' '",
+    #   collapse = "', '"
+    # ),
+    # "');"
+    #          )
+    #        )
 
-         if (nrow(getTableQuery(
-           paste0(
-             "SELECT * FROM information_schema.tables
-          WHERE table_schema = '",
-          schema_scenarios$schema() ,
-          "' and table_name = 'fisher'"
-           )
-         )) > 0) {
-           if (nrow(getTableQuery(
-             paste0(
-               "SELECT * FROM ",
-               schema_scenarios$schema(),
-               ".fisher where scenario IN ('",
-               paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-               "') limit 1"
-             )
-           )) > 0) {
-             data.fisherOccupancy <-
-               data.table(getTableQuery(
-                 paste0(
-                   "SELECT rel_prob_occup, zone, reference_zone, timeperiod, scenario  FROM ",
-                   schema_scenarios$schema(),
-                   ".fisher where scenario IN ('",
-                   paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-                   "') order by scenario, timeperiod;"
-                 )
-               ))
-             data.fisher.hexa <-
-               data.table(
-                 getTableQuery(
-                   "SELECT x,y, size, ogc_fid as zone, reference_zone FROM public.fisher_territory_pts "
-                 )
-               )
-             data.fisherPoints <-
-               merge(
-                 data.fisher.hexa,
-                 data.fisherOccupancy[timeperiod == 0 &
-                                        scenario == schema_scenarios$scenario()[1], c('zone', 'reference_zone', 'rel_prob_occup')],
-                 by.x = c('zone', 'reference_zone'),
-                 by.y = c('zone', 'reference_zone'),
-                 all.y = TRUE
-               )
-           } else{
-             data.fisherPoints <- NULL
-             data.fisherOccupancy <- NULL
-           }
-         } else{
-           data.fisherPoints <- NULL
-           data.fisherOccupancy <- NULL
-         }
+    # .... fisher ----
+         # if (nrow(getTableQuery(
+         #   paste0(
+         #     "SELECT * FROM information_schema.tables
+         #  WHERE table_schema = '",
+         #  schema_scenarios$schema() ,
+         #  "' and table_name = 'fisher'"
+         #   )
+         # )) > 0) {
+         #   if (nrow(getTableQuery(
+         #     paste0(
+         #       "SELECT * FROM ",
+         #       schema_scenarios$schema(),
+         #       ".fisher where scenario IN ('",
+         #       paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+         #       "') limit 1"
+         #     )
+         #   )) > 0) {
+         #     data.fisherOccupancy <-
+         #       data.table(getTableQuery(
+         #         paste0(
+         #           "SELECT rel_prob_occup, zone, reference_zone, timeperiod, scenario  FROM ",
+         #           schema_scenarios$schema(),
+         #           ".fisher where scenario IN ('",
+         #           paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+         #           "') order by scenario, timeperiod;"
+         #         )
+         #       ))
+         #     data.fisher.hexa <-
+         #       data.table(
+         #         getTableQuery(
+         #           "SELECT x,y, size, ogc_fid as zone, reference_zone FROM public.fisher_territory_pts "
+         #         )
+         #       )
+         #     data.fisherPoints <-
+         #       merge(
+         #         data.fisher.hexa,
+         #         data.fisherOccupancy[timeperiod == 0 &
+         #                                scenario == schema_scenarios$scenario()[1], c('zone', 'reference_zone', 'rel_prob_occup')],
+         #         by.x = c('zone', 'reference_zone'),
+         #         by.y = c('zone', 'reference_zone'),
+         #         all.y = TRUE
+         #       )
+         #   } else{
+         #     data.fisherPoints <- NULL
+         #     data.fisherOccupancy <- NULL
+         #   }
+         # } else{
+         #   data.fisherPoints <- NULL
+         #   data.fisherOccupancy <- NULL
+         # }
 
     # reportList <- reactive({
       # req(schema_scenarios$schema())
@@ -1138,16 +1143,16 @@ app_server <- function(input, output, session) {
 
       list(
         harvest = data.table(getTableQuery(paste0("SELECT * FROM ", schema_scenarios$schema(), ".harvest where scenario IN ('", paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"), "');"))),
-        growingstock = data.table(getTableQuery(paste0("SELECT scenario, timeperiod, sum(m_gs) as growingstock FROM ", schema_scenarios$schema(), ".growingstock where scenario IN ('", paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"), "') group by scenario, timeperiod;"))),
-        rsf = data.table(getTableQuery(paste0("SELECT * FROM ", schema_scenarios$schema(), ".rsf where scenario IN ('", paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"), "') order by scenario, rsf_model, timeperiod;"))),
+        # growingstock = data.table(getTableQuery(paste0("SELECT scenario, timeperiod, sum(m_gs) as growingstock FROM ", schema_scenarios$schema(), ".growingstock where scenario IN ('", paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"), "') group by scenario, timeperiod;"))),
+        # rsf = data.table(getTableQuery(paste0("SELECT * FROM ", schema_scenarios$schema(), ".rsf where scenario IN ('", paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"), "') order by scenario, rsf_model, timeperiod;"))),
         survival = data.survival,
-        disturbance = data.disturbance,
-        fire = data.fire,
-        fire2 = data.fire2,
-        fisher = data.fisherOccupancy,
-        fisherPts = data.fisherPoints,
-        grizzly_survival = data.grizzly_survival,
-        abundance = data.abundance
+        disturbance = data.disturbance#,
+        # fire = data.fire,
+        # fire2 = data.fire2,
+        # fisher = data.fisherOccupancy,
+        # fisherPts = data.fisherPoints,
+        # grizzly_survival = data.grizzly_survival,
+        # abundance = data.abundance
       )
 
     # })
