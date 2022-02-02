@@ -23,6 +23,7 @@ golem::add_module( name = "clus_explorer_utils_server" )
 golem::add_module( name = "clus_explorer_utils_server" )
 # Chart modules
 golem::add_module( name = "chart_bar" )
+golem::add_module( name = "chart_heatmap" )
 golem::add_module( name = "chart_treemap" )
 golem::add_module( name = "chart_sankey" )
 # Tabs

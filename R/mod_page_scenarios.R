@@ -159,7 +159,8 @@ mod_page_scenarios_ui <- function(id){
           # uiOutput(ns("scenarios"))
           checkboxGroupInput(
             inputId = ns("scenario"), label = NULL, selected = NULL, choiceNames = NULL
-          )
+          ),
+          actionButton(ns("apply_scenario"), label = "Apply", class = "btn-clus")
         )
       )
     )
@@ -410,7 +411,8 @@ ON c.compartment = a.compartment;"
       list(
         schema = reactive({input$schema}),
         tsa_selected = reactive({input$tsa_selected}),
-        scenario = reactive({input$scenario})
+        scenario = reactive({input$scenario}),
+        apply_scenario = reactive({input$apply_scenario})
       )
     )
 

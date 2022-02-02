@@ -20,15 +20,21 @@ getDbConnection <- function() {
 #'
 #' @param sql The SQL query
 #' @param params The SQL query parameters
+#' @param conn Optional database connection which can be reused
 #'
 #' @return
 #' @export
 getTableQuery <- function(sql, params = list(), conn = NULL) {
   if (is.null(conn)) {
-    conn <- getDbConnection()
+    new_conn <- getDbConnection()
+    data <- dbGetQuery(conn = new_conn, statement = sql, params = params)
+    dbDisconnect(new_conn)
+  } else {
+    # browser()
+    print(sql)
+    a <- 2
+    data <- dbGetQuery(conn = conn, statement = sql, params = params)
   }
-  data <- dbGetQuery(conn = conn, statement = sql, params = params)
-  dbDisconnect(conn)
   data
 }
 
