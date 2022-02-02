@@ -689,7 +689,7 @@ app_server <- function(input, output, session) {
           if (nrow(getTableQuery(
             sql = glue_sql(
               "SELECT scenario, subpop_name, timeperiod,  area, core, matrix, abundance_r50, abundance_c80r50, abundance_c80, abundance_avg
-              FROM {schema_scenarios$schema()}.caribou_abundance where scenario IN ({schema_scenarios$scenario()*}) limit 1"
+              FROM {`schema_scenarios$schema()`}.caribou_abundance where scenario IN ({schema_scenarios$scenario()*}) limit 1"
             ),
             conn = conn
           )) > 0) {
