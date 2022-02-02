@@ -10,6 +10,8 @@ getTableQuery(sql, params = list(), conn = NULL)
 \item{sql}{The SQL query}
 
 \item{params}{The SQL query parameters}
+
+\item{conn}{Optional database connection which can be reused}
 }
 \value{
 

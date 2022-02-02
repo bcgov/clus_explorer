@@ -16,11 +16,11 @@ mod_page_dashboard_caribou_ui <- function(id){
         "Disturbance",
 
         h4("Proportion Disturbed"),
-        plotlyOutput(outputId = ns("propDisturbPlot"), height = "900px") %>%
+        plotlyOutput(outputId = ns("propDisturbPlot"), height = "600px") %>%
           withSpinner(color.background = '#ecf0f5', color = '#ffffff'),
 
         h4("Proportion Disturbed with 500m Buffer"),
-        plotlyOutput(outputId = ns("propDisturbBuffPlot"), height = "900px") %>%
+        plotlyOutput(outputId = ns("propDisturbBuffPlot"), height = "600px") %>%
           withSpinner(color.background = '#ecf0f5', color = '#ffffff')
       ),
 
@@ -28,15 +28,15 @@ mod_page_dashboard_caribou_ui <- function(id){
         "Forest Age",
 
         h4("Early Forest"),
-        plotlyOutput(outputId = ns("propEarlyPlot"), height = "900px") %>%
+        plotlyOutput(outputId = ns("propEarlyPlot"), height = "600px") %>%
           withSpinner(color.background = '#ecf0f5', color = '#ffffff'),
 
         h4("Mature Forest"),
-        plotlyOutput(outputId = ns("propMaturePlot"), height = "900px") %>%
+        plotlyOutput(outputId = ns("propMaturePlot"), height = "600px") %>%
           withSpinner(color.background = '#ecf0f5', color = '#ffffff'),
 
         h4("Old Forest"),
-        plotlyOutput(outputId = ns("propOldPlot"), height = "900px") %>%
+        plotlyOutput(outputId = ns("propOldPlot"), height = "600px") %>%
           withSpinner(color.background = '#ecf0f5', color = '#ffffff')
       ),
 
@@ -44,14 +44,14 @@ mod_page_dashboard_caribou_ui <- function(id){
         "Population",
 
         h4("Abundance (Southern Group of Southern Mountain Caribou Only)"),
-        plotlyOutput(outputId = ns("abundancePlot"), height = "900px") %>%
+        plotlyOutput(outputId = ns("abundancePlot"), height = "600px") %>%
           withSpinner(color.background = '#ecf0f5', color = '#ffffff'),
         shiny::tags$small(
           '"Use abundance estimates with caution. The estimates assume the entire herd is in the area of interest, or forestry development is similar outside the area of interest."'
         ),
 
         h4("Survival (Southern Group of Southern Mountain Caribou Only)"),
-        plotlyOutput(outputId = ns("survivalPlot"), height = "900px") %>%
+        plotlyOutput(outputId = ns("survivalPlot"), height = "600px") %>%
           withSpinner(color.background = '#ecf0f5', color = '#ffffff')
       ),
 
@@ -59,7 +59,7 @@ mod_page_dashboard_caribou_ui <- function(id){
         "Resource Selection",
 
         h4("Resource Selection"),
-        plotlyOutput(outputId = ns("rsfPlot"), height = "900px") %>%
+        plotlyOutput(outputId = ns("rsfPlot"), height = "600px") %>%
           withSpinner(color.background = '#ecf0f5', color = '#ffffff')
       )
     )
@@ -93,7 +93,7 @@ mod_page_dashboard_caribou_server <- function(id, reportList){
           theme_bw() +
           theme (legend.title = element_blank())
 
-        ggplotly(p, height = 900) %>%
+        ggplotly(p, height = 600) %>%
           plotly::layout (
             legend = list (orientation = "h", y = -0.1),
             margin = list (
@@ -131,7 +131,7 @@ mod_page_dashboard_caribou_server <- function(id, reportList){
           # scale_color_grey(start=0.8, end=0.2) +
           theme_bw() +
           theme (legend.title = element_blank())
-        ggplotly(p, height = 900) %>%
+        ggplotly(p, height = 600) %>%
           plotly::layout (
             legend = list (orientation = "h", y = -0.1),
             margin = list (
@@ -167,7 +167,7 @@ mod_page_dashboard_caribou_server <- function(id, reportList){
           # scale_color_grey(start=0.8, end=0.2) +
           theme_bw() +
           theme (legend.title = element_blank())
-        ggplotly(p, height = 900) %>%
+        ggplotly(p, height = 600) %>%
           plotly::layout (
             legend = list (orientation = "h", y = -0.1),
             margin = list (
@@ -203,7 +203,7 @@ mod_page_dashboard_caribou_server <- function(id, reportList){
           # scale_color_grey(start=0.8, end=0.2) +
           theme_bw() +
           theme (legend.title = element_blank())
-        ggplotly(p, height = 900) %>%
+        ggplotly(p, height = 600) %>%
           plotly::layout (
             legend = list (orientation = "h", y = -0.1),
             margin = list (
@@ -239,7 +239,7 @@ mod_page_dashboard_caribou_server <- function(id, reportList){
           # scale_color_grey(start=0.8, end=0.2) +
           theme_bw() +
           theme (legend.title = element_blank())
-        ggplotly(p, height = 900) %>%
+        ggplotly(p, height = 600) %>%
           plotly::layout (
             legend = list (orientation = "h", y = -0.1),
             margin = list (
@@ -270,7 +270,7 @@ mod_page_dashboard_caribou_server <- function(id, reportList){
           theme_bw () +
           theme (legend.title = element_blank(),
                  plot.caption = element_text (hjust = 0))
-        ggplotly(p, height = 900) %>%
+        ggplotly(p, height = 600) %>%
           plotly::layout (
             legend = list (orientation = "h", y = -0.1),
             margin = list (
@@ -304,7 +304,7 @@ mod_page_dashboard_caribou_server <- function(id, reportList){
                              breaks = seq(0, 50, by = 10)) +
           theme_bw() +
           theme (legend.title = element_blank())
-        ggplotly(p, height = 900) %>%
+        ggplotly(p, height = 600) %>%
           plotly::layout (
             legend = list (orientation = "h", y = -0.1),
             margin = list (
@@ -319,7 +319,11 @@ mod_page_dashboard_caribou_server <- function(id, reportList){
     })
 
     output$rsfPlot <- renderPlotly ({
-      data <- reportList()$rsf
+      # browser()
+      data <- as.data.table(reportList()$rsf)
+
+      if (nrow(data)) {
+
       # data$scenario <- reorder(data$scenario, data$sum_rsf_hat, function(x) -max(x) )
       data[, rsf_perc_change := ((first(sum_rsf_hat) - sum_rsf_hat) / first(sum_rsf_hat) * 100), by = .(scenario, rsf_model)]  # replace first() with shift() to get difference with previous year value instead of first year value
       p <-
@@ -334,7 +338,7 @@ mod_page_dashboard_caribou_server <- function(id, reportList){
         scale_x_continuous(limits = c(0, 55), breaks = seq(0, 50, by = 10)) +
         theme_bw() +
         theme (legend.title = element_blank())
-      ggplotly(p, height = 900)  %>%
+      ggplotly(p, height = 600)  %>%
         plotly::layout (
           legend = list (orientation = "h", y = -0.1),
           margin = list (
@@ -346,6 +350,7 @@ mod_page_dashboard_caribou_server <- function(id, reportList){
           )
           #yaxis = list (title=paste0(c(rep("&nbsp;", 10),"RSF Value Percent Change", rep("&nbsp;", 200), rep("&nbsp;", 3))
         )# change seasonal values
+      }
     })
 
 

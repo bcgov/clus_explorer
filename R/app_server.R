@@ -19,6 +19,7 @@
 #' @import purrr
 #' @import config
 #' @import ggplot2
+#' @importFrom glue glue glue_sql
 #' @param input,output,session Internal parameters for {shiny}.
 #'     DO NOT REMOVE.
 app_server <- function(input, output, session) {
@@ -290,134 +291,6 @@ app_server <- function(input, output, session) {
   #   )
   # })
   #
-  # output$harvestAreaPlot <- renderPlotly ({
-  #   withProgress(message = 'Making Plots', value = 0.1, {
-  #     data <-
-  #       reportList()$harvest[, sum(area), by = c("scenario", "timeperiod")]
-  #     data$scenario <-
-  #       reorder(data$scenario, data$V1, function(x)
-  #         - max(x))
-  #     data[, timeperiod := as.integer(timeperiod)]
-  #     p <- ggplot (data, aes (x = timeperiod, y = V1, fill = scenario)) +
-  #       geom_area(position = "identity", aes(alpha = scenario)) +
-  #       xlab ("Future year") +
-  #       ylab ("Area Harvested (ha)") +
-  #       scale_x_continuous(breaks = seq(0, max(data$timeperiod), by = 10)) +
-  #       scale_alpha_discrete(range = c(0.4, 0.8)) +
-  #       scale_fill_grey(start = 0.8, end = 0.2) +
-  #       theme_bw()
-  #     ggplotly(p)
-  #   })
-  # })
-  #
-  # output$harvestAgePlot <- renderPlotly ({
-  #   withProgress(message = 'Making Plots', value = 0.1, {
-  #     data <- reportList()$harvest
-  #     data <-
-  #       data[, lapply(.SD, FUN = weighted.mean, x = age), by = c("timeperiod", "scenario"), .SDcols =
-  #              'age']
-  #     #data$scenario <- reorder(data$scenario, data$V1, function(x) -max(x) )
-  #     data[, timeperiod := as.integer(timeperiod)]
-  #     p <- ggplot (data, aes (x = timeperiod, y = age, fill = scenario)) +
-  #       geom_area(position = "identity", aes(alpha = scenario)) +
-  #       xlab ("Future year") +
-  #       ylab ("Average Harvest Age (yrs)") +
-  #       scale_x_continuous(breaks = seq(0, max(data$timeperiod), by = 10)) +
-  #       scale_alpha_discrete(range = c(0.4, 0.8)) +
-  #       scale_fill_grey(start = 0.8, end = 0.2) +
-  #       theme_bw()
-  #     ggplotly(p)
-  #   })
-  # })
-  #
-  # output$harvestVolumePlot <- renderPlotly ({
-  #   data <-
-  #     reportList()$harvest[, sum(volume), by = c("scenario", "timeperiod")]
-  #   data$scenario <-
-  #     reorder(data$scenario, data$V1, function(x)
-  #       - max(x))
-  #   data[, timeperiod := as.integer(timeperiod)]
-  #   p <- ggplot (data, aes (x = timeperiod, y = V1, fill = scenario)) +
-  #     geom_area(position = "identity", aes(alpha = scenario)) +
-  #     xlab ("Future year") +
-  #     ylab ("Volume Harvested (m3)") +
-  #     scale_x_continuous(breaks = seq(0, max(data$timeperiod), by = 10)) +
-  #     scale_alpha_discrete(range = c(0.4, 0.8)) +
-  #     scale_fill_grey(start = 0.8, end = 0.2) +
-  #     theme_bw()
-  #   ggplotly(p)
-  # })
-  #
-  # output$managedAreaPlot <- renderPlotly ({
-  #   data <-
-  #     reportList()$harvest[, sum(transition_area), by = c("scenario", "timeperiod")]
-  #   data$scenario <-
-  #     reorder(data$scenario, data$V1, function(x)
-  #       - max(x))
-  #   data[, timeperiod := as.integer(timeperiod)]
-  #   p <- ggplot (data, aes (x = timeperiod, y = V1, fill = scenario)) +
-  #     geom_area(position = "identity", aes(alpha = scenario)) +
-  #     xlab ("Future year") +
-  #     ylab ("Managed Area Harvested (ha)") +
-  #     scale_x_continuous(breaks = seq(0, max(data$timeperiod), by = 10)) +
-  #     scale_alpha_discrete(range = c(0.4, 0.8)) +
-  #     scale_fill_grey(start = 0.8, end = 0.2) +
-  #     theme_bw()
-  #   ggplotly(p)
-  # })
-  #
-  # output$managedVolumePlot <- renderPlotly ({
-  #   data <-
-  #     reportList()$harvest[, sum(transition_volume), by = c("scenario", "timeperiod")]
-  #   data$scenario <-
-  #     reorder(data$scenario, data$V1, function(x)
-  #       - max(x))
-  #   data[, timeperiod := as.integer(timeperiod)]
-  #   p <- ggplot (data, aes (x = timeperiod, y = V1, fill = scenario)) +
-  #     geom_area(position = "identity", aes(alpha = scenario)) +
-  #     xlab ("Future year") +
-  #     ylab ("Managed Volume Harvested (m3)") +
-  #     scale_x_continuous(breaks = seq(0, max(data$timeperiod), by = 10)) +
-  #     scale_alpha_discrete(range = c(0.4, 0.8)) +
-  #     scale_fill_grey(start = 0.8, end = 0.2) +
-  #     theme_bw()
-  #   ggplotly(p)
-  # })
-  #
-  # output$availableTHLBPlot <- renderPlotly ({
-  #   data <-
-  #     reportList()$harvest[, sum(avail_thlb), by = c("scenario", "timeperiod")]
-  #   data$scenario <-
-  #     reorder(data$scenario, data$V1, function(x)
-  #       - max(x))
-  #   data[, timeperiod := as.integer(timeperiod)]
-  #   p <- ggplot (data, aes (x = timeperiod, y = V1, fill = scenario)) +
-  #     geom_area(position = "identity", aes(alpha = scenario)) +
-  #     xlab ("Future year") +
-  #     ylab ("Available THLB (ha)") +
-  #     scale_x_continuous(breaks = seq(0, max(data$timeperiod), by = 10)) +
-  #     scale_alpha_discrete(range = c(0.4, 0.8)) +
-  #     scale_fill_grey(start = 0.8, end = 0.2) +
-  #     theme_bw()
-  #   ggplotly(p)
-  # })
-  #
-  # output$growingStockPlot <- renderPlotly ({
-  #   data <- reportList()$growingstock
-  #   data$scenario <-
-  #     reorder(data$scenario, data$growingstock, function(x)
-  #       - max(x))
-  #   p <-
-  #     ggplot(data, aes (x = timeperiod, y = growingstock, fill = scenario)) +
-  #     geom_area(position = "identity", aes(alpha = scenario)) +
-  #     xlab ("Future year") +
-  #     ylab ("Growing Stock (m3)") +
-  #     scale_x_continuous(breaks = seq(0, max(data$timeperiod), by = 10)) +
-  #     scale_alpha_discrete(range = c(0.4, 0.8)) +
-  #     scale_fill_grey(start = 0.8, end = 0.2) +
-  #     theme_bw()
-  #   ggplotly(p)
-  # })
   #
   # output$abundancePlot <- renderPlotly ({
   #   withProgress(message = 'Making Plots', value = 0.1, {
@@ -787,107 +660,6 @@ app_server <- function(input, output, session) {
   #       #yaxis = list (title=paste0(c(rep("&nbsp;", 10),"RSF Value Percent Change", rep("&nbsp;", 200), rep("&nbsp;", 3))
   #     )# change seasonal values
   # })
-  #
-  # output$fireByYearPlot <- renderPlotly ({
-  #   withProgress(message = 'Making Plot', value = 0.1, {
-  #     data <- reportList()$fire
-  #     # data$scenario <- reorder(data$scenario, data$sum_rsf_hat, function(x) -max(x) )
-  #     #print(data)
-  #
-  #     p <- ggplot(data, aes (x = year, y = proportion.burn)) +
-  #       facet_grid (rows = vars(herd_bounds)) +
-  #       geom_bar(stat = "identity", width = 1) +
-  #       #geom_line(col="grey")+
-  #       #geom_bar(stat="identity", width=0.7) +
-  #       xlab ("Year") +
-  #       ylab ("Proportion of area burned") +
-  #       scale_x_continuous(limits = c(1919, 2025),
-  #                          breaks = seq(1925, 2025, by = 75)) +
-  #       scale_y_continuous(limits = c(0, 45),
-  #                          breaks = seq(0, 45, by = 20)) +
-  #       theme_bw() +
-  #       theme (legend.title = element_blank())
-  #     ggplotly(p, height = 900) %>%
-  #       layout (
-  #         legend = list (orientation = "h", y = -0.1),
-  #         margin = list (
-  #           l = 50,
-  #           r = 40,
-  #           b = 50,
-  #           t = 40,
-  #           pad = 0
-  #         )
-  #       )
-  #   })
-  # })
-  #
-  # output$firecummulativePlot <- renderPlotly ({
-  #   withProgress(message = 'Making Plot', value = 0.1, {
-  #     data <- reportList()$fire
-  #
-  #
-  #     ##Calculating cummulative area burned over a 40 year moving window for each herd across each habitat type
-  #     Years <- 1919:2018
-  #     window_size <- 40
-  #
-  #     Fire_cummulative <- data.frame (matrix (ncol = 3, nrow = 0))
-  #     colnames (Fire_cummulative) <-
-  #       c ("herd_bounds", "cummulative.area.burned", "year")
-  #
-  #     for (i in 1:(length(Years) - window_size)) {
-  #       fire.summary <-
-  #         data %>% filter(year >= Years[i] & year <= (Years[i] + window_size)) %>%
-  #         group_by (herd_bounds) %>%
-  #         summarize(cummulative.area.burned = sum(proportion.burn))
-  #       fire.summary$year <- Years[i] + window_size
-  #
-  #       Fire_cummulative <-
-  #         rbind(Fire_cummulative, as.data.frame(fire.summary))
-  #     }
-  #     #print(Fire_cummulative)
-  #
-  #     p <-
-  #       ggplot(Fire_cummulative,
-  #              aes (x = year, y = cummulative.area.burned)) +
-  #       facet_grid (rows = vars(herd_bounds)) +
-  #       #geom_line (col="grey") +
-  #       #geom_point()+
-  #       geom_bar(stat = "identity", width = 1) +
-  #       xlab ("Year") +
-  #       ylab ("Cummulative proportion of area burned < 40 years") +
-  #       scale_x_continuous(limits = c(1959, 2020),
-  #                          breaks = seq(1960, 2020, by = 30)) +
-  #       scale_y_continuous(limits = c(0, 70),
-  #                          breaks = seq(0, 70, by = 20)) +
-  #       theme_bw() +
-  #       theme (legend.title = element_blank())
-  #
-  #     ggplotly(p, height = 900) %>%
-  #       layout (
-  #         legend = list (orientation = "h", y = -0.1),
-  #         margin = list (
-  #           l = 50,
-  #           r = 40,
-  #           b = 50,
-  #           t = 40,
-  #           pad = 0
-  #         )
-  #       )
-  #   })
-  # })
-  #
-  # output$fireTable <- DT::renderDataTable({
-  #   dat <- reportList()$fire2
-  #   names_col <- names(dat)
-  #   dat <- dat %>%
-  #     datatable(extensions = 'Buttons',
-  #               options = list(
-  #                 dom = 'Bfrtip',
-  #                 buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
-  #               )) %>%
-  #     formatStyle(names_col,  color = 'black', fontWeight = 'bold')
-  #   return(dat)
-  # })
 
   # observe({
   reportList <- reactive({
@@ -896,275 +668,327 @@ app_server <- function(input, output, session) {
       # browser()
     req(schema_scenarios$schema())
     req(schema_scenarios$scenario())
+    req(schema_scenarios$apply_scenario())
 
     # .... abundance ----
-    if (nrow(getTableQuery(
-      paste0(
-        "SELECT * FROM information_schema.tables
-     WHERE table_schema = '",
-     schema_scenarios$schema() ,
-     "' and table_name = 'caribou_abundance'"
-      )
-    )) > 0) {
-      if (nrow(getTableQuery(
-        paste0(
-          "SELECT scenario, subpop_name, timeperiod,  area, core, matrix, abundance_r50, abundance_c80r50, abundance_c80, abundance_avg FROM ",
-          schema_scenarios$schema(),
-          ".caribou_abundance where scenario IN ('",
-          paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-          "') limit 1"
-        )
-      )) > 0) {
-        data.abundance <-
-          data.table(getTableQuery(
-            paste0(
-              "SELECT scenario, subpop_name, timeperiod, area, core, matrix, abundance_r50, abundance_c80r50, abundance_c80, abundance_avg FROM ",
-              schema_scenarios$schema(),
-              ".caribou_abundance where scenario IN ('",
-              paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-              "') order by scenario, subpop_name, timeperiod;"
-            )
-          ))
-        data.abundance <-
-          data.abundance [, lapply(.SD, weighted.mean, w = area), by = c("scenario",  "subpop_name", "timeperiod"), .SDcols = c(
-            "core",
-            "matrix",
-            "abundance_r50",
-            "abundance_c80r50",
-            "abundance_c80",
-            "abundance_avg"
-          )]
-      } else{
-        data.abundance <- NULL
-      }
-    } else{
-      data.abundance <- NULL
-    }
+    withProgress(
+      message = "Getting abundance data...", min = 0, max = 9, {
 
-    # .... survival ----
-    if (nrow(getTableQuery(
-      paste0(
-        "SELECT * FROM information_schema.tables
-     WHERE table_schema = '",
-     schema_scenarios$schema() ,
-     "' and table_name = 'survival'"
-      )
-    )) > 0) {
+        # Reusable db connection
+        conn = getDbConnection()
+
+        if (nrow(getTableQuery(
+          sql = glue_sql(
+            "SELECT * FROM information_schema.tables WHERE table_schema =
+            {schema_scenarios$schema()}
+            AND table_name = 'caribou_abundance'",
+            .con = conn
+          ),
+          conn = conn
+        )) > 0) {
+          if (nrow(getTableQuery(
+            sql = glue_sql(
+              "SELECT scenario, subpop_name, timeperiod,  area, core, matrix, abundance_r50, abundance_c80r50, abundance_c80, abundance_avg
+              FROM {schema_scenarios$schema()}.caribou_abundance where scenario IN ({schema_scenarios$scenario()*}) limit 1"
+            ),
+            conn = conn
+          )) > 0) {
+            data.abundance <-
+              data.table(getTableQuery(
+                paste0(
+                  "SELECT scenario, subpop_name, timeperiod, area, core, matrix, abundance_r50, abundance_c80r50, abundance_c80, abundance_avg FROM ",
+                  schema_scenarios$schema(),
+                  ".caribou_abundance where scenario IN ('",
+                  paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+                  "') order by scenario, subpop_name, timeperiod;"
+                )
+              ))
+            data.abundance <-
+              data.abundance [, lapply(.SD, weighted.mean, w = area), by = c("scenario",  "subpop_name", "timeperiod"), .SDcols = c(
+                "core",
+                "matrix",
+                "abundance_r50",
+                "abundance_c80r50",
+                "abundance_c80",
+                "abundance_avg"
+              )]
+          } else{
+            data.abundance <- NULL
+          }
+        } else{
+          data.abundance <- NULL
+        }
+
+      incProgress(amount = 1, message = "Getting survival data...")
+
+      # .... survival ----
       if (nrow(getTableQuery(
-        paste0(
-          "SELECT * FROM ",
-          schema_scenarios$schema(),
-          ".survival where scenario IN ('",
-          paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-          "') limit 1"
-        )
+        sql = glue_sql(
+          "SELECT * FROM information_schema.tables
+          WHERE table_schema = {schema_scenarios$schema()}
+          AND table_name = 'survival'",
+          .con = conn
+        ),
+        conn = conn
       )) > 0) {
-        data.survival <-
-          data.table(getTableQuery(
-            paste0(
-              "SELECT * FROM ",
-              schema_scenarios$schema(),
-              ".survival where scenario IN ('",
-              paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-              "') order by scenario, herd_bounds, timeperiod;"
-            )
-          ))
-        data.survival <-
-          data.survival[, lapply(.SD, weighted.mean, w = area), by = c("scenario",  "herd_bounds", "timeperiod"), .SDcols = c("prop_age",
-                                                                                                                              "prop_mature",
-                                                                                                                              "prop_old",
-                                                                                                                              "survival_rate")]
+        if (nrow(getTableQuery(
+          sql = glue_sql(
+            "SELECT * FROM {`schema_scenarios$schema()`}.survival
+            WHERE scenario IN ({schema_scenarios$scenario()*}) limit 1",
+            .con = conn
+          ),
+          conn = conn
+        )) > 0) {
+          data.survival <-
+            data.table(getTableQuery(
+              glue_sql(
+                "SELECT * FROM {`schema_scenarios$schema()`}.survival
+                WHERE scenario IN ({schema_scenarios$scenario()*})
+                ORDER BY scenario, herd_bounds, timeperiod;",
+                .con = conn
+              ),
+              conn = conn
+            ))
+          data.survival <-
+            data.survival[, lapply(.SD, weighted.mean, w = area),
+                          by = c("scenario",  "herd_bounds", "timeperiod"),
+                          .SDcols = c("prop_age", "prop_mature", "prop_old", "survival_rate")]
+        } else{
+          data.survival <- NULL
+        }
       } else{
         data.survival <- NULL
       }
-    } else{
-      data.survival <- NULL
-    }
 
-    # .... disturbance ----
-         if (nrow(getTableQuery(
-           paste0(
-             "SELECT * FROM information_schema.tables
-          WHERE table_schema = '",
-          schema_scenarios$schema() ,
-          "' and table_name = 'disturbance'"
-           )
-         )) > 0) {
+      incProgress(amount = 1, message = "Getting disturbance data...")
+
+      # .... disturbance ----
            if (nrow(getTableQuery(
              paste0(
-               "SELECT * FROM ",
-               schema_scenarios$schema(),
-               ".disturbance where scenario IN ('",
-               paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-               "') limit 1"
+               "SELECT * FROM information_schema.tables
+            WHERE table_schema = '",
+            schema_scenarios$schema() ,
+            "' and table_name = 'disturbance'"
              )
            )) > 0) {
-             data.disturbance <-
-               data.table (getTableQuery(
-                 paste0(
-                   "SELECT scenario,timeperiod,critical_hab,
-       sum(c40r500) as c40r500, sum(c40r50) as c40r50, sum(total_area) as total_area FROM ",
-       schema_scenarios$schema(),
-       ".disturbance where scenario IN ('",
-       paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-       "') group by scenario, critical_hab, timeperiod order by scenario, critical_hab, timeperiod;"
-                 )
-               ))
-             # c40r50 = dist; c40r500 = dist500 }
-             data.disturbance <-
-               data.disturbance[, dist_per := c40r50 / total_area][, dist500_per := c40r500 /
-                                                                     total_area]
+             if (nrow(getTableQuery(
+               paste0(
+                 "SELECT * FROM ",
+                 schema_scenarios$schema(),
+                 ".disturbance where scenario IN ('",
+                 paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+                 "') limit 1"
+               )
+             )) > 0) {
+               data.disturbance <-
+                 data.table (getTableQuery(
+                   paste0(
+                     "SELECT scenario,timeperiod,critical_hab,
+         sum(c40r500) as c40r500, sum(c40r50) as c40r50, sum(total_area) as total_area FROM ",
+         schema_scenarios$schema(),
+         ".disturbance where scenario IN ('",
+         paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+         "') group by scenario, critical_hab, timeperiod order by scenario, critical_hab, timeperiod;"
+                   )
+                 ))
+               # c40r50 = dist; c40r500 = dist500 }
+               data.disturbance <-
+                 data.disturbance[, dist_per := c40r50 / total_area][, dist500_per := c40r500 /
+                                                                       total_area]
+             } else{
+               data.disturbance <- NULL
+             }
            } else{
              data.disturbance <- NULL
            }
-         } else{
-           data.disturbance <- NULL
-         }
 
-    # .... grizzly survival ----
-         # if (nrow(getTableQuery(
-         #   paste0(
-         #     "SELECT * FROM information_schema.tables
-         #  WHERE table_schema = '",
-         #  schema_scenarios$schema() ,
-         #  "' and table_name = 'grizzly_survival'"
-         #   )
-         # )) > 0) {
-         #   if (nrow(getTableQuery(
-         #     paste0(
-         #       "SELECT * FROM ",
-         #       schema_scenarios$schema(),
-         #       ".grizzly_survival where scenario IN ('",
-         #       paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-         #       "') limit 1"
-         #     )
-         #   )) > 0) {
-         #     data.grizzly_survival <-
-         #       data.table(getTableQuery(
-         #         paste0(
-         #           "SELECT * FROM ",
-         #           schema_scenarios$schema(),
-         #           ".grizzly_survival where scenario IN ('",
-         #           paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-         #           "') order by scenario, gbpu_name, timeperiod;"
-         #         )
-         #       ))
-         #     data.grizzly_survival <-
-         #       data.grizzly_survival[, lapply(.SD, weighted.mean, w = total_area), by =
-         #                               c("scenario",  "gbpu_name", "timeperiod"), .SDcols = c("road_density", "survival_rate")]
-         #   } else{
-         #     data.grizzly_survival <- NULL
-         #   }
-         # } else{
-         #   data.grizzly_survival <- NULL
-         # }
+      incProgress(amount = 1, message = "Getting grizzly survival data...")
 
-    # .... fire ----
-    #      data.fire <-
-    #        getTableQuery(paste0(
-    #          "SELECT * FROM fire where herd_bounds IN ('",
-    #          paste(
-    #            unique(data.survival$herd_bounds),
-    #            sep =  "' '",
-    #            collapse = "', '"
-    #          ),
-    #          "');"
-    #        ))
-    #      data.fire2 <-
-    #        getTableQuery(
-    #          paste0(
-    #            "SELECT herd_name, habitat,  round(cast(mean_ha2 as numeric),1) as mean,  round(cast(mean_area_percent as numeric),1) as percent,
-    # round(cast(max_ha2 as numeric),1) as max,  round(cast(min_ha2 as numeric),1) as min, round(cast(cummulative_area_ha2 as numeric),1) as cummulative, round(cast(cummulative_area_percent as numeric),1) as cummul_percent FROM firesummary where herd_bounds IN ('",
-    # paste(
-    #   unique(data.survival$herd_bounds),
-    #   sep =  "' '",
-    #   collapse = "', '"
-    # ),
-    # "');"
-    #          )
-    #        )
+      # .... grizzly survival ----
+      if (nrow(getTableQuery(
+       paste0(
+         "SELECT * FROM information_schema.tables
+      WHERE table_schema = '",
+      schema_scenarios$schema() ,
+      "' and table_name = 'grizzly_survival'"
+       )
+      )) > 0) {
+       if (nrow(getTableQuery(
+         paste0(
+           "SELECT * FROM ",
+           schema_scenarios$schema(),
+           ".grizzly_survival where scenario IN ('",
+           paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+           "') limit 1"
+         )
+       )) > 0) {
+         data.grizzly_survival <-
+           data.table(getTableQuery(
+             paste0(
+               "SELECT * FROM ",
+               schema_scenarios$schema(),
+               ".grizzly_survival where scenario IN ('",
+               paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+               "') order by scenario, gbpu_name, timeperiod;"
+             )
+           ))
+         data.grizzly_survival <-
+           data.grizzly_survival[, lapply(.SD, weighted.mean, w = total_area), by =
+                                   c("scenario",  "gbpu_name", "timeperiod"), .SDcols = c("road_density", "survival_rate")]
+       } else{
+         data.grizzly_survival <- NULL
+       }
+      } else{
+       data.grizzly_survival <- NULL
+      }
 
-    # .... fisher ----
-         # if (nrow(getTableQuery(
-         #   paste0(
-         #     "SELECT * FROM information_schema.tables
-         #  WHERE table_schema = '",
-         #  schema_scenarios$schema() ,
-         #  "' and table_name = 'fisher'"
-         #   )
-         # )) > 0) {
-         #   if (nrow(getTableQuery(
-         #     paste0(
-         #       "SELECT * FROM ",
-         #       schema_scenarios$schema(),
-         #       ".fisher where scenario IN ('",
-         #       paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-         #       "') limit 1"
-         #     )
-         #   )) > 0) {
-         #     data.fisherOccupancy <-
-         #       data.table(getTableQuery(
-         #         paste0(
-         #           "SELECT rel_prob_occup, zone, reference_zone, timeperiod, scenario  FROM ",
-         #           schema_scenarios$schema(),
-         #           ".fisher where scenario IN ('",
-         #           paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-         #           "') order by scenario, timeperiod;"
-         #         )
-         #       ))
-         #     data.fisher.hexa <-
-         #       data.table(
-         #         getTableQuery(
-         #           "SELECT x,y, size, ogc_fid as zone, reference_zone FROM public.fisher_territory_pts "
-         #         )
-         #       )
-         #     data.fisherPoints <-
-         #       merge(
-         #         data.fisher.hexa,
-         #         data.fisherOccupancy[timeperiod == 0 &
-         #                                scenario == schema_scenarios$scenario()[1], c('zone', 'reference_zone', 'rel_prob_occup')],
-         #         by.x = c('zone', 'reference_zone'),
-         #         by.y = c('zone', 'reference_zone'),
-         #         all.y = TRUE
-         #       )
-         #   } else{
-         #     data.fisherPoints <- NULL
-         #     data.fisherOccupancy <- NULL
-         #   }
-         # } else{
-         #   data.fisherPoints <- NULL
-         #   data.fisherOccupancy <- NULL
-         # }
+      incProgress(amount = 1, message = "Getting fire data...")
 
-    # reportList <- reactive({
-      # req(schema_scenarios$schema())
-      # req(schema_scenarios$scenario())
-      #
+      # .... fire ----
+      data.fire <-
+       getTableQuery(paste0(
+         "SELECT * FROM fire where herd_bounds IN ('",
+         paste(
+           unique(data.survival$herd_bounds),
+           sep =  "' '",
+           collapse = "', '"
+         ),
+         "');"
+       ))
+      data.fire2 <-
+       getTableQuery(
+         paste0(
+           "SELECT herd_name, habitat,  round(cast(mean_ha2 as numeric),1) as mean,  round(cast(mean_area_percent as numeric),1) as percent,
+      round(cast(max_ha2 as numeric),1) as max,  round(cast(min_ha2 as numeric),1) as min, round(cast(cummulative_area_ha2 as numeric),1) as cummulative, round(cast(cummulative_area_percent as numeric),1) as cummul_percent FROM firesummary where herd_bounds IN ('",
+      paste(
+      unique(data.survival$herd_bounds),
+      sep =  "' '",
+      collapse = "', '"
+      ),
+      "');"
+         )
+       )
 
-      list(
-        harvest = data.table(getTableQuery(paste0("SELECT * FROM ", schema_scenarios$schema(), ".harvest where scenario IN ('", paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"), "');"))),
-        # growingstock = data.table(getTableQuery(paste0("SELECT scenario, timeperiod, sum(m_gs) as growingstock FROM ", schema_scenarios$schema(), ".growingstock where scenario IN ('", paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"), "') group by scenario, timeperiod;"))),
-        # rsf = data.table(getTableQuery(paste0("SELECT * FROM ", schema_scenarios$schema(), ".rsf where scenario IN ('", paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"), "') order by scenario, rsf_model, timeperiod;"))),
-        survival = data.survival,
-        disturbance = data.disturbance#,
-        # fire = data.fire,
-        # fire2 = data.fire2,
-        # fisher = data.fisherOccupancy,
-        # fisherPts = data.fisherPoints,
-        # grizzly_survival = data.grizzly_survival,
-        # abundance = data.abundance
-      )
+      incProgress(amount = 1, message = "Getting fisher data...")
 
-    # })
+      # .... fisher ----
+      if (nrow(getTableQuery(
+       paste0(
+         "SELECT * FROM information_schema.tables
+      WHERE table_schema = '",
+      schema_scenarios$schema() ,
+      "' and table_name = 'fisher'"
+       )
+      )) > 0) {
+       if (nrow(getTableQuery(
+         paste0(
+           "SELECT * FROM ",
+           schema_scenarios$schema(),
+           ".fisher where scenario IN ('",
+           paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+           "') limit 1"
+         )
+       )) > 0) {
+         data.fisherOccupancy <-
+           data.table(getTableQuery(
+             paste0(
+               "SELECT rel_prob_occup, zone, reference_zone, timeperiod, scenario  FROM ",
+               schema_scenarios$schema(),
+               ".fisher where scenario IN ('",
+               paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+               "') order by scenario, timeperiod;"
+             )
+           ))
+         data.fisher.hexa <-
+           data.table(
+             getTableQuery(
+               "SELECT x,y, size, ogc_fid as zone, reference_zone FROM public.fisher_territory_pts "
+             )
+           )
+         data.fisherPoints <-
+           merge(
+             data.fisher.hexa,
+             data.fisherOccupancy[timeperiod == 0 &
+                                    scenario == schema_scenarios$scenario()[1], c('zone', 'reference_zone', 'rel_prob_occup')],
+             by.x = c('zone', 'reference_zone'),
+             by.y = c('zone', 'reference_zone'),
+             all.y = TRUE
+           )
+       } else{
+         data.fisherPoints <- NULL
+         data.fisherOccupancy <- NULL
+       }
+      } else{
+       data.fisherPoints <- NULL
+       data.fisherOccupancy <- NULL
+      }
 
+      # reportList <- reactive({
+        # req(schema_scenarios$schema())
+        # req(schema_scenarios$scenario())
+        #
 
+      incProgress(amount = 1, message = "Getting harvest data...")
 
+      # .... harvest ----
+        data.harvest <- data.table(
+          getTableQuery(
+            paste0(
+              "SELECT *
+               FROM ", schema_scenarios$schema(), ".harvest
+               WHERE scenario IN ('",
+              paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+              "');"
+            )
+          )
+        )
 
+      incProgress(amount = 1, message = "Getting growing stock data...")
+
+      # .... growing stock ----
+        data.growingstock <- data.table(
+          getTableQuery(
+            paste0(
+              "SELECT scenario, timeperiod, sum(m_gs) as growingstock
+              FROM ", schema_scenarios$schema(), ".growingstock
+              WHERE scenario IN ('",
+              paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+              "') group by scenario, timeperiod;"
+            )
+          )
+        )
+
+      incProgress(amount = 1, message = "Getting rsf data...")
+
+      # .... rsf ----
+        data.rsf <- data.table(getTableQuery(paste0("SELECT * FROM ", schema_scenarios$schema(), ".rsf where scenario IN ('", paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"), "') order by scenario, rsf_model, timeperiod;")))
+
+        list(
+          harvest = data.harvest,
+          growingstock = data.growingstock,
+          rsf = data.rsf,
+          survival = data.survival,
+          disturbance = data.disturbance,
+          fire = data.fire,
+          fire2 = data.fire2,
+          fisher = data.fisherOccupancy,
+          fisherPts = data.fisherPoints,
+          grizzly_survival = data.grizzly_survival,
+          abundance = data.abundance
+        )
+
+      # })
+
+    })
   })
 
   observe({
     mod_page_dashboard_summary_server("page_dashboard_summary", schema_scenarios, reportList)
     mod_page_dashboard_caribou_server("page_dashboard_caribou", reportList)
+    mod_page_dashboard_grizzly_server("page_dashboard_grizzly", reportList)
+    mod_page_dashboard_climate_server("page_dashboard_climate", reportList)
+    mod_page_dashboard_forestry_server("page_dashboard_forestry", reportList)
+    mod_page_dashboard_fire_server("page_dashboard_fire", reportList)
   })
 
 }

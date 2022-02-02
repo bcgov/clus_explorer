@@ -15,11 +15,16 @@ mod_page_dashboard_summary_ui <- function(id){
       column(
         width = 6,
         selectizeInput(ns("baseline_scenario"), label = "Baseline scenario", choices = NULL),
+        # actionButton(ns("baseline_scenario_apply"), label = "Apply"),
+        # mod_chart_bar_ui(ns("baseline_values"), ),
+        # mod_chart_line_ui(ns("baseline_compare"))
         div("Baseline chart here...")
       ),
       column(
         width = 6,
         plotlyOutput(outputId = ns("radar"), height = "750px") %>%
+          withSpinner(color.background = '#ecf0f5', color = '#ffffff'),
+        mod_chart_heatmap_ui(ns("heatmap"), chart_height = "400px") %>%
           withSpinner(color.background = '#ecf0f5', color = '#ffffff')
       )
     )
@@ -29,6 +34,9 @@ mod_page_dashboard_summary_ui <- function(id){
 #' page_dashboard_summary Server Functions
 #'
 #' @noRd
+#' @importFrom dplyr filter mutate
+#' @importFrom forcats as_factor fct_reorder
+#' @importFrom tidyr pivot_longer
 #' @importFrom stringr str_replace str_replace_all
 mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
   moduleServer( id, function(input, output, session){
@@ -95,13 +103,46 @@ ON (foo1.scenario = foo2.scenario) )"
         ))
       base::merge(DT.all, DT.g, by = "scenario")
     })
+# browser()
+    rl <- radarList
+    rl_long <- reactive({
+      radarList() %>%
+        tidyr::pivot_longer(
+          cols = -1,
+          names_to = 'Herd',
+          values_to = 'Ratio'
+        )
+    })
+
+#     baseline_values <- reactive({
+#       req(input$baseline_scenario_apply)
+# # browser()
+# a <- 2
+# rlb <- rl_long() %>%
+#   dplyr::filter(`scenario` == input$baseline_scenario) %>%
+#   dplyr::mutate(
+#     Ratio = round(Ratio, 2),
+#     scenario = fct_reorder(
+#       forcats::as_factor(scenario),
+#       Ratio
+#     )
+#   )
+# b <- 2
+#
+#       mod_chart_bar_server(
+#         "baseline_values",
+#         rlb,
+#         x = Herd,
+#         y = Ratio
+#       )
+#     })
 
     radar_plot <- reactive({
       renderPlotly ({
         # browser()
-        a <- 2
+
+
         rl <- radarList()
-        b <- 3
         radarLength <<- 1:nrow(rl)
         radarNames <-
           paste(c(names(rl)[2:length(rl)], names(rl)[2]), collapse = "', '")
@@ -139,7 +180,7 @@ ON (foo1.scenario = foo2.scenario) )"
       )
     ),
     legend = list (orientation = 'h'),
-    margin = list(t = 50, r = 50, b = 50, l = 50)
+    margin = list(t = 75, r = 75, b = 75, l = 75)
   ) "
           )
         ))
@@ -147,6 +188,10 @@ ON (foo1.scenario = foo2.scenario) )"
     })
 
     output$radar <- radar_plot()
+    # output$baseline_values <- baseline_values()
+
+    rll <- rl_long()
+    mod_chart_heatmap_server('heatmap', rl_long(), col_x = Herd, col_y = scenario, col_z = Ratio)
 
   })
 }
