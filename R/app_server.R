@@ -175,21 +175,7 @@ app_server <- function(input, output, session) {
   # Outputs ----
 
 
-  # output$numberFisherTerritory <- renderValueBox({
-  #   valueBoxSpark(
-  #     value = paste0(as.integer(nrow(
-  #       reportList()$fisher[timeperiod == input$fisheryear &
-  #                             scenario == input$fisher_scenario_selected &
-  #                             rel_prob_occup > 0.55, "zone"]
-  #     ))),
-  #     title = toupper("Territories"),
-  #     subtitle = NULL,
-  #     icon = icon("times-circle"),
-  #     width = 4,
-  #     color = "blue"
-  #   )
-  # })
-  #
+  # # Query Builder
   # output$resultSetTable <- renderDataTable({
   #   #print(paste0("SELECT ", paste(c(input$queryRows,input$queryColumns), sep="' '", collapse=", "), " FROM ", schema_scenarios$schema(), ".", input$queryTable, " WHERE scenario IN ('", paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"), "') GROUP BY ", input$queryColumns))
   #   data.table(getTableQuery(
@@ -217,6 +203,7 @@ app_server <- function(input, output, session) {
   #   ))
   # })
   #
+  # # Mapviewer
   # output$resultSetRaster <- renderLeaflet({
   #   leaflet(options = leafletOptions(doubleClickZoom = TRUE)) %>%
   #     setView(-124.87, 54.29, zoom = 5) %>%
@@ -229,443 +216,11 @@ app_server <- function(input, output, session) {
   #
   # })
   #
-  # output$fishermapper <- renderLeaflet({
-  #   pal <- colorNumeric(palette = 'Blues',
-  #                       domain = reportList()$fisherPts$rel_prob_occup)
-  #   leaflet(reportList()$fisherPts) %>%
-  #     addTiles() %>%
-  #     fitBounds( ~ min(x), ~ min(y), ~ max(x), ~ max(y)) %>%
-  #     addProviderTiles("OpenStreetMap", group = "OpenStreetMap") %>%
-  #     addProviderTiles("Esri.WorldImagery", group = "WorldImagery") %>%
-  #     addProviderTiles("Esri.DeLorme", group = "DeLorme") %>%
-  #     addScaleBar(position = "bottomright") %>%
-  #     addLayersControl(baseGroups = c("OpenStreetMap", "WorldImagery", "DeLorme")) %>%
-  #     addCircles(
-  #       lat = ~ y,
-  #       lng = ~ x,
-  #       fillColor = ~ pal(reportList()$fisherPts$rel_prob_occup),
-  #       color =  ~ pal(reportList()$fisherPts$rel_prob_occup),
-  #       radius = reportList()$fisherPts$size * 100,
-  #       popup = ~ paste0(
-  #         "ref:",
-  #         reference_zone,
-  #         " zone:",
-  #         zone,
-  #         " occupancy:",
-  #         rel_prob_occup
-  #       )
-  #     ) %>%
-  #     addLegend(
-  #       position = "topright",
-  #       pal = pal,
-  #       values = ~ reportList()$fisherPts$rel_prob_occup,
-  #       title = "Prob"
-  #     )
-  # })
   #
-  # output$climatemap <- renderPlot({
-  #   plot.igraph(climateMap[[1]], layout = climateMap[[2]])
-  #   legend(
-  #     'topleft',
-  #     legend = c(
-  #       "Climate",
-  #       "Anthropogenic",
-  #       "Landscape Condition",
-  #       "Predator-prey",
-  #       "Energetics",
-  #       "Health",
-  #       "Population"
-  #     ),
-  #     col = c(
-  #       "yellow",
-  #       "orange",
-  #       "purple",
-  #       "lightblue",
-  #       "pink",
-  #       "red",
-  #       "green"
-  #     ),
-  #     pch = 19,
-  #     bty = 'n',
-  #     cex = 1.7
-  #   )
-  # })
-  #
-  #
-  # output$abundancePlot <- renderPlotly ({
-  #   withProgress(message = 'Making Plots', value = 0.1, {
-  #     data <- reportList()$abundance
-  #
-  #     p <-
-  #       ggplot(data,
-  #              aes (x = timeperiod, y = abundance_avg, color = scenario)) +
-  #       facet_grid (rows = vars(subpop_name)) +
-  #       geom_line () +
-  #       xlab ("Future year") +
-  #       ylab ("Abundance") +
-  #       scale_x_continuous (limits = c(0, 50),
-  #                           breaks = seq (0, 50, by = 10)) +
-  #       theme_bw () +
-  #       theme (legend.title = element_blank(),
-  #              plot.caption = element_text (hjust = 0))
-  #     ggplotly(p, height = 900) %>%
-  #       layout (
-  #         legend = list (orientation = "h", y = -0.1),
-  #         margin = list (
-  #           l = 50,
-  #           r = 40,
-  #           b = 50,
-  #           t = 40,
-  #           pad = 0
-  #         )
-  #       )
-  #
-  #   })
-  # })
-  #
-  # output$survivalPlot <- renderPlotly ({
-  #   withProgress(message = 'Making Plots', value = 0.1, {
-  #     data <- reportList()$survival
-  #     data[, survival_rate_change := survival_rate - first(survival_rate), by = .(scenario, herd_bounds)]  # replace first() with shift() to get difference with previous year value instead of first year value
-  #
-  #     p <-
-  #       ggplot(data,
-  #              aes (x = timeperiod, y = survival_rate_change, color = scenario)) +
-  #       facet_grid (rows = vars(herd_bounds)) +
-  #       geom_line() +
-  #       geom_hline(yintercept = 0,
-  #                  linetype = "dashed",
-  #                  color = "black") +
-  #       xlab ("Future year") +
-  #       ylab ("Change in Annual Adult Female Survival Rate") +
-  #       scale_x_continuous(limits = c(0, 50),
-  #                          breaks = seq(0, 50, by = 10)) +
-  #       theme_bw() +
-  #       theme (legend.title = element_blank())
-  #     ggplotly(p, height = 900) %>%
-  #       layout (
-  #         legend = list (orientation = "h", y = -0.1),
-  #         margin = list (
-  #           l = 50,
-  #           r = 40,
-  #           b = 50,
-  #           t = 40,
-  #           pad = 0
-  #         )
-  #       )
-  #   })
-  # })
-  #
-  # output$survival_grizzly_af_Plot <- renderPlotly ({
-  #   withProgress(message = 'Making Plots', value = 0.1, {
-  #     data <- reportList()$grizzly_survival
-  #
-  #     # if want to look at difference:
-  #     # grizzly_data[, survival_rate_change := survival_rate - first(survival_rate), by = .(scenario, gbpu_name)]  # replace first() with shift() to get difference with previous year value instead of first year value
-  #
-  #     p <-
-  #       ggplot(data,
-  #              aes (x = timeperiod, y = survival_rate, color = scenario)) +
-  #       facet_grid (rows = vars(gbpu_name)) +
-  #       geom_line() +
-  #       xlab ("Future year") +
-  #       ylab ("Adult Female Survival Rate") +
-  #       theme_bw() +
-  #       theme (legend.title = element_blank()) +
-  #       scale_x_continuous(limits = c (input$grizzlyYear[1], input$grizzlyYear[2]))
-  #
-  #     ggplotly(p, height = 900) %>%
-  #       layout (
-  #         legend = list (orientation = "h", y = -0.1),
-  #         margin = list (
-  #           l = 50,
-  #           r = 40,
-  #           b = 50,
-  #           t = 40,
-  #           pad = 0
-  #         )
-  #       )
-  #   })
-  # })
-  #
-  # output$road_density_grizzly_Plot <- renderPlotly ({
-  #   withProgress(message = 'Making Plots', value = 0.1, {
-  #     data <- reportList()$grizzly_survival
-  #
-  #     # if want to look at difference:
-  #     # grizzly_data[, survival_rate_change := survival_rate - first(survival_rate), by = .(scenario, gbpu_name)]  # replace first() with shift() to get difference with previous year value instead of first year value
-  #
-  #     p <-
-  #       ggplot(data, aes (x = timeperiod, y = road_density, color = scenario)) +
-  #       facet_grid (rows = vars(gbpu_name)) +
-  #       geom_line() +
-  #       xlab ("Future year") +
-  #       ylab ("Grizzly Bear Population Unit Road Density (km/km2)") +
-  #       theme_bw() +
-  #       theme (legend.title = element_blank()) +
-  #       scale_x_continuous(limits = c (input$grizzlyYear[1], input$grizzlyYear[2]))
-  #
-  #     ggplotly(p, height = 900) %>%
-  #       layout (
-  #         legend = list (orientation = "h", y = -0.1),
-  #         margin = list (
-  #           l = 50,
-  #           r = 40,
-  #           b = 50,
-  #           t = 40,
-  #           pad = 0
-  #         )
-  #       )
-  #   })
-  # })
 
-  # output$propDisturbPlot <- renderPlotly ({
-  #   withProgress(message = 'Making Plots', value = 0.1, {
-  #     data1 <- reportList()$disturbance
-  #     p <-
-  #       ggplot(data1,
-  #              aes (
-  #                x = timeperiod,
-  #                y = (dist_per * 100),
-  #                color = scenario,
-  #                linetype = scenario
-  #              )) +
-  #       facet_wrap (facets = vars (critical_hab)) +
-  #       geom_line() +
-  #       xlab ("Future year") +
-  #       ylab ("Percent Disturbed") +
-  #       scale_x_continuous(limits = c(0, 50),
-  #                          breaks = seq(0, 50, by = 10)) +
-  #       theme_bw() +
-  #       theme (legend.title = element_blank())
-  #     ggplotly(p, height = 900) %>%
-  #       layout (
-  #         legend = list (orientation = "h", y = -0.1),
-  #         margin = list (
-  #           l = 50,
-  #           r = 40,
-  #           b = 40,
-  #           t = 40,
-  #           pad = 0
-  #         )
-  #         #yaxis = list (title=paste0(c(rep("&nbsp;", 10),"RSF Value Percent Change", rep("&nbsp;", 200), rep("&nbsp;", 3))
-  #       )# change seasonal values
-  #   })
-  # })
-  #
-  # output$propDisturbBuffPlot <- renderPlotly ({
-  #   withProgress(message = 'Making Plots', value = 0.1, {
-  #     data1 <- reportList()$disturbance
-  #     p <-
-  #       ggplot(data1,
-  #              aes (
-  #                x = timeperiod,
-  #                y = (dist500_per * 100),
-  #                color = scenario,
-  #                linetype = scenario
-  #              )) +
-  #       facet_wrap (facets = vars (critical_hab)) +
-  #       geom_line() +
-  #       xlab ("Future year") +
-  #       ylab ("Percent Disturbed") +
-  #       scale_x_continuous(limits = c(0, 50),
-  #                          breaks = seq(0, 50, by = 10)) +
-  #       scale_y_continuous(limits = c(0, 100),
-  #                          breaks = seq(0, 100, by = 10)) +
-  #       # scale_alpha_discrete(range=c(0.4,0.8))+
-  #       # scale_color_grey(start=0.8, end=0.2) +
-  #       theme_bw() +
-  #       theme (legend.title = element_blank())
-  #     ggplotly(p, height = 900) %>%
-  #       layout (
-  #         legend = list (orientation = "h", y = -0.1),
-  #         margin = list (
-  #           l = 50,
-  #           r = 40,
-  #           b = 40,
-  #           t = 40,
-  #           pad = 0
-  #         )
-  #         #yaxis = list (title=paste0(c(rep("&nbsp;", 10),"RSF Value Percent Change", rep("&nbsp;", 200), rep("&nbsp;", 3))
-  #       )# change seasonal values
-  #   })
-  # })
-  #
-  # output$propEarlyPlot <- renderPlotly ({
-  #   withProgress(message = 'Making Plots', value = 0.1, {
-  #     data1 <- reportList()$survival
-  #     p <-
-  #       ggplot(data1,
-  #              aes (
-  #                x = timeperiod,
-  #                y = prop_age,
-  #                color = scenario,
-  #                type = scenario
-  #              )) +
-  #       facet_grid (rows = vars(herd_bounds)) +
-  #       geom_line() +
-  #       xlab ("Future year") +
-  #       ylab ("Proportion Age 0 to 40 years") +
-  #       scale_x_continuous(limits = c(0, 50),
-  #                          breaks = seq(0, 50, by = 10)) +
-  #       # scale_alpha_discrete(range=c(0.4,0.8))+
-  #       # scale_color_grey(start=0.8, end=0.2) +
-  #       theme_bw() +
-  #       theme (legend.title = element_blank())
-  #     ggplotly(p, height = 900) %>%
-  #       layout (
-  #         legend = list (orientation = "h", y = -0.1),
-  #         margin = list (
-  #           l = 50,
-  #           r = 40,
-  #           b = 40,
-  #           t = 40,
-  #           pad = 0
-  #         )
-  #         #yaxis = list (title=paste0(c(rep("&nbsp;", 10),"RSF Value Percent Change", rep("&nbsp;", 200), rep("&nbsp;", 3))
-  #       )# change seasonal values
-  #   })
-  # })
-  #
-  # output$propMaturePlot <- renderPlotly ({
-  #   withProgress(message = 'Making Plots', value = 0.1, {
-  #     data1 <- reportList()$survival
-  #     p <-
-  #       ggplot(data1,
-  #              aes (
-  #                x = timeperiod,
-  #                y = prop_mature,
-  #                color = scenario,
-  #                type = scenario
-  #              )) +
-  #       facet_grid (rows = vars(herd_bounds)) +
-  #       geom_line() +
-  #       xlab ("Future year") +
-  #       ylab ("Proportion Age 80 to 120 years") +
-  #       scale_x_continuous(limits = c(0, 50),
-  #                          breaks = seq(0, 50, by = 10)) +
-  #       # scale_alpha_discrete(range=c(0.4,0.8))+
-  #       # scale_color_grey(start=0.8, end=0.2) +
-  #       theme_bw() +
-  #       theme (legend.title = element_blank())
-  #     ggplotly(p, height = 900) %>%
-  #       layout (
-  #         legend = list (orientation = "h", y = -0.1),
-  #         margin = list (
-  #           l = 50,
-  #           r = 40,
-  #           b = 40,
-  #           t = 40,
-  #           pad = 0
-  #         )
-  #         #yaxis = list (title=paste0(c(rep("&nbsp;", 10),"RSF Value Percent Change", rep("&nbsp;", 200), rep("&nbsp;", 3))
-  #       )# change seasonal values
-  #   })
-  # })
-  #
-  # output$propOldPlot <- renderPlotly ({
-  #   withProgress(message = 'Making Plots', value = 0.1, {
-  #     data1 <- reportList()$survival
-  #     p <-
-  #       ggplot(data1,
-  #              aes (
-  #                x = timeperiod,
-  #                y = prop_old,
-  #                color = scenario,
-  #                type = scenario
-  #              )) +
-  #       facet_grid (rows = vars(herd_bounds)) +
-  #       geom_line() +
-  #       xlab ("Future year") +
-  #       ylab ("Proportion > 120 years") +
-  #       scale_x_continuous(limits = c(0, 50),
-  #                          breaks = seq(0, 50, by = 10)) +
-  #       # scale_alpha_discrete(range=c(0.4,0.8))+
-  #       # scale_color_grey(start=0.8, end=0.2) +
-  #       theme_bw() +
-  #       theme (legend.title = element_blank())
-  #     ggplotly(p, height = 900) %>%
-  #       layout (
-  #         legend = list (orientation = "h", y = -0.1),
-  #         margin = list (
-  #           l = 50,
-  #           r = 40,
-  #           b = 40,
-  #           t = 40,
-  #           pad = 0
-  #         )
-  #         #yaxis = list (title=paste0(c(rep("&nbsp;", 10),"RSF Value Percent Change", rep("&nbsp;", 200), rep("&nbsp;", 3))
-  #       )# change seasonal values
-  #   })
-  # })
-
-  # output$fisherOccupancyPlot <- renderPlotly({
-  #   data <-
-  #     reportList()$fisher[, sum(rel_prob_occup), by = c('scenario', 'timeperiod')]
-  #   p <-
-  #     ggplot(data,
-  #            aes (
-  #              x = timeperiod,
-  #              y = V1,
-  #              group = scenario,
-  #              color = scenario
-  #            )) +
-  #     geom_line() +
-  #     xlab ("Future year") +
-  #     ylab ("Sum relative probability of occupancy") +
-  #     theme_bw() +
-  #     theme (legend.title = element_blank())
-  #   ggplotly(p) %>%
-  #     layout (legend = list (orientation = "h", y = -0.1))
-  # })
-  #
-  # output$fisherTerritoryPlot <- renderPlot({
-  #   data <- reportList()$fisher[timeperiod == input$fisherTerritoryYear]
-  #   ggplot(data, aes(rel_prob_occup, color = scenario, fill = scenario)) +
-  #     facet_grid(. ~ reference_zone) +
-  #     geom_density(aes(y = ..scaled..), alpha = 0.1) +
-  #     xlab ("Relative probability of occupancy") +
-  #     ylab ("Frequency") +
-  #     theme_bw() +
-  #     theme (legend.title = element_blank(), legend.position = 'bottom')
-  #
-  # })
-  #
-  # output$rsfPlot <- renderPlotly ({
-  #   data <- reportList()$rsf
-  #   # data$scenario <- reorder(data$scenario, data$sum_rsf_hat, function(x) -max(x) )
-  #   data[, rsf_perc_change := ((first(sum_rsf_hat) - sum_rsf_hat) / first(sum_rsf_hat) * 100), by = .(scenario, rsf_model)]  # replace first() with shift() to get difference with previous year value instead of first year value
-  #   p <-
-  #     ggplot(data, aes (x = timeperiod, y = rsf_perc_change, fill = scenario)) +
-  #     facet_grid (rows = vars(rsf_model)) +
-  #     geom_bar(stat = "identity", position = "dodge") +
-  #     geom_hline(yintercept = 0,
-  #                linetype = "dashed",
-  #                color = "black") +
-  #     xlab ("Future year") +
-  #     ylab ("RSF Value Percent Change") +
-  #     scale_x_continuous(limits = c(0, 55), breaks = seq(0, 50, by = 10)) +
-  #     theme_bw() +
-  #     theme (legend.title = element_blank())
-  #   ggplotly(p, height = 900)  %>%
-  #     layout (
-  #       legend = list (orientation = "h", y = -0.1),
-  #       margin = list (
-  #         l = 50,
-  #         r = 40,
-  #         b = 40,
-  #         t = 10,
-  #         pad = 0
-  #       )
-  #       #yaxis = list (title=paste0(c(rep("&nbsp;", 10),"RSF Value Percent Change", rep("&nbsp;", 200), rep("&nbsp;", 3))
-  #     )# change seasonal values
-  # })
-
-  # observe({
   reportList <- reactive({
 
     # .. report list ----
-      # browser()
     req(schema_scenarios$schema())
     req(schema_scenarios$scenario())
     req(schema_scenarios$apply_scenario())
@@ -695,13 +250,15 @@ app_server <- function(input, output, session) {
           )) > 0) {
             data.abundance <-
               data.table(getTableQuery(
-                paste0(
-                  "SELECT scenario, subpop_name, timeperiod, area, core, matrix, abundance_r50, abundance_c80r50, abundance_c80, abundance_avg FROM ",
-                  schema_scenarios$schema(),
-                  ".caribou_abundance where scenario IN ('",
-                  paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-                  "') order by scenario, subpop_name, timeperiod;"
-                )
+                sql = glue::glue_sql(
+                  "SELECT scenario, subpop_name, timeperiod, area, core, matrix,
+                  abundance_r50, abundance_c80r50, abundance_c80, abundance_avg
+                  FROM {`schema_scenarios$schema()`}.caribou_abundance
+                  WHERE scenario IN ({schema_scenarios$scenario()*})
+                  ORDER BY scenario, subpop_name, timeperiod;",
+                  .con = conn
+                ),
+                conn = conn
               ))
             data.abundance <-
               data.abundance [, lapply(.SD, weighted.mean, w = area), by = c("scenario",  "subpop_name", "timeperiod"), .SDcols = c(
@@ -719,249 +276,268 @@ app_server <- function(input, output, session) {
           data.abundance <- NULL
         }
 
-      incProgress(amount = 1, message = "Getting survival data...")
+        incProgress(amount = 1, message = "Getting survival data...")
 
-      # .... survival ----
-      if (nrow(getTableQuery(
-        sql = glue_sql(
-          "SELECT * FROM information_schema.tables
+        # .... survival ----
+        if (nrow(getTableQuery(
+          sql = glue_sql(
+            "SELECT * FROM information_schema.tables
           WHERE table_schema = {schema_scenarios$schema()}
           AND table_name = 'survival'",
           .con = conn
-        ),
-        conn = conn
-      )) > 0) {
-        if (nrow(getTableQuery(
-          sql = glue_sql(
-            "SELECT * FROM {`schema_scenarios$schema()`}.survival
+          ),
+          conn = conn
+        )) > 0) {
+          if (nrow(getTableQuery(
+            sql = glue_sql(
+              "SELECT * FROM {`schema_scenarios$schema()`}.survival
             WHERE scenario IN ({schema_scenarios$scenario()*}) limit 1",
+            .con = conn
+            ),
+            conn = conn
+          )) > 0) {
+            data.survival <-
+              data.table(getTableQuery(
+                sql = glue_sql(
+                  "SELECT * FROM {`schema_scenarios$schema()`}.survival
+                WHERE scenario IN ({schema_scenarios$scenario()*})
+                ORDER BY scenario, herd_bounds, timeperiod;",
+                .con = conn
+                ),
+                conn = conn
+              ))
+            data.survival <-
+              data.survival[, lapply(.SD, weighted.mean, w = area),
+                            by = c("scenario",  "herd_bounds", "timeperiod"),
+                            .SDcols = c("prop_age", "prop_mature", "prop_old", "survival_rate")]
+          } else{
+            data.survival <- NULL
+          }
+        } else{
+          data.survival <- NULL
+        }
+
+        incProgress(amount = 1, message = "Getting disturbance data...")
+
+        # .... disturbance ----
+        if (nrow(getTableQuery(
+          sql = glue::glue_sql(
+            "SELECT * FROM information_schema.tables
+            WHERE table_schema = {schema_scenarios$schema()}
+            AND table_name = 'disturbance'",
+            .con = conn
+          ),
+          conn = conn
+        )
+        ) > 0) {
+          if (nrow(getTableQuery(
+            sql = glue::glue_sql(
+              "SELECT * FROM {`schema_scenarios$schema()`}.disturbance
+                 WHERE scenario IN ({schema_scenarios$scenario()*})
+                 LIMIT 1",
+              .con = conn
+            ),
+            conn = conn
+          )) > 0) {
+            data.disturbance <-
+              data.table (getTableQuery(
+                sql = glue::glue_sql(
+                  "SELECT scenario, timeperiod, critical_hab, sum(c40r500) as c40r500,
+                      sum(c40r50) as c40r50, sum(total_area) as total_area
+                     FROM {`schema_scenarios$schema()`}.disturbance
+                     WHERE scenario IN ({schema_scenarios$scenario()*})
+                    GROUP BY scenario, critical_hab, timeperiod
+                    ORDER BY scenario, critical_hab, timeperiod",
+                  .con = conn
+                ),
+                conn = conn
+              ))
+            # c40r50 = dist; c40r500 = dist500 }
+            data.disturbance <-
+              data.disturbance[, dist_per := c40r50 / total_area][, dist500_per := c40r500 /
+                                                                    total_area]
+          } else{
+            data.disturbance <- NULL
+          }
+        } else{
+          data.disturbance <- NULL
+        }
+
+        incProgress(amount = 1, message = "Getting grizzly survival data...")
+
+        # .... grizzly survival ----
+        if (nrow(getTableQuery(
+          sql = glue::glue_sql(
+            "SELECT * FROM information_schema.tables
+            WHERE table_schema = {schema_scenarios$schema()}
+            AND table_name = 'grizzly_survival'",
             .con = conn
           ),
           conn = conn
         )) > 0) {
-          data.survival <-
-            data.table(getTableQuery(
-              glue_sql(
-                "SELECT * FROM {`schema_scenarios$schema()`}.survival
-                WHERE scenario IN ({schema_scenarios$scenario()*})
-                ORDER BY scenario, herd_bounds, timeperiod;",
-                .con = conn
-              ),
-              conn = conn
-            ))
-          data.survival <-
-            data.survival[, lapply(.SD, weighted.mean, w = area),
-                          by = c("scenario",  "herd_bounds", "timeperiod"),
-                          .SDcols = c("prop_age", "prop_mature", "prop_old", "survival_rate")]
+          if (nrow(getTableQuery(
+            sql = glue::glue_sql(
+              "SELECT * FROM {`schema_scenarios$schema()`}.grizzly_survival
+           WHERE scenario IN ({schema_scenarios$scenario()*}) limit 1",
+           .con = conn
+            ),
+           conn = conn
+          )) > 0) {
+            data.grizzly_survival <-
+              data.table(getTableQuery(
+                sql = glue::glue_sql(
+                  "SELECT * FROM {`schema_scenarios$schema()`}.grizzly_survival
+               WHERE scenario IN ({schema_scenarios$scenario()*})
+               ORDER BY scenario, gbpu_name, timeperiod;",
+               .con = conn
+                ),
+               conn = conn
+              )
+              )
+            data.grizzly_survival <-
+              data.grizzly_survival[, lapply(.SD, weighted.mean, w = total_area), by =
+                                      c("scenario",  "gbpu_name", "timeperiod"), .SDcols = c("road_density", "survival_rate")]
+          } else{
+            data.grizzly_survival <- NULL
+          }
         } else{
-          data.survival <- NULL
+          data.grizzly_survival <- NULL
         }
-      } else{
-        data.survival <- NULL
-      }
 
-      incProgress(amount = 1, message = "Getting disturbance data...")
+        incProgress(amount = 1, message = "Getting fire data...")
 
-      # .... disturbance ----
-           if (nrow(getTableQuery(
-             paste0(
-               "SELECT * FROM information_schema.tables
-            WHERE table_schema = '",
-            schema_scenarios$schema() ,
-            "' and table_name = 'disturbance'"
-             )
-           )) > 0) {
-             if (nrow(getTableQuery(
-               paste0(
-                 "SELECT * FROM ",
-                 schema_scenarios$schema(),
-                 ".disturbance where scenario IN ('",
-                 paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-                 "') limit 1"
-               )
-             )) > 0) {
-               data.disturbance <-
-                 data.table (getTableQuery(
-                   paste0(
-                     "SELECT scenario,timeperiod,critical_hab,
-         sum(c40r500) as c40r500, sum(c40r50) as c40r50, sum(total_area) as total_area FROM ",
-         schema_scenarios$schema(),
-         ".disturbance where scenario IN ('",
-         paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-         "') group by scenario, critical_hab, timeperiod order by scenario, critical_hab, timeperiod;"
-                   )
-                 ))
-               # c40r50 = dist; c40r500 = dist500 }
-               data.disturbance <-
-                 data.disturbance[, dist_per := c40r50 / total_area][, dist500_per := c40r500 /
-                                                                       total_area]
-             } else{
-               data.disturbance <- NULL
-             }
-           } else{
-             data.disturbance <- NULL
-           }
+        # .... fire ----
+        data.fire <-
+          getTableQuery(
+            sql = glue::glue_sql(
+              "SELECT * FROM fire where herd_bounds IN ({unique(data.survival$herd_bounds)*});",
+              .con = conn
+            ),
+            conn = conn
+          )
+        data.fire2 <-
+          getTableQuery(
+            sql = glue::glue_sql(
+              "SELECT
+              herd_name, habitat, round(cast(mean_ha2 as numeric), 1) as mean,
+              round(cast(mean_area_percent as numeric), 1) as percent, round(cast(max_ha2 as numeric), 1) as max,
+              round(cast(min_ha2 as numeric), 1) as min,
+              round(cast(cummulative_area_ha2 as numeric), 1) as cummulative,
+              round(cast(cummulative_area_percent as numeric), 1) as cummul_percent
+           FROM firesummary where herd_bounds IN (
+      {unique(data.survival$herd_bounds)*});",
+      .con = conn
+            ),
+      conn = conn
+          )
 
-      incProgress(amount = 1, message = "Getting grizzly survival data...")
+        incProgress(amount = 1, message = "Getting fisher data...")
 
-      # .... grizzly survival ----
-      if (nrow(getTableQuery(
-       paste0(
-         "SELECT * FROM information_schema.tables
-      WHERE table_schema = '",
-      schema_scenarios$schema() ,
-      "' and table_name = 'grizzly_survival'"
-       )
-      )) > 0) {
-       if (nrow(getTableQuery(
-         paste0(
-           "SELECT * FROM ",
-           schema_scenarios$schema(),
-           ".grizzly_survival where scenario IN ('",
-           paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-           "') limit 1"
-         )
-       )) > 0) {
-         data.grizzly_survival <-
-           data.table(getTableQuery(
-             paste0(
-               "SELECT * FROM ",
-               schema_scenarios$schema(),
-               ".grizzly_survival where scenario IN ('",
-               paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-               "') order by scenario, gbpu_name, timeperiod;"
-             )
-           ))
-         data.grizzly_survival <-
-           data.grizzly_survival[, lapply(.SD, weighted.mean, w = total_area), by =
-                                   c("scenario",  "gbpu_name", "timeperiod"), .SDcols = c("road_density", "survival_rate")]
-       } else{
-         data.grizzly_survival <- NULL
-       }
-      } else{
-       data.grizzly_survival <- NULL
-      }
+        # .... fisher ----
+        if (nrow(getTableQuery(
+          sql = glue::glue_sql(
+            "SELECT * FROM information_schema.tables
+      WHERE table_schema = {schema_scenarios$schema()}
+      AND table_name = 'fisher'",
+      .con = conn
+          ),
+      conn = conn
+        )) > 0) {
+          if (nrow(getTableQuery(
+            sql = glue::glue_sql(
+              "SELECT * FROM {`schema_scenarios$schema()`}.fisher
+           WHERE scenario IN ({schema_scenarios$scenario()*})
+           LIMIT 1",
+           .con = conn
+            ),
+           conn = conn
+          )) > 0) {
+            data.fisherOccupancy <-
+              data.table(getTableQuery(
+                sql = glue::glue_sql(
+                  "SELECT rel_prob_occup, zone, reference_zone, timeperiod, scenario
+               FROM {`schema_scenarios$schema()`}.fisher
+               WHERE scenario IN ({schema_scenarios$scenario()*})
+               ORDER BY scenario, timeperiod;",
+               .con = conn
+                ),
+               conn = conn
+              ))
+            data.fisher.hexa <-
+              data.table(
+                getTableQuery(
+                  sql = "SELECT x,y, size, ogc_fid as zone, reference_zone FROM public.fisher_territory_pts",
+                  conn = conn
+                )
+              )
+            data.fisherPoints <-
+              merge(
+                data.fisher.hexa,
+                data.fisherOccupancy[timeperiod == 0 &
+                                       scenario == schema_scenarios$scenario()[1], c('zone', 'reference_zone', 'rel_prob_occup')],
+                by.x = c('zone', 'reference_zone'),
+                by.y = c('zone', 'reference_zone'),
+                all.y = TRUE
+              )
+          } else{
+            data.fisherPoints <- NULL
+            data.fisherOccupancy <- NULL
+          }
+        } else{
+          data.fisherPoints <- NULL
+          data.fisherOccupancy <- NULL
+        }
 
-      incProgress(amount = 1, message = "Getting fire data...")
-
-      # .... fire ----
-      data.fire <-
-       getTableQuery(paste0(
-         "SELECT * FROM fire where herd_bounds IN ('",
-         paste(
-           unique(data.survival$herd_bounds),
-           sep =  "' '",
-           collapse = "', '"
-         ),
-         "');"
-       ))
-      data.fire2 <-
-       getTableQuery(
-         paste0(
-           "SELECT herd_name, habitat,  round(cast(mean_ha2 as numeric),1) as mean,  round(cast(mean_area_percent as numeric),1) as percent,
-      round(cast(max_ha2 as numeric),1) as max,  round(cast(min_ha2 as numeric),1) as min, round(cast(cummulative_area_ha2 as numeric),1) as cummulative, round(cast(cummulative_area_percent as numeric),1) as cummul_percent FROM firesummary where herd_bounds IN ('",
-      paste(
-      unique(data.survival$herd_bounds),
-      sep =  "' '",
-      collapse = "', '"
-      ),
-      "');"
-         )
-       )
-
-      incProgress(amount = 1, message = "Getting fisher data...")
-
-      # .... fisher ----
-      if (nrow(getTableQuery(
-       paste0(
-         "SELECT * FROM information_schema.tables
-      WHERE table_schema = '",
-      schema_scenarios$schema() ,
-      "' and table_name = 'fisher'"
-       )
-      )) > 0) {
-       if (nrow(getTableQuery(
-         paste0(
-           "SELECT * FROM ",
-           schema_scenarios$schema(),
-           ".fisher where scenario IN ('",
-           paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-           "') limit 1"
-         )
-       )) > 0) {
-         data.fisherOccupancy <-
-           data.table(getTableQuery(
-             paste0(
-               "SELECT rel_prob_occup, zone, reference_zone, timeperiod, scenario  FROM ",
-               schema_scenarios$schema(),
-               ".fisher where scenario IN ('",
-               paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-               "') order by scenario, timeperiod;"
-             )
-           ))
-         data.fisher.hexa <-
-           data.table(
-             getTableQuery(
-               "SELECT x,y, size, ogc_fid as zone, reference_zone FROM public.fisher_territory_pts "
-             )
-           )
-         data.fisherPoints <-
-           merge(
-             data.fisher.hexa,
-             data.fisherOccupancy[timeperiod == 0 &
-                                    scenario == schema_scenarios$scenario()[1], c('zone', 'reference_zone', 'rel_prob_occup')],
-             by.x = c('zone', 'reference_zone'),
-             by.y = c('zone', 'reference_zone'),
-             all.y = TRUE
-           )
-       } else{
-         data.fisherPoints <- NULL
-         data.fisherOccupancy <- NULL
-       }
-      } else{
-       data.fisherPoints <- NULL
-       data.fisherOccupancy <- NULL
-      }
-
-      # reportList <- reactive({
+        # reportList <- reactive({
         # req(schema_scenarios$schema())
         # req(schema_scenarios$scenario())
         #
 
-      incProgress(amount = 1, message = "Getting harvest data...")
+        incProgress(amount = 1, message = "Getting harvest data...")
 
-      # .... harvest ----
+        # .... harvest ----
         data.harvest <- data.table(
           getTableQuery(
-            paste0(
+            sql = glue::glue_sql(
               "SELECT *
-               FROM ", schema_scenarios$schema(), ".harvest
-               WHERE scenario IN ('",
-              paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-              "');"
-            )
+               FROM {`schema_scenarios$schema()`}.harvest
+               WHERE scenario IN ({schema_scenarios$scenario()*});",
+              .con = conn
+            ),
+            conn = conn
           )
         )
 
-      incProgress(amount = 1, message = "Getting growing stock data...")
+        incProgress(amount = 1, message = "Getting growing stock data...")
 
-      # .... growing stock ----
+        # .... growing stock ----
         data.growingstock <- data.table(
           getTableQuery(
-            paste0(
+            sql = glue::glue_sql(
               "SELECT scenario, timeperiod, sum(m_gs) as growingstock
-              FROM ", schema_scenarios$schema(), ".growingstock
-              WHERE scenario IN ('",
-              paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-              "') group by scenario, timeperiod;"
-            )
+              FROM {`schema_scenarios$schema()`}.growingstock
+              WHERE scenario IN ({schema_scenarios$scenario()*})
+              GROUP BY scenario, timeperiod;",
+              .con = conn
+            ),
+            conn = conn
           )
         )
 
-      incProgress(amount = 1, message = "Getting rsf data...")
+        incProgress(amount = 1, message = "Getting rsf data...")
 
-      # .... rsf ----
-        data.rsf <- data.table(getTableQuery(paste0("SELECT * FROM ", schema_scenarios$schema(), ".rsf where scenario IN ('", paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"), "') order by scenario, rsf_model, timeperiod;")))
+        # .... rsf ----
+        data.rsf <- data.table(
+          getTableQuery(
+            sql = glue::glue_sql(
+              "SELECT * FROM {`schema_scenarios$schema()`}.rsf
+              WHERE scenario IN ({schema_scenarios$scenario()*})
+              ORDER BY scenario, rsf_model, timeperiod;",
+              .con = conn
+            ),
+            conn = conn
+          )
+        )
 
         list(
           harvest = data.harvest,
@@ -977,9 +553,9 @@ app_server <- function(input, output, session) {
           abundance = data.abundance
         )
 
-      # })
+        # })
 
-    })
+      })
   })
 
   observe({
