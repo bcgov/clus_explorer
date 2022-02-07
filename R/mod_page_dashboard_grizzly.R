@@ -108,6 +108,37 @@ mod_page_dashboard_grizzly_server <- function(id, reportList){
       })
     })
 
+    output$survival_grizzly_af_Plot <- renderPlotly ({
+      withProgress(message = 'Making Plots', value = 0.1, {
+        data <- reportList()$grizzly_survival
+
+        # if want to look at difference:
+        # grizzly_data[, survival_rate_change := survival_rate - first(survival_rate), by = .(scenario, gbpu_name)]  # replace first() with shift() to get difference with previous year value instead of first year value
+
+        p <-
+          ggplot(data,
+                 aes (x = timeperiod, y = survival_rate, color = scenario)) +
+          facet_grid (rows = vars(gbpu_name)) +
+          geom_line() +
+          xlab ("Future year") +
+          ylab ("Adult Female Survival Rate") +
+          theme_bw() +
+          theme (legend.title = element_blank()) +
+          scale_x_continuous(limits = c (input$grizzlyYear[1], input$grizzlyYear[2]))
+
+        ggplotly(p, height = 900) %>%
+          layout (
+            legend = list (orientation = "h", y = -0.1),
+            margin = list (
+              l = 50,
+              r = 40,
+              b = 50,
+              t = 40,
+              pad = 0
+            )
+          )
+      })
+    })
 
   })
 }

@@ -91,15 +91,90 @@ mod_page_dashboard_fisher_ui <- function(id){
 #' page_dashboard_fisher Server Functions
 #'
 #' @noRd
-mod_page_dashboard_fisher_server <- function(id){
+mod_page_dashboard_fisher_server <- function(id, reportList){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
+    output$numberFisherTerritory <- renderValueBox({
+      valueBoxSpark(
+        value = paste0(as.integer(nrow(
+          reportList()$fisher[timeperiod == input$fisheryear &
+                                scenario == input$fisher_scenario_selected &
+                                rel_prob_occup > 0.55, "zone"]
+        ))),
+        title = toupper("Territories"),
+        subtitle = NULL,
+        icon = icon("times-circle"),
+        width = 4,
+        color = "blue"
+      )
+    })
+
+    output$fisherTerritoryPlot <- renderPlot({
+      data <- reportList()$fisher[timeperiod == input$fisherTerritoryYear]
+      ggplot(data, aes(rel_prob_occup, color = scenario, fill = scenario)) +
+        facet_grid(. ~ reference_zone) +
+        geom_density(aes(y = ..scaled..), alpha = 0.1) +
+        xlab ("Relative probability of occupancy") +
+        ylab ("Frequency") +
+        theme_bw() +
+        theme (legend.title = element_blank(), legend.position = 'bottom')
+    })
+
+    output$fishermapper <- renderLeaflet({
+      pal <- colorNumeric(palette = 'Blues',
+                          domain = reportList()$fisherPts$rel_prob_occup)
+      leaflet(reportList()$fisherPts) %>%
+        addTiles() %>%
+        fitBounds( ~ min(x), ~ min(y), ~ max(x), ~ max(y)) %>%
+        addProviderTiles("OpenStreetMap", group = "OpenStreetMap") %>%
+        addProviderTiles("Esri.WorldImagery", group = "WorldImagery") %>%
+        addProviderTiles("Esri.DeLorme", group = "DeLorme") %>%
+        addScaleBar(position = "bottomright") %>%
+        addLayersControl(baseGroups = c("OpenStreetMap", "WorldImagery", "DeLorme")) %>%
+        addCircles(
+          lat = ~ y,
+          lng = ~ x,
+          fillColor = ~ pal(reportList()$fisherPts$rel_prob_occup),
+          color =  ~ pal(reportList()$fisherPts$rel_prob_occup),
+          radius = reportList()$fisherPts$size * 100,
+          popup = ~ paste0(
+            "ref:",
+            reference_zone,
+            " zone:",
+            zone,
+            " occupancy:",
+            rel_prob_occup
+          )
+        ) %>%
+        addLegend(
+          position = "topright",
+          pal = pal,
+          values = ~ reportList()$fisherPts$rel_prob_occup,
+          title = "Prob"
+        )
+    })
+
+    output$fisherOccupancyPlot <- renderPlotly({
+      data <-
+        reportList()$fisher[, sum(rel_prob_occup), by = c('scenario', 'timeperiod')]
+      p <-
+        ggplot(data,
+               aes (
+                 x = timeperiod,
+                 y = V1,
+                 group = scenario,
+                 color = scenario
+               )) +
+        geom_line() +
+        xlab ("Future year") +
+        ylab ("Sum relative probability of occupancy") +
+        theme_bw() +
+        theme (legend.title = element_blank())
+      ggplotly(p) %>%
+        plotly::layout (legend = list (orientation = "h", y = -0.1))
+    })
+
+
   })
 }
-
-## To be copied in the UI
-# mod_page_dashboard_fisher_ui("page_dashboard_fisher_ui_1")
-
-## To be copied in the server
-# mod_page_dashboard_fisher_server("page_dashboard_fisher_ui_1")
