@@ -101,7 +101,24 @@ group by scenario, timeperiod) foo2
 ON (foo1.scenario = foo2.scenario) )"
           )
         ))
+
+      dt.indicators<-getTableQuery(
+        sql = glue_sql("WITH view1 AS (select scenario, compartment, timeperiod, m_gs as variable, 'm_gs' as ind_name from {`schema_scenarios$schema()`}.growingstock
+			where scenario in ({schema_scenarios$scenario()*})
+			Union All
+ SELECT scenario, compartment, timeperiod, volume as variable, 'vol_h' as ind_name
+	FROM {`schema_scenarios$schema()`}.harvest where scenario in ({schema_scenarios$scenario()*})
+Union all
+SELECT scenario, compartment, timeperiod, sum(cut80) as variable, split_part(critical_hab, ' ', 1) AS ind_name
+	FROM {`schema_scenarios$schema()`}.disturbance where scenario in ({schema_scenarios$scenario()*})
+		group by scenario, compartment, timeperiod, ind_name)
+select * from view1;")
+      )
+
+
       base::merge(DT.all, DT.g, by = "scenario")
+
+
     })
 # browser()
     rl <- radarList
