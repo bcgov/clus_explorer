@@ -963,6 +963,23 @@ app_server <- function(input, output, session) {
       # .... rsf ----
         data.rsf <- data.table(getTableQuery(paste0("SELECT * FROM ", schema_scenarios$schema(), ".rsf where scenario IN ('", paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"), "') order by scenario, rsf_model, timeperiod;")))
 
+      incProgress(amount = 1, message = "Getting summary data...")
+
+      data.indicators<-getTableQuery(
+        sql = glue_sql("WITH view1 AS (select scenario, compartment, timeperiod, m_gs as variable, 'm_gs' as ind_name from {`schema_scenarios$schema()`}.growingstock
+			where scenario in ({schema_scenarios$scenario()*})
+			Union All
+ SELECT scenario, compartment, timeperiod, volume as variable, 'vol_h' as ind_name
+	FROM {`schema_scenarios$schema()`}.harvest where scenario in ({schema_scenarios$scenario()*})
+Union all
+SELECT scenario, compartment, timeperiod, sum(cut80) as variable, split_part(critical_hab, ' ', 1) AS ind_name
+	FROM {`schema_scenarios$schema()`}.disturbance where scenario in ({schema_scenarios$scenario()*})
+		group by scenario, compartment, timeperiod, ind_name)
+select scenario, compartment, timeperiod, COALESCE(variable, 0) as variable, ind_name from view1
+where ind_name is not null;", .con = conn),
+        conn = conn
+      )
+
         list(
           harvest = data.harvest,
           growingstock = data.growingstock,
@@ -974,7 +991,8 @@ app_server <- function(input, output, session) {
           fisher = data.fisherOccupancy,
           fisherPts = data.fisherPoints,
           grizzly_survival = data.grizzly_survival,
-          abundance = data.abundance
+          abundance = data.abundance,
+          indicators = data.indicators
         )
 
       # })

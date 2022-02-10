@@ -15,6 +15,7 @@ mod_page_dashboard_summary_ui <- function(id){
       column(
         width = 6,
         selectizeInput(ns("baseline_scenario"), label = "Baseline scenario", choices = NULL),
+        selectizeInput(ns("discount_rate"), label = "Risk", choices = c(0, 0.05,0.01,-0.01)),
         # actionButton(ns("baseline_scenario_apply"), label = "Apply"),
         # mod_chart_bar_ui(ns("baseline_values"), ),
         # mod_chart_line_ui(ns("baseline_compare"))
@@ -69,6 +70,13 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
 
     # .. radar list ----
     radarList <- reactive({
+      req(reportList()$indicators)
+      req(input$discount_rate)
+      req(baseline_values())
+
+      if(FALSE){
+
+
       req(reportList()$harvest)
       req(reportList()$survival)
       req(schema_scenarios$scenario())
@@ -101,24 +109,21 @@ group by scenario, timeperiod) foo2
 ON (foo1.scenario = foo2.scenario) )"
           )
         ))
+      }
+      dt.baseline<-baseline_values()
+      setnames(dt.baseline, "variable", "base_variable")
+      dt.indicators<-reportList()$indicators %>% dplyr::filter(!(`scenario` == input$baseline_scenario))
+      dt.compare.indicators<-merge(dt.indicators, dt.baseline, by.x =c("compartment", "timeperiod", "ind_name"),
+                                   by.y =c("compartment", "timeperiod", "ind_name"))
 
-      dt.indicators<-getTableQuery(
-        sql = glue_sql("WITH view1 AS (select scenario, compartment, timeperiod, m_gs as variable, 'm_gs' as ind_name from {`schema_scenarios$schema()`}.growingstock
-			where scenario in ({schema_scenarios$scenario()*})
-			Union All
- SELECT scenario, compartment, timeperiod, volume as variable, 'vol_h' as ind_name
-	FROM {`schema_scenarios$schema()`}.harvest where scenario in ({schema_scenarios$scenario()*})
-Union all
-SELECT scenario, compartment, timeperiod, sum(cut80) as variable, split_part(critical_hab, ' ', 1) AS ind_name
-	FROM {`schema_scenarios$schema()`}.disturbance where scenario in ({schema_scenarios$scenario()*})
-		group by scenario, compartment, timeperiod, ind_name)
-select * from view1;")
+      out<-dt.compare.indicators[,list(scen = sum((variable)/(1+input$discount_rate)**timeperiod), base = sum((base_variable)/(1+input$discount_rate)**timeperiod)), by = c("scenario.x", "ind_name")][, ind:=(scen-base)/base]
+      #base::merge(DT.all, DT.g, by = "scenario")
+
+      out %>% tidyr::pivot_wider(
+        id_cols = 1,
+        names_from = 'ind_name',
+        values_from = 'ind'
       )
-
-
-      base::merge(DT.all, DT.g, by = "scenario")
-
-
     })
 # browser()
     rl <- radarList
@@ -129,6 +134,12 @@ select * from view1;")
           names_to = 'Herd',
           values_to = 'Ratio'
         )
+    })
+
+    baseline_values <- reactive({
+      req(input$baseline_scenario_apply)
+      req(reportList()$indicators)
+      reportList()$indicators %>% dplyr::filter(`scenario` == input$baseline_scenario)
     })
 
 #     baseline_values <- reactive({
