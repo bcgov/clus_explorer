@@ -70,9 +70,11 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
 
     # .. radar list ----
     radarList <- reactive({
+
+      # req(input$baseline_scenario_apply)
       req(reportList()$indicators)
       req(input$discount_rate)
-      req(baseline_values())
+      req((baseline_values))
 
       if(FALSE){
 
@@ -110,13 +112,14 @@ ON (foo1.scenario = foo2.scenario) )"
           )
         ))
       }
-      dt.baseline<-baseline_values()
-      setnames(dt.baseline, "variable", "base_variable")
-      dt.indicators<-reportList()$indicators %>% dplyr::filter(!(`scenario` == input$baseline_scenario))
-      dt.compare.indicators<-merge(dt.indicators, dt.baseline, by.x =c("compartment", "timeperiod", "ind_name"),
-                                   by.y =c("compartment", "timeperiod", "ind_name"))
 
-      out<-dt.compare.indicators[,list(scen = sum((variable)/(1+input$discount_rate)**timeperiod), base = sum((base_variable)/(1+input$discount_rate)**timeperiod)), by = c("scenario.x", "ind_name")][, ind:=(scen-base)/base]
+      dt.baseline<- data.table::copy(baseline_values())
+      dt.indicators <- data.table::copy(reportList()$indicators %>% dplyr::filter(!(`scenario` == input$baseline_scenario)))
+      setnames(dt.baseline, "variable", "base_variable")
+      dt.compare.indicators <- as.data.table(base::merge(dt.indicators, dt.baseline, by.x =c("compartment", "timeperiod", "ind_name"),
+                                   by.y =c("compartment", "timeperiod", "ind_name")))
+
+      out<-dt.compare.indicators[,list(scen = sum((variable)/(1+as.numeric(input$discount_rate))**timeperiod), base = sum((base_variable)/(1+as.numeric(input$discount_rate))**timeperiod)), by = c("scenario.x", "ind_name")][, ind:=(scen-base)/base]
       #base::merge(DT.all, DT.g, by = "scenario")
 
       out %>% tidyr::pivot_wider(
@@ -125,9 +128,9 @@ ON (foo1.scenario = foo2.scenario) )"
         values_from = 'ind'
       )
     })
-# browser()
     rl <- radarList
     rl_long <- reactive({
+
       radarList() %>%
         tidyr::pivot_longer(
           cols = -1,
@@ -137,45 +140,21 @@ ON (foo1.scenario = foo2.scenario) )"
     })
 
     baseline_values <- reactive({
-      req(input$baseline_scenario_apply)
+      # req(input$baseline_scenario_apply)
       req(reportList()$indicators)
       reportList()$indicators %>% dplyr::filter(`scenario` == input$baseline_scenario)
     })
 
-#     baseline_values <- reactive({
-#       req(input$baseline_scenario_apply)
-# # browser()
-# a <- 2
-# rlb <- rl_long() %>%
-#   dplyr::filter(`scenario` == input$baseline_scenario) %>%
-#   dplyr::mutate(
-#     Ratio = round(Ratio, 2),
-#     scenario = fct_reorder(
-#       forcats::as_factor(scenario),
-#       Ratio
-#     )
-#   )
-# b <- 2
-#
-#       mod_chart_bar_server(
-#         "baseline_values",
-#         rlb,
-#         x = Herd,
-#         y = Ratio
-#       )
-#     })
 
     radar_plot <- reactive({
       renderPlotly ({
-        # browser()
 
-
-        rl <- radarList()
+        rl <- as.data.table(radarList())
         radarLength <<- 1:nrow(rl)
         radarNames <-
           paste(c(names(rl)[2:length(rl)], names(rl)[2]), collapse = "', '")
         radarData <-
-          rl[, data := paste(.SD, collapse = ',')  , .SDcols = c(names(rl)[2:length(rl)], names(rl)[2]), by = scenario]
+          rl[, data := paste(.SD, collapse = ',')  , .SDcols = c(names(rl)[2:length(rl)], names(rl)[2]), by = scenario.x]
 
         eval(parse(
           text = paste0(
@@ -194,7 +173,7 @@ ON (foo1.scenario = foo2.scenario) )"
       radarNames,
       "'),
       name = '",
-      rl$scenario[x[]],
+      rl$scenario.x[x[]],
       "'
     ) %>%"
     )
@@ -204,7 +183,7 @@ ON (foo1.scenario = foo2.scenario) )"
     polar = list(
       radialaxis = list(
         visible = T,
-        range = c(0,1.2)
+        range = c(-2, 2)
       )
     ),
     legend = list (orientation = 'h'),
@@ -219,7 +198,7 @@ ON (foo1.scenario = foo2.scenario) )"
     # output$baseline_values <- baseline_values()
 
     rll <- rl_long()
-    mod_chart_heatmap_server('heatmap', rl_long(), col_x = Herd, col_y = scenario, col_z = Ratio)
+    mod_chart_heatmap_server('heatmap', rl_long(), col_x = Herd, col_y = scenario.x, col_z = Ratio)
 
   })
 }
