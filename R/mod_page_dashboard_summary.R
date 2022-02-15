@@ -76,50 +76,67 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
       req(input$discount_rate)
       req((baseline_values))
 
-      if(FALSE){
+#       if(FALSE){
+#
+#
+#       req(reportList()$harvest)
+#       req(reportList()$survival)
+#       req(schema_scenarios$scenario())
+#       # browser()
+#       DT.h <-
+#         reportList()$harvest[, sum(volume) / sum(target), by = c("scenario", "timeperiod")][V1 > 0.9, .N, by = c("scenario")][, N :=
+#                                                                                                                                 N / 100]
+#       setnames(DT.h, "N", "Timber")
+#       DT.s <-
+#         dcast(reportList()$survival[survival_rate > 0.75 &
+#                                       timeperiod > 0, .N / 100, by = c("scenario", "herd_bounds")], scenario ~
+#                 herd_bounds, value.var =  "V1")
+#       DT.all <- base::merge(DT.h, DT.s, by = "scenario")
+#       DT.g <-
+#         data.table(getTableQuery(
+#           paste0(
+#             "select foo1.scenario, gs_100/gs_0 as GrowingStock  from (
+# 	(select sum(m_gs) as gs_0, scenario from ",
+# 	schema_name,
+# 	".growingstock where timeperiod in (0)  and scenario IN ('",
+# 	paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+# 	"')
+# group by scenario, timeperiod) foo1
+# JOIN (select sum(m_gs) as gs_100, scenario from ",
+# schema_name,
+# ".growingstock where timeperiod in (100) and scenario IN ('",
+# paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+# "')
+# group by scenario, timeperiod) foo2
+# ON (foo1.scenario = foo2.scenario) )"
+#           )
+#         ))
+#       }
 
-
-      req(reportList()$harvest)
-      req(reportList()$survival)
-      req(schema_scenarios$scenario())
-      # browser()
-      DT.h <-
-        reportList()$harvest[, sum(volume) / sum(target), by = c("scenario", "timeperiod")][V1 > 0.9, .N, by = c("scenario")][, N :=
-                                                                                                                                N / 100]
-      setnames(DT.h, "N", "Timber")
-      DT.s <-
-        dcast(reportList()$survival[survival_rate > 0.75 &
-                                      timeperiod > 0, .N / 100, by = c("scenario", "herd_bounds")], scenario ~
-                herd_bounds, value.var =  "V1")
-      DT.all <- base::merge(DT.h, DT.s, by = "scenario")
-      DT.g <-
-        data.table(getTableQuery(
-          paste0(
-            "select foo1.scenario, gs_100/gs_0 as GrowingStock  from (
-	(select sum(m_gs) as gs_0, scenario from ",
-	schema_name,
-	".growingstock where timeperiod in (0)  and scenario IN ('",
-	paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-	"')
-group by scenario, timeperiod) foo1
-JOIN (select sum(m_gs) as gs_100, scenario from ",
-schema_name,
-".growingstock where timeperiod in (100) and scenario IN ('",
-paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
-"')
-group by scenario, timeperiod) foo2
-ON (foo1.scenario = foo2.scenario) )"
-          )
-        ))
-      }
-
-      dt.baseline<- data.table::copy(baseline_values())
-      dt.indicators <- data.table::copy(reportList()$indicators %>% dplyr::filter(!(`scenario` == input$baseline_scenario)))
+      # Copy the reactive object, otherwise the new object is the reference to
+      # the reactive object
+      dt.baseline <- data.table::copy(baseline_values())
+      dt.indicators <- data.table::copy(
+        reportList()$indicators %>% dplyr::filter(!(`scenario` == input$baseline_scenario))
+      )
       setnames(dt.baseline, "variable", "base_variable")
-      dt.compare.indicators <- as.data.table(base::merge(dt.indicators, dt.baseline, by.x =c("compartment", "timeperiod", "ind_name"),
-                                   by.y =c("compartment", "timeperiod", "ind_name")))
+      dt.compare.indicators <- as.data.table(
+        base::merge(
+          dt.indicators,
+          dt.baseline,
+          by.x =c("compartment", "timeperiod", "ind_name"),
+          by.y =c("compartment", "timeperiod", "ind_name")
+        )
+      )
 
-      out<-dt.compare.indicators[,list(scen = sum((variable)/(1+as.numeric(input$discount_rate))**timeperiod), base = sum((base_variable)/(1+as.numeric(input$discount_rate))**timeperiod)), by = c("scenario.x", "ind_name")][, ind:=(scen-base)/base]
+      out <- dt.compare.indicators[
+        ,
+        list(
+          scen = sum((variable) / (1 + as.numeric(input$discount_rate)) ** timeperiod),
+          base = sum((base_variable) / (1 + as.numeric(input$discount_rate)) ** timeperiod)
+        ),
+        by = c("scenario.x", "ind_name")
+      ][, ind := (scen - base) / base]
       #base::merge(DT.all, DT.g, by = "scenario")
 
       out %>% tidyr::pivot_wider(
@@ -199,6 +216,15 @@ ON (foo1.scenario = foo2.scenario) )"
 
     rll <- rl_long()
     mod_chart_heatmap_server('heatmap', rl_long(), col_x = Herd, col_y = scenario.x, col_z = Ratio)
+
+    # Return reactive values ----
+    # to be used in other modules
+    return(
+      list(
+        radar_list = radarList,
+        radar_list_long = rl_long
+      )
+    )
 
   })
 }

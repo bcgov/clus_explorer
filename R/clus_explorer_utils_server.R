@@ -30,9 +30,6 @@ getTableQuery <- function(sql, params = list(), conn = NULL) {
     data <- dbGetQuery(conn = new_conn, statement = sql, params = params)
     dbDisconnect(new_conn)
   } else {
-    # browser()
-    print(sql)
-    a <- 2
     data <- dbGetQuery(conn = conn, statement = sql, params = params)
   }
   data

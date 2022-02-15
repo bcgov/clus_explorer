@@ -3,5 +3,4 @@
 .RData
 .Ruserdata
 config.yml
-renv.lock
-.Rprofile
+*.log

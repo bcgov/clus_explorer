@@ -65,6 +65,14 @@ app_ui <- function(request) {
           ),
           add_class(
             menuItem(
+              "Generate Report",
+              tabName = "report",
+              icon = icon("file-pdf")
+            ),
+            "report"
+          ),
+          add_class(
+            menuItem(
               "Query Builder",
               tabName = "querybuilder",
               icon = icon("search")
@@ -154,6 +162,11 @@ app_ui <- function(request) {
           tabItem(
             tabName = "recreation",
             mod_page_dashboard_recreation_ui("page_dashboard_recreation")
+          ),
+
+          tabItem(
+            tabName = "report",
+            mod_page_report_ui("page_report")
           ),
 
           tabItem(

@@ -54,7 +54,7 @@ mod_page_dashboard_fire_server <- function(id, reportList){
           theme_bw() +
           theme (legend.title = element_blank())
         ggplotly(p, height = 900) %>%
-          layout (
+          plotly::layout (
             legend = list (orientation = "h", y = -0.1),
             margin = list (
               l = 50,
@@ -109,7 +109,7 @@ mod_page_dashboard_fire_server <- function(id, reportList){
           theme (legend.title = element_blank())
 
         ggplotly(p, height = 900) %>%
-          layout (
+          plotly::layout (
             legend = list (orientation = "h", y = -0.1),
             margin = list (
               l = 50,

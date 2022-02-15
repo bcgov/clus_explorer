@@ -1,0 +1,299 @@
+---
+path_logo: www/img/clus-logo.png
+title: |
+  ![](www/img/clus-logo.png){width=1in}  
+  B.C Caribou Recovery Program
+author: "Ministry of Forests, Lands, Natural Resource Operations and Rural Development"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  pdf_document:
+    df_print: kable
+    fontsize: 10pt
+    keep_tex: no
+    always_allow_html: true
+params:
+  schema: NA
+  tsas: NA
+  scenarios: NA
+  data_seral_treemap: NA
+  reportList: NA
+  baseline_scenario: NA
+  status_thlb: NA
+  status_avg_vol: NA
+  status_road: NA
+  radar_list: NA
+  radar_list_long: NA
+header-includes:
+  # - \usepackage{fontspec}
+  # - \usepackage{awesomebox}
+  - \usepackage{ragged2e}
+  - \usepackage[sfdefault]{roboto}
+  - \usepackage[T1]{fontenc}
+  - \usepackage{booktabs}
+  - \usepackage{xcolor}
+  - \usepackage{makecell}
+  - \usepackage{longtable}
+  - \usepackage{array}
+  - \usepackage{multirow}
+  - \usepackage{wrapfig}
+  - \usepackage{float}
+  - \usepackage{colortbl}
+  - \usepackage{pdflscape}
+  - \usepackage{tabu}
+  - \usepackage{threeparttable}
+  - \mdseries
+  - \pagestyle{plain}
+  # - \bfseries
+  - \usepackage{fancyhdr}
+  - \pagestyle{fancy}
+  - \renewcommand{\footrulewidth}{0.5pt} \newcommand{\hffont}{%
+  -   \fontsize{7}{9}\selectfont}
+  - \fancyhead[CO,CE]{\hffont `r params$report_title`}
+  - \fancyfoot[LO,LE]{\includegraphics[height=0.65cm]{www/img/gov3_bc_logo.png}}
+  - \fancyfoot[CO,CE]{\hffont `r params$report_author`}
+  - \fancyfoot[RE,RO]{\hffont \thepage}
+  - \fancypagestyle{plain}{\pagestyle{fancy}}
+
+documentclass: report
+classoption: article
+papersize: A4
+fontsize: 11pt
+geometry: margin=0.9in
+linestretch: 1.15
+---
+\definecolor{TextGreyColour}{rgb}{0.24, 0.3, 0.35} 
+\color{TextGreyColour}
+
+```{r setup, include=FALSE}
+library(dplyr, quietly = TRUE, warn.conflicts = FALSE)
+library(magrittr, quietly = TRUE, warn.conflicts = FALSE)
+library(forcats, quietly = TRUE, warn.conflicts = FALSE)
+library(scales, quietly = TRUE, warn.conflicts = FALSE)
+library(data.table, quietly = TRUE, warn.conflicts = FALSE)
+library(ggplot2, quietly = TRUE, warn.conflicts = FALSE)
+library(ggradar, quietly = TRUE, warn.conflicts = FALSE)
+library(treemapify, quietly = TRUE, warn.conflicts = FALSE)
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+```
+
+In this document we evaluate different scenarios that model the impact of timber harvesting to the wildlife habitat, including caribou, grizzly bears and others. We also take into account climate events such as wildfires.
+
+The selected area of interest is `r params$schema`.
+
+## Current State
+
+### Landbase
+
+The following indicators highlight the current state of the landbase in the area of interest:
+
+-   **`r scales::percent(params$status_thlb, accuracy = 1, scale = 1)`** - Percentage of the timber harvesting landbase in the area of interest.
+-   **`r scales::percent(params$status_road, accuracy = 1, scale = 1)`** - Percentage of the are of interest within 100m from the road.
+-   **`r params$status_avg_vol`** - Average volume (`m3`) per `ha` in THLB.
+
+### Seral Stage
+
+The following chart represents the proportion of forest by forest age. Categories of forest age are defined as:
+
+-   Early (younger than 40 years old)
+
+-   Mature (60 - 120 years old)
+
+-   Old (Older than 120 years of age)
+
+```{r seral_stage, fig.height=2, fig.width=4}
+ggplot2::ggplot(
+    params$data_seral_treemap %>% 
+      dplyr::filter(!is.na(variable)) %>% 
+      mutate(
+        variable = forcats::fct_reorder(variable, V1, .desc = TRUE),
+        percentage = round(V1 / sum(V1) * 100, 1)
+      ),
+    aes(
+      area = V1, fill = variable, 
+      label = paste0(variable, " (", scales::percent(percentage, accuracy = 1, scale = 1), ")")
+    )
+  ) +
+  geom_treemap(alpha = 0.75) +
+  geom_treemap_text(size = 9, colour = "#323F4B", place = 'topleft', grow = FALSE, reflow = TRUE)+
+  theme_minimal() +
+  theme(
+    text = element_text(size = 10),
+    legend.position = 'none',
+    plot.title = element_text(size = 8, colour = '#3E4C59'),
+    plot.subtitle = element_text(hjust = 0, size = 7, colour = '#3E4C59', margin = margin(b = 0.25, t = 0, unit = "cm")),
+    plot.caption = element_text(face = 'italic', size = 6, colour = '#3E4C59', hjust = 1, margin = margin(t = 0.5, unit = "cm"))
+  ) +
+  scale_fill_brewer(palette = 'Greens') +
+  labs(
+    title = "Proportion of forest by age group",
+    subtitle = "Early (<40 yrs), mature (60 - 120 yrs) and old (> 120 yrs)"
+  )
+```
+
+## Summary
+
+```{r}
+# We evaluate different scenarios, and compare various parameters against the baseline scenario. The baseline scenario is `r params$baseline_scenario()`.
+```
+
+```{r summary_charts, fig.height=3.5}
+ggradar::ggradar(
+  params$radar_list, 
+  base.size = 5,
+  grid.min = min(params$radar_list_long$Ratio) * 1.1, 
+  grid.max = max(params$radar_list_long$Ratio) * 1.1,
+  grid.label.size = 3,
+  gridline.min.colour = "#CBD2D9",
+  gridline.mid.colour = "#CBD2D9",
+  gridline.max.colour = "#CBD2D9",
+  group.point.size = 1.5,
+  group.line.width = 0.5,
+  background.circle.colour = "#F5F7FA",
+  axis.line.colour = "#CBD2D9",
+  axis.label.size = 3,
+  legend.title = "",
+  legend.position = "right", 
+  legend.text.size = 6,
+)
+# knitr::kable(params$radar_list)
+# knitr::kable(params$radar_list_long$Ratio)
+
+chart_heatmap(data = params$radar_list_long, x = Herd, y = scenario.x, z = Ratio)
+```
+
+## Caribou
+
+### Disturbance
+
+```{r caribou_disturbance}
+chart_line_faceted(
+  data = params$reportList$disturbance,
+  x_var = timeperiod,
+  y_var = (dist_per * 100),
+  color_var = scenario,
+  facet_chart = TRUE,
+  facet_vars = critical_hab,
+  xlab = "Future year",
+  ylab = "Percent Disturbed"
+)
+
+chart_line_faceted(
+  data = params$reportList$disturbance,
+  x_var = timeperiod,
+  y_var = (dist500_per * 100),
+  color_var = scenario,
+  facet_chart = TRUE,
+  facet_vars = critical_hab,
+  xlab = "Future year",
+  ylab = "Percent Disturbed"
+)
+```
+
+### Forest Age
+
+````{r caribou_forest_age}
+chart_line_faceted(
+  data = params$reportList$survival,
+  x_var = timeperiod,
+  y_var = prop_age,
+  color_var = scenario,
+  facet_chart = TRUE,
+  facet_vars = herd_bounds,
+  xlab = "Future year",
+  ylab = "Proportion Age 0 to 40 years"
+)
+
+chart_line_faceted(
+  data = params$reportList$survival,
+  x_var = timeperiod,
+  y_var = prop_mature,
+  color_var = scenario,
+  facet_chart = TRUE,
+  facet_vars = herd_bounds,
+  xlab = "Future year",
+  ylab = "Proportion Age 80 to 120 years"
+)
+
+chart_line_faceted(
+  data = params$reportList$survival,
+  x_var = timeperiod,
+  y_var = prop_old,
+  color_var = scenario,
+  facet_chart = TRUE,
+  facet_vars = herd_bounds,
+  xlab = "Future year",
+  ylab = "Proportion > 120 years"
+)
+```
+
+### Population
+
+````{r caribou_population, results = 'asis'}
+if (!is.null(params$reportList$abundance)) {
+  chart_line_faceted(
+    data = params$reportList$abundance,
+    x_var = timeperiod,
+    y_var = abundance_avg,
+    color_var = scenario,
+    facet_chart = TRUE,
+    facet_vars = subpop_name,
+    xlab = "Future year",
+    ylab = "Abundance"
+  )
+} else {
+  cat('\n')
+  cat('No data found for selection.')
+  cat('\n')
+  cat('\n')
+}
+
+data <- params$reportList$survival
+data[, survival_rate_change := survival_rate - first(survival_rate), by = .(scenario, herd_bounds)]
+
+chart_line_faceted(
+  data = data,
+  x_var = timeperiod,
+  y_var = survival_rate_change,
+  color_var = scenario,
+  facet_chart = TRUE,
+  facet_vars = herd_bounds,
+  xlab = "Future year",
+  ylab = "Change in Annual Adult Female Survival Rate"
+)
+```
+
+### Resource Selection
+
+````{r caribou_rsf, results='asis'}
+data <- as.data.table(params$reportList$rsf)
+
+if (nrow(data)) {
+  data[, rsf_perc_change := ((first(sum_rsf_hat) - sum_rsf_hat) / first(sum_rsf_hat) * 100), by = .(scenario, rsf_model)]
+  chart_line_faceted(
+    data = data,
+    x_var = timeperiod,
+    y_var = rsf_perc_change,
+    color_var = scenario,
+    facet_chart = TRUE,
+    facet_vars = rsf_model,
+    add_y_intercept = TRUE,
+    xlab = "Future year",
+    ylab = "RSF Value Percent Change"
+  )
+} else {
+  cat('\n')
+  cat('No data found for selection.')
+  cat('\n')
+}
+```
+
+## Climate
+
+## Fire
+
+## Fisher
+
+## Forestry
+
+## Grizzly Bear

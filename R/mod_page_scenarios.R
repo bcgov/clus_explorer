@@ -97,7 +97,7 @@ mod_page_scenarios_ui <- function(id){
                     width = 12,
                     tags$p(
                       class = 'chart-title',
-                      'Proportion of seral'
+                      'Proportion of forest by age group'
                     ),
                     tags$p(
                       class = 'chart-subtitle',
@@ -175,47 +175,116 @@ mod_page_scenarios_server <- function(id){
     ns <- session$ns
 
     # Reactive values ----
+
     # .. available scenarios ----
     scenariosList <- reactive({
       req(input$schema)
-      s <- input$schema
-      # data.table(
+
+      conn = getDbConnection()
+
+      scenario_list <- data.table(
         getTableQuery(
-          paste0(
+          sql = glue::glue_sql(
             "SELECT scenario, description, COALESCE(rank, 0) AS rank
-            FROM ", {input$schema}, ".scenarios ORDER BY rank DESC"
-          )
+            FROM {`input$schema`}.scenarios
+            ORDER BY rank DESC",
+            .con = conn
+          ),
+          conn = conn
         )
-      # )
+      )
+
+      dbDisconnect(conn)
+
+      scenario_list
     })
 
     # .. status data ----
     statusData <- reactive({
       req(input$schema)
 
-      data.table(getTableQuery(
-        paste0(
-          "select a.compartment as compartment, gs, (gs/thlb) as avg_m3_ha, aoi, total, thlb, early, mature, old, road, c40r500, c40r50, total_area from (SELECT compartment, max(m_gs) as gs
-    FROM ",
-    input$schema,
-    ".growingstock
-where timeperiod = 0 group by compartment) a
-Left join (Select * from ",
-input$schema,
-".state ) b
-ON b.compartment = a.compartment
-left join (select sum(c40r500) as c40r500, sum(c40r50) as c40r50, sum(total_area) as total_area, compartment
-		   from ",
-input$schema,
-".disturbance where timeperiod = 0 and scenario = (select scenario from ",
-input$schema,
-".disturbance limit 1) group by compartment )c
-ON c.compartment = a.compartment;"
+      conn = getDbConnection()
+
+      status_data <- data.table(
+        getTableQuery(
+          sql = glue::glue_sql(
+            "SELECT
+              a.compartment as compartment, gs, (gs/thlb) as avg_m3_ha, aoi, total,
+              thlb, early, mature, old, road, c40r500, c40r50, total_area
+            FROM (
+              SELECT compartment, MAX(m_gs) as gs
+              FROM {`input$schema`}.growingstock
+              WHERE timeperiod = 0
+              GROUP BY compartment
+            ) a
+            LEFT JOIN (
+              SELECT *
+              FROM {`input$schema`}.state
+            ) b ON b.compartment = a.compartment
+            LEFT JOIN (
+              SELECT SUM(c40r500) as c40r500, SUM(c40r50) as c40r50,
+                SUM(total_area) as total_area, compartment
+  		        FROM {`input$schema`}.disturbance
+              WHERE timeperiod = 0
+              AND scenario = (
+                SELECT scenario
+                FROM {`input$schema`}.disturbance LIMIT 1)
+                GROUP BY compartment
+            ) c ON c.compartment = a.compartment;",
+            .con = conn
+          ),
+          conn = conn
         )
-      ))
+      )
+
+      dbDisconnect(conn)
+
+      status_data
     })
 
+    # .. data for selected schema ----
     data <- reactive(statusData()[compartment %in% input$tsa_selected, ])
+
+    # .... treemap data ----
+    data_seral_treemap <- reactive({
+      data_seral_treemap <- data.table(
+        reshape2::melt(
+          data()[, c("compartment", "early", "mature", "old")],
+          id.vars = "compartment",
+          measure.vars = c("early", "mature", "old")
+        )
+      )
+      data_seral_treemap <- data_seral_treemap[, sum(value), by = list(variable)]
+
+      data_seral_treemap <- data_seral_treemap %>% mutate(
+        parent_col = 'Total area'
+      )
+      data_total <- data_seral_treemap %>%
+        group_by(parent_col) %>%
+        summarise(V1 = sum(V1)) %>%
+        ungroup()
+
+      data_seral_treemap <- bind_rows(data_total, data_seral_treemap)
+    })
+
+    # .... landbase ----
+    status_thlb <- reactive({
+      round(
+        (sum(data()$thlb) / sum(data()$total)) * 100, 0
+      )
+    })
+
+    status_road <- reactive({
+      round(
+        (sum(data()$road) / sum(data()$total)) * 100, 0
+      )
+    })
+
+    status_avg_vol <- reactive({
+      round(
+        (sum(data()$gs) / sum(data()$thlb)), 0
+      )
+    })
 
     # Observers ----
     observe({
@@ -331,28 +400,30 @@ ON c.compartment = a.compartment;"
       input$tsa_selected,
       ignoreInit = TRUE,
       {
-        data_treemap <- data.table(
-          reshape2::melt(
-            data()[, c("compartment", "early", "mature", "old")],
-            id.vars = "compartment",
-            measure.vars = c("early", "mature", "old")
-          )
-        )
-        data_treemap <- data_treemap[, sum(value), by = list(variable)]
-
-        data_treemap <- data_treemap %>% mutate(
-          parent_col = 'Total area'
-        )
-        data_total <- data_treemap %>%
-          group_by(parent_col) %>%
-          summarise(V1 = sum(V1)) %>%
-          ungroup()
-
-        data_treemap <- bind_rows(data_total, data_treemap)
+        # data_seral_treemap(),
+        # data_seral_treemap <- data.table(
+        #   reshape2::melt(
+        #     data()[, c("compartment", "early", "mature", "old")],
+        #     id.vars = "compartment",
+        #     measure.vars = c("early", "mature", "old")
+        #   )
+        # )
+        # data_seral_treemap <- data_seral_treemap[, sum(value), by = list(variable)]
+        #
+        # data_seral_treemap <- data_seral_treemap %>% mutate(
+        #   parent_col = 'Total area'
+        # )
+        # data_total <- data_seral_treemap %>%
+        #   group_by(parent_col) %>%
+        #   summarise(V1 = sum(V1)) %>%
+        #   ungroup()
+        #
+        # data_seral_treemap <- bind_rows(data_total, data_seral_treemap)
 
         mod_chart_treemap_server(
           'statusPlot',
-          data = data_treemap,
+          data = data_seral_treemap(),
+          # data = data_seral_treemap,
           col_parent = parent_col,
           col_child = variable,
           col_value = V1,
@@ -370,12 +441,8 @@ ON c.compartment = a.compartment;"
         title = NULL,
         subtitle = "THLB",
         value = tags$p(
-          paste0(
-            round(
-              (sum(data()$thlb) / sum(data()$total)) * 100, 0
-            ),
-            '%'
-          ), style = "font-size: 160%;"),
+          scales::percent(status_thlb(), accuracy = 0.1, scale = 1), style = "font-size: 160%;"
+        ),
         icon = icon("images"),
         color = "green"
       )
@@ -385,9 +452,9 @@ ON c.compartment = a.compartment;"
       infoBox(
         title = NULL,
         subtitle = "m3/ha",
-        value = tags$p(paste0(round((
-          sum(data()$gs) / sum(data()$thlb)
-        ), 0)), style = "font-size: 160%;"),
+        value = tags$p(
+          status_avg_vol(), style = "font-size: 160%;"
+        ),
         icon = icon("seedling"),
         color = "green"
       )
@@ -397,9 +464,9 @@ ON c.compartment = a.compartment;"
       infoBox(
         title = NULL,
         subtitle = "Road",
-        value = tags$p(paste0(round((sum(data()$road) / sum(data()$total)) *
-                                      100, 0
-        ), '%'),  style = "font-size: 160%;"),
+        value = tags$p(
+          scales::percent(status_road(), accuracy = 0.1, scale = 1),  style = "font-size: 160%;"
+        ),
         icon = icon("road"),
         color = "green"
       )
@@ -412,7 +479,11 @@ ON c.compartment = a.compartment;"
         schema = reactive({input$schema}),
         tsa_selected = reactive({input$tsa_selected}),
         scenario = reactive({input$scenario}),
-        apply_scenario = reactive({input$apply_scenario})
+        apply_scenario = reactive({input$apply_scenario}),
+        data_seral_treemap = data_seral_treemap,
+        status_thlb = status_thlb,
+        status_avg_vol = status_avg_vol,
+        status_road = status_road
       )
     )
 

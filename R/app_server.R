@@ -30,6 +30,8 @@ app_server <- function(input, output, session) {
   options(spinner.size = 1)
   options(spinner.type = 3)
 
+  future::plan(future::multicore())
+
   config <- config::get()
 
   # Modules' server functions ----
@@ -69,22 +71,6 @@ app_server <- function(input, output, session) {
     # )$r_table_name
   })
 
-
-  # .. fisher points filter ----
-  fisherPointsFilter <- reactive({
-    req(reportList())
-    req(input$fisheryear)
-    req(input$fisher_scenario_selected)
-    merge(
-      reportList()$fisherPts[, c('zone', 'reference_zone', 'size', 'x', 'y')],
-      reportList()$fisher[timeperiod == input$fisheryear &
-                            scenario == input$fisher_scenario_selected, c('zone', 'reference_zone', 'rel_prob_occup')],
-      by.x = c('zone', 'reference_zone'),
-      by.y = c('zone', 'reference_zone'),
-      all.y = TRUE
-    )
-  })
-
   # Observers ----
   observeEvent(input$getMapLayersButton, {
     withProgress(message = 'Loading layers', value = 0.1, {
@@ -115,28 +101,6 @@ app_server <- function(input, output, session) {
         overlayGroups = "Selected"
       ) %>%
       addScaleBar(position = "bottomleft")
-  })
-
-  observeEvent(input$fisheryear, {
-    pal <- colorNumeric(palette = 'Blues',
-                        domain = reportList()$fisherPts$rel_prob_occup)
-    leafletProxy("fishermapper", data = fisherPointsFilter(), session) %>%
-      clearShapes() %>%
-      addCircles(
-        lat = ~ y,
-        lng = ~ x,
-        fillColor = ~ pal(fisherPointsFilter()$rel_prob_occup),
-        color =  ~ pal(fisherPointsFilter()$rel_prob_occup),
-        radius = fisherPointsFilter()$size * 100,
-        popup = ~ paste0(
-          "ref:",
-          reference_zone,
-          " zone:",
-          zone,
-          " occupancy:",
-          rel_prob_occup
-        )
-      )
   })
 
   observe({
@@ -577,12 +541,27 @@ where ind_name is not null;", .con = conn),
   })
 
   observe({
-    mod_page_dashboard_summary_server("page_dashboard_summary", schema_scenarios, reportList)
+    summary_data <- mod_page_dashboard_summary_server("page_dashboard_summary", schema_scenarios, reportList)
     mod_page_dashboard_caribou_server("page_dashboard_caribou", reportList)
     mod_page_dashboard_grizzly_server("page_dashboard_grizzly", reportList)
     mod_page_dashboard_climate_server("page_dashboard_climate", reportList)
     mod_page_dashboard_forestry_server("page_dashboard_forestry", reportList)
     mod_page_dashboard_fire_server("page_dashboard_fire", reportList)
+    mod_page_report_server(
+      "page_report",
+      schema = schema_scenarios$schema,
+      tsas = schema_scenarios$tsa_selected,
+      scenarios = schema_scenarios$scenario,
+      data_seral_treemap = schema_scenarios$data_seral_treemap,
+      reportList = reportList,
+      baseline_scenario = NA,
+      status_thlb = schema_scenarios$status_thlb,
+      status_avg_vol = schema_scenarios$status_avg_vol,
+      status_road = schema_scenarios$status_road,
+      radar_list = summary_data$radar_list,
+      radar_list_long = summary_data$radar_list_long
+    )
   })
+    # mod_page_report_server("page_report", list())
 
 }

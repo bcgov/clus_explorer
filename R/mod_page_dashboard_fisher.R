@@ -95,6 +95,44 @@ mod_page_dashboard_fisher_server <- function(id, reportList){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
+    # .. fisher points filter ----
+    fisherPointsFilter <- reactive({
+      req(reportList())
+      req(input$fisheryear)
+      req(input$fisher_scenario_selected)
+      merge(
+        reportList()$fisherPts[, c('zone', 'reference_zone', 'size', 'x', 'y')],
+        reportList()$fisher[timeperiod == input$fisheryear &
+                              scenario == input$fisher_scenario_selected, c('zone', 'reference_zone', 'rel_prob_occup')],
+        by.x = c('zone', 'reference_zone'),
+        by.y = c('zone', 'reference_zone'),
+        all.y = TRUE
+      )
+    })
+
+    observeEvent(input$fisheryear, {
+      pal <- colorNumeric(palette = 'Blues',
+                          domain = reportList()$fisherPts$rel_prob_occup)
+      leafletProxy("fishermapper", data = fisherPointsFilter(), session) %>%
+        clearShapes() %>%
+        addCircles(
+          lat = ~ y,
+          lng = ~ x,
+          fillColor = ~ pal(fisherPointsFilter()$rel_prob_occup),
+          color =  ~ pal(fisherPointsFilter()$rel_prob_occup),
+          radius = fisherPointsFilter()$size * 100,
+          popup = ~ paste0(
+            "ref:",
+            reference_zone,
+            " zone:",
+            zone,
+            " occupancy:",
+            rel_prob_occup
+          )
+        )
+    })
+
+
     output$numberFisherTerritory <- renderValueBox({
       valueBoxSpark(
         value = paste0(as.integer(nrow(
