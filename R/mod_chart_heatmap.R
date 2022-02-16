@@ -20,8 +20,7 @@ mod_chart_heatmap_ui <- function(id, chart_height = 450){
 #' @noRd
 mod_chart_heatmap_server <- function(
   id, dataset, col_x, col_y, col_z,
-  colour_ramp_start = '#A7D8F0', colour_ramp_middle = '#F8E3A3', colour_ramp_end = '#A081D9',
-  colour_ramp_start_middle = '#A3D9A5', colour_ramp_middle_end = '#F29B9B',
+  palette = c('#C1EAC5', '#7BC47F', '#3F9142'),
   y_axis_labels = TRUE, hovertemplate = 'x: %{y}<br>y: %{x}<br>z: %{z}'
 ){
   moduleServer( id, function(input, output, session){
@@ -43,12 +42,6 @@ mod_chart_heatmap_server <- function(
     fontFamily <- "Inconsolata, Karla, 'Open Sans', sans-serif"
     tickFont <- list(family = fontFamily, size = 14)
     textFont <- list(family = fontFamily, color = '#1F2933', size = 13)
-    # textTemplate <- '%{y:,}'
-    # if (text_template == 'currency') {
-    #   textTemplate <- '%{y:$,.1f}'
-    # } else if (text_template == 'percentage') {
-    #   textTemplate <- '%{y:.1%f}'
-    # }
 
     xAxisFormat <- axisFormat <- list(
       title = "",
@@ -104,16 +97,8 @@ mod_chart_heatmap_server <- function(
         connectgaps = FALSE,
         xgap = 1,
         ygap = 1,
-        # colors = 'YlGnBu',
-        # colorscale = 'Jet',
         colors = colorRamp(
-          c(
-            colour_ramp_start,
-            # colour_ramp_start_middle,
-            colour_ramp_middle,
-            colour_ramp_middle_end#,
-            # colour_ramp_end
-          )
+          palette
         ),
         hovertemplate = hovertemplate,
         colorbar = list(
@@ -121,10 +106,6 @@ mod_chart_heatmap_server <- function(
           outlinecolor = '#969696',
           bordercolor = '#969696',
           thickness = 15,
-          # x = 0,
-          # xanchor = 'left',
-          # y = 0,
-          # yanchor = 'bottom',
           title = list(font = textFont)
         )
       )
@@ -151,9 +132,3 @@ mod_chart_heatmap_server <- function(
 
   })
 }
-
-## To be copied in the UI
-# mod_chart_heatmap_ui("chart_heatmap_ui_1")
-
-## To be copied in the server
-# mod_chart_heatmap_server("chart_heatmap_ui_1")

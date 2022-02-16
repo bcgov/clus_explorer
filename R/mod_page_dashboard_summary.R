@@ -15,7 +15,13 @@ mod_page_dashboard_summary_ui <- function(id){
       column(
         width = 6,
         selectizeInput(ns("baseline_scenario"), label = "Baseline scenario", choices = NULL),
-        selectizeInput(ns("discount_rate"), label = "Risk", choices = c(0, 0.05,0.01,-0.01)),
+        selectizeInput(ns("discount_rate"), label = "Future importance", choices = list(
+          "Neutral" = 0,
+          "Low" = -0.01,
+          "Medium" = 0.01,
+          "High" = 0.05
+        )),
+                         # c(0, 0.05,0.01,-0.01)),
         # actionButton(ns("baseline_scenario_apply"), label = "Apply"),
         # mod_chart_bar_ui(ns("baseline_values"), ),
         # mod_chart_line_ui(ns("baseline_compare"))
@@ -51,7 +57,7 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
     updateSelectizeInput(
       session = getDefaultReactiveDomain(),
       inputId = "baseline_scenario",
-      choices = c(NULL, schema_scenarios$scenario())
+      choices = c(NULL, schema_scenarios$scenario_names())
     )
 
     output$heading <- renderUI(
@@ -63,7 +69,7 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
         )#,
         # shiny::tags$h4('Scenarios:'),
         # shiny::tags$ul(
-        #   list_to_li(schema_scenarios$scenario())
+        #   list_to_li(schema_scenarios$scenario_names())
         # )
       )
     )
@@ -81,7 +87,7 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
 #
 #       req(reportList()$harvest)
 #       req(reportList()$survival)
-#       req(schema_scenarios$scenario())
+#       req(schema_scenarios$scenario_names())
 #       # browser()
 #       DT.h <-
 #         reportList()$harvest[, sum(volume) / sum(target), by = c("scenario", "timeperiod")][V1 > 0.9, .N, by = c("scenario")][, N :=
@@ -99,13 +105,13 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
 # 	(select sum(m_gs) as gs_0, scenario from ",
 # 	schema_name,
 # 	".growingstock where timeperiod in (0)  and scenario IN ('",
-# 	paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+# 	paste(schema_scenarios$scenario_names(), sep =  "' '", collapse = "', '"),
 # 	"')
 # group by scenario, timeperiod) foo1
 # JOIN (select sum(m_gs) as gs_100, scenario from ",
 # schema_name,
 # ".growingstock where timeperiod in (100) and scenario IN ('",
-# paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+# paste(schema_scenarios$scenario_names(), sep =  "' '", collapse = "', '"),
 # "')
 # group by scenario, timeperiod) foo2
 # ON (foo1.scenario = foo2.scenario) )"
@@ -161,7 +167,6 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
       req(reportList()$indicators)
       reportList()$indicators %>% dplyr::filter(`scenario` == input$baseline_scenario)
     })
-
 
     radar_plot <- reactive({
       renderPlotly ({
@@ -222,7 +227,10 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
     return(
       list(
         radar_list = radarList,
-        radar_list_long = rl_long
+        radar_list_long = rl_long,
+        baseline_values = baseline_values,
+        baseline_scenario = input$baseline_scenario,
+        risk = input$discount_rate
       )
     )
 

@@ -12,17 +12,21 @@ output:
     keep_tex: no
     always_allow_html: true
 params:
+  details: list()
   schema: NA
   tsas: NA
+  scenario_names: NA
   scenarios: NA
   data_seral_treemap: NA
   reportList: NA
-  baseline_scenario: NA
   status_thlb: NA
   status_avg_vol: NA
   status_road: NA
   radar_list: NA
   radar_list_long: NA
+  baseline_values: NA
+  baseline_scenario: NA
+  risk: NA
 header-includes:
   # - \usepackage{fontspec}
   # - \usepackage{awesomebox}
@@ -133,9 +137,37 @@ ggplot2::ggplot(
 
 ## Summary
 
-```{r}
-# We evaluate different scenarios, and compare various parameters against the baseline scenario. The baseline scenario is `r params$baseline_scenario()`.
+We evaluate different scenarios, and compare various parameters against the baseline scenario. The following scenarios have been selected for analysis:
+
+```{r, results='asis'}
+selected_scenarios <- as.data.frame(
+  params$scenarios %>%
+    filter(scenario %in% params$scenario_names)
+)
+
+# Have to assign value even though it's not used, otherwise [[i]] NULL is printed
+s <- lapply(rownames(selected_scenarios), function(i) {
+  scenario_name <- selected_scenarios[i, 1]
+  scenario_description <- selected_scenarios[i, 2]
+  scenario_rank <- selected_scenarios[i, 3]
+  
+  cat(paste0('- **', scenario_name, '**: ', scenario_description, '\n\n'))
+})
 ```
+
+Scenario `r params$baseline_scenario` has been selected as the baseline, with "Future importance" factor set to `r params$risk`. The baseline scenario values are:
+
+```{r echo=FALSE, warning=FALSE}
+knitr::kable(params$baseline_values)
+```
+
+The table below illustrates how other scenarios compare to the baseline:
+
+```{r echo=FALSE, warning=FALSE}
+knitr::kable(params$radar_list)
+```
+
+The following charts compare the scenarions to the baseline scenario.
 
 ```{r summary_charts, fig.height=3.5}
 ggradar::ggradar(
@@ -162,138 +194,22 @@ ggradar::ggradar(
 chart_heatmap(data = params$radar_list_long, x = Herd, y = scenario.x, z = Ratio)
 ```
 
-## Caribou
-
-### Disturbance
-
-```{r caribou_disturbance}
-chart_line_faceted(
-  data = params$reportList$disturbance,
-  x_var = timeperiod,
-  y_var = (dist_per * 100),
-  color_var = scenario,
-  facet_chart = TRUE,
-  facet_vars = critical_hab,
-  xlab = "Future year",
-  ylab = "Percent Disturbed"
-)
-
-chart_line_faceted(
-  data = params$reportList$disturbance,
-  x_var = timeperiod,
-  y_var = (dist500_per * 100),
-  color_var = scenario,
-  facet_chart = TRUE,
-  facet_vars = critical_hab,
-  xlab = "Future year",
-  ylab = "Percent Disturbed"
-)
+<!-- Caribou -->
+```{r, eval=('caribou' %in% params$details), child=c('reports/caribou.Rmd')}
+```
+<!-- Climate -->
+```{r, eval=('climate' %in% params$details), child=c('reports/climate.Rmd')}
+```
+<!-- Fire -->
+```{r, eval=('fire' %in% params$details), child=c('reports/fire.Rmd')}
+```
+<!-- Fisher -->
+```{r, eval=('fisher' %in% params$details), child=c('reports/fisher.Rmd')}
+```
+<!-- Forestry -->
+```{r, eval=('forestry' %in% params$details), child=c('reports/forestry.Rmd')}
+```
+<!-- Grizzly bear -->
+```{r, eval=('grizzly' %in% params$details), child=c('reports/grizzly.Rmd')}
 ```
 
-### Forest Age
-
-````{r caribou_forest_age}
-chart_line_faceted(
-  data = params$reportList$survival,
-  x_var = timeperiod,
-  y_var = prop_age,
-  color_var = scenario,
-  facet_chart = TRUE,
-  facet_vars = herd_bounds,
-  xlab = "Future year",
-  ylab = "Proportion Age 0 to 40 years"
-)
-
-chart_line_faceted(
-  data = params$reportList$survival,
-  x_var = timeperiod,
-  y_var = prop_mature,
-  color_var = scenario,
-  facet_chart = TRUE,
-  facet_vars = herd_bounds,
-  xlab = "Future year",
-  ylab = "Proportion Age 80 to 120 years"
-)
-
-chart_line_faceted(
-  data = params$reportList$survival,
-  x_var = timeperiod,
-  y_var = prop_old,
-  color_var = scenario,
-  facet_chart = TRUE,
-  facet_vars = herd_bounds,
-  xlab = "Future year",
-  ylab = "Proportion > 120 years"
-)
-```
-
-### Population
-
-````{r caribou_population, results = 'asis'}
-if (!is.null(params$reportList$abundance)) {
-  chart_line_faceted(
-    data = params$reportList$abundance,
-    x_var = timeperiod,
-    y_var = abundance_avg,
-    color_var = scenario,
-    facet_chart = TRUE,
-    facet_vars = subpop_name,
-    xlab = "Future year",
-    ylab = "Abundance"
-  )
-} else {
-  cat('\n')
-  cat('No data found for selection.')
-  cat('\n')
-  cat('\n')
-}
-
-data <- params$reportList$survival
-data[, survival_rate_change := survival_rate - first(survival_rate), by = .(scenario, herd_bounds)]
-
-chart_line_faceted(
-  data = data,
-  x_var = timeperiod,
-  y_var = survival_rate_change,
-  color_var = scenario,
-  facet_chart = TRUE,
-  facet_vars = herd_bounds,
-  xlab = "Future year",
-  ylab = "Change in Annual Adult Female Survival Rate"
-)
-```
-
-### Resource Selection
-
-````{r caribou_rsf, results='asis'}
-data <- as.data.table(params$reportList$rsf)
-
-if (nrow(data)) {
-  data[, rsf_perc_change := ((first(sum_rsf_hat) - sum_rsf_hat) / first(sum_rsf_hat) * 100), by = .(scenario, rsf_model)]
-  chart_line_faceted(
-    data = data,
-    x_var = timeperiod,
-    y_var = rsf_perc_change,
-    color_var = scenario,
-    facet_chart = TRUE,
-    facet_vars = rsf_model,
-    add_y_intercept = TRUE,
-    xlab = "Future year",
-    ylab = "RSF Value Percent Change"
-  )
-} else {
-  cat('\n')
-  cat('No data found for selection.')
-  cat('\n')
-}
-```
-
-## Climate
-
-## Fire
-
-## Fisher
-
-## Forestry
-
-## Grizzly Bear

@@ -59,7 +59,7 @@ app_server <- function(input, output, session) {
   # .. available column names ----
   availableMapLayers <- reactive({
     # req(schema_scenarios$schema()())
-    # req(schema_scenarios$scenario()())
+    # req(schema_scenarios$scenario_names()())
     # #print(paste0("SELECT r_table_name FROM public.raster_columns WHERE r_table_schema = '", schema_scenarios$schema() , "' ;"))
     # #print(getSpatialQuery(paste0("SELECT r_table_name FROM public.raster_columns WHERE r_table_schema = '", schema_scenarios$schema() , "' ;")))
     # getTableQuery(
@@ -127,11 +127,11 @@ app_server <- function(input, output, session) {
   })
 
   # observe({
-  #   # req(schema_scenarios$scenario())
+  #   # req(schema_scenarios$scenario_names())
   #   updateSelectInput(
   #     session,
   #     "fisher_scenario_selected",
-  #     choices = schema_scenarios$scenario(),
+  #     choices = schema_scenarios$scenario_names(),
   #     selected = character(0)
   #   )
   # })
@@ -141,7 +141,7 @@ app_server <- function(input, output, session) {
 
   # # Query Builder
   # output$resultSetTable <- renderDataTable({
-  #   #print(paste0("SELECT ", paste(c(input$queryRows,input$queryColumns), sep="' '", collapse=", "), " FROM ", schema_scenarios$schema(), ".", input$queryTable, " WHERE scenario IN ('", paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"), "') GROUP BY ", input$queryColumns))
+  #   #print(paste0("SELECT ", paste(c(input$queryRows,input$queryColumns), sep="' '", collapse=", "), " FROM ", schema_scenarios$schema(), ".", input$queryTable, " WHERE scenario IN ('", paste(schema_scenarios$scenario_names(), sep =  "' '", collapse = "', '"), "') GROUP BY ", input$queryColumns))
   #   data.table(getTableQuery(
   #     paste0(
   #       "SELECT scenario, ",
@@ -158,7 +158,7 @@ app_server <- function(input, output, session) {
   #       ".",
   #       input$queryTable,
   #       " WHERE scenario IN ('",
-  #       paste(schema_scenarios$scenario(), sep =  "' '", collapse = "', '"),
+  #       paste(schema_scenarios$scenario_names(), sep =  "' '", collapse = "', '"),
   #       "') GROUP BY scenario, ",
   #       input$queryColumns,
   #       " ORDER BY ",
@@ -186,7 +186,7 @@ app_server <- function(input, output, session) {
 
     # .. report list ----
     req(schema_scenarios$schema())
-    req(schema_scenarios$scenario())
+    req(schema_scenarios$scenario_names())
     req(schema_scenarios$apply_scenario())
 
     # .... abundance ----
@@ -208,7 +208,7 @@ app_server <- function(input, output, session) {
           if (nrow(getTableQuery(
             sql = glue_sql(
               "SELECT scenario, subpop_name, timeperiod,  area, core, matrix, abundance_r50, abundance_c80r50, abundance_c80, abundance_avg
-              FROM {`schema_scenarios$schema()`}.caribou_abundance where scenario IN ({schema_scenarios$scenario()*}) limit 1"
+              FROM {`schema_scenarios$schema()`}.caribou_abundance where scenario IN ({schema_scenarios$scenario_names()*}) limit 1"
             ),
             conn = conn
           )) > 0) {
@@ -218,7 +218,7 @@ app_server <- function(input, output, session) {
                   "SELECT scenario, subpop_name, timeperiod, area, core, matrix,
                   abundance_r50, abundance_c80r50, abundance_c80, abundance_avg
                   FROM {`schema_scenarios$schema()`}.caribou_abundance
-                  WHERE scenario IN ({schema_scenarios$scenario()*})
+                  WHERE scenario IN ({schema_scenarios$scenario_names()*})
                   ORDER BY scenario, subpop_name, timeperiod;",
                   .con = conn
                 ),
@@ -255,7 +255,7 @@ app_server <- function(input, output, session) {
           if (nrow(getTableQuery(
             sql = glue_sql(
               "SELECT * FROM {`schema_scenarios$schema()`}.survival
-            WHERE scenario IN ({schema_scenarios$scenario()*}) limit 1",
+            WHERE scenario IN ({schema_scenarios$scenario_names()*}) limit 1",
             .con = conn
             ),
             conn = conn
@@ -264,7 +264,7 @@ app_server <- function(input, output, session) {
               data.table(getTableQuery(
                 sql = glue_sql(
                   "SELECT * FROM {`schema_scenarios$schema()`}.survival
-                WHERE scenario IN ({schema_scenarios$scenario()*})
+                WHERE scenario IN ({schema_scenarios$scenario_names()*})
                 ORDER BY scenario, herd_bounds, timeperiod;",
                 .con = conn
                 ),
@@ -297,7 +297,7 @@ app_server <- function(input, output, session) {
           if (nrow(getTableQuery(
             sql = glue::glue_sql(
               "SELECT * FROM {`schema_scenarios$schema()`}.disturbance
-                 WHERE scenario IN ({schema_scenarios$scenario()*})
+                 WHERE scenario IN ({schema_scenarios$scenario_names()*})
                  LIMIT 1",
               .con = conn
             ),
@@ -309,7 +309,7 @@ app_server <- function(input, output, session) {
                   "SELECT scenario, timeperiod, critical_hab, sum(c40r500) as c40r500,
                       sum(c40r50) as c40r50, sum(total_area) as total_area
                      FROM {`schema_scenarios$schema()`}.disturbance
-                     WHERE scenario IN ({schema_scenarios$scenario()*})
+                     WHERE scenario IN ({schema_scenarios$scenario_names()*})
                     GROUP BY scenario, critical_hab, timeperiod
                     ORDER BY scenario, critical_hab, timeperiod",
                   .con = conn
@@ -342,7 +342,7 @@ app_server <- function(input, output, session) {
           if (nrow(getTableQuery(
             sql = glue::glue_sql(
               "SELECT * FROM {`schema_scenarios$schema()`}.grizzly_survival
-           WHERE scenario IN ({schema_scenarios$scenario()*}) limit 1",
+           WHERE scenario IN ({schema_scenarios$scenario_names()*}) limit 1",
            .con = conn
             ),
            conn = conn
@@ -351,7 +351,7 @@ app_server <- function(input, output, session) {
               data.table(getTableQuery(
                 sql = glue::glue_sql(
                   "SELECT * FROM {`schema_scenarios$schema()`}.grizzly_survival
-               WHERE scenario IN ({schema_scenarios$scenario()*})
+               WHERE scenario IN ({schema_scenarios$scenario_names()*})
                ORDER BY scenario, gbpu_name, timeperiod;",
                .con = conn
                 ),
@@ -410,7 +410,7 @@ app_server <- function(input, output, session) {
           if (nrow(getTableQuery(
             sql = glue::glue_sql(
               "SELECT * FROM {`schema_scenarios$schema()`}.fisher
-           WHERE scenario IN ({schema_scenarios$scenario()*})
+           WHERE scenario IN ({schema_scenarios$scenario_names()*})
            LIMIT 1",
            .con = conn
             ),
@@ -421,7 +421,7 @@ app_server <- function(input, output, session) {
                 sql = glue::glue_sql(
                   "SELECT rel_prob_occup, zone, reference_zone, timeperiod, scenario
                FROM {`schema_scenarios$schema()`}.fisher
-               WHERE scenario IN ({schema_scenarios$scenario()*})
+               WHERE scenario IN ({schema_scenarios$scenario_names()*})
                ORDER BY scenario, timeperiod;",
                .con = conn
                 ),
@@ -438,7 +438,7 @@ app_server <- function(input, output, session) {
               merge(
                 data.fisher.hexa,
                 data.fisherOccupancy[timeperiod == 0 &
-                                       scenario == schema_scenarios$scenario()[1], c('zone', 'reference_zone', 'rel_prob_occup')],
+                                       scenario == schema_scenarios$scenario_names()[1], c('zone', 'reference_zone', 'rel_prob_occup')],
                 by.x = c('zone', 'reference_zone'),
                 by.y = c('zone', 'reference_zone'),
                 all.y = TRUE
@@ -454,7 +454,7 @@ app_server <- function(input, output, session) {
 
         # reportList <- reactive({
         # req(schema_scenarios$schema())
-        # req(schema_scenarios$scenario())
+        # req(schema_scenarios$scenario_names())
         #
 
         incProgress(amount = 1, message = "Getting harvest data...")
@@ -465,7 +465,7 @@ app_server <- function(input, output, session) {
             sql = glue::glue_sql(
               "SELECT *
                FROM {`schema_scenarios$schema()`}.harvest
-               WHERE scenario IN ({schema_scenarios$scenario()*});",
+               WHERE scenario IN ({schema_scenarios$scenario_names()*});",
               .con = conn
             ),
             conn = conn
@@ -480,7 +480,7 @@ app_server <- function(input, output, session) {
             sql = glue::glue_sql(
               "SELECT scenario, timeperiod, sum(m_gs) as growingstock
               FROM {`schema_scenarios$schema()`}.growingstock
-              WHERE scenario IN ({schema_scenarios$scenario()*})
+              WHERE scenario IN ({schema_scenarios$scenario_names()*})
               GROUP BY scenario, timeperiod;",
               .con = conn
             ),
@@ -495,7 +495,7 @@ app_server <- function(input, output, session) {
           getTableQuery(
             sql = glue::glue_sql(
               "SELECT * FROM {`schema_scenarios$schema()`}.rsf
-              WHERE scenario IN ({schema_scenarios$scenario()*})
+              WHERE scenario IN ({schema_scenarios$scenario_names()*})
               ORDER BY scenario, rsf_model, timeperiod;",
               .con = conn
             ),
@@ -507,13 +507,13 @@ app_server <- function(input, output, session) {
 
       data.indicators<-getTableQuery(
         sql = glue_sql("WITH view1 AS (select scenario, compartment, timeperiod, m_gs as variable, 'm_gs' as ind_name from {`schema_scenarios$schema()`}.growingstock
-			where scenario in ({schema_scenarios$scenario()*})
+			where scenario in ({schema_scenarios$scenario_names()*})
 			Union All
  SELECT scenario, compartment, timeperiod, volume as variable, 'vol_h' as ind_name
-	FROM {`schema_scenarios$schema()`}.harvest where scenario in ({schema_scenarios$scenario()*})
+	FROM {`schema_scenarios$schema()`}.harvest where scenario in ({schema_scenarios$scenario_names()*})
 Union all
 SELECT scenario, compartment, timeperiod, sum(cut80) as variable, split_part(critical_hab, ' ', 1) AS ind_name
-	FROM {`schema_scenarios$schema()`}.disturbance where scenario in ({schema_scenarios$scenario()*})
+	FROM {`schema_scenarios$schema()`}.disturbance where scenario in ({schema_scenarios$scenario_names()*})
 		group by scenario, compartment, timeperiod, ind_name)
 select scenario, compartment, timeperiod, COALESCE(variable, 0) as variable, ind_name from view1
 where ind_name is not null;", .con = conn),
@@ -551,15 +551,18 @@ where ind_name is not null;", .con = conn),
       "page_report",
       schema = schema_scenarios$schema,
       tsas = schema_scenarios$tsa_selected,
-      scenarios = schema_scenarios$scenario,
+      scenario_names = schema_scenarios$scenario_names,
+      scenarios = schema_scenarios$scenarios,
       data_seral_treemap = schema_scenarios$data_seral_treemap,
       reportList = reportList,
-      baseline_scenario = NA,
       status_thlb = schema_scenarios$status_thlb,
       status_avg_vol = schema_scenarios$status_avg_vol,
       status_road = schema_scenarios$status_road,
       radar_list = summary_data$radar_list,
-      radar_list_long = summary_data$radar_list_long
+      radar_list_long = summary_data$radar_list_long,
+      baseline_values = summary_data$baseline_values,
+      baseline_scenario = summary_data$baseline_scenario,
+      risk = summary_data$risk
     )
   })
     # mod_page_report_server("page_report", list())

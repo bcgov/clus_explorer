@@ -478,7 +478,8 @@ mod_page_scenarios_server <- function(id){
       list(
         schema = reactive({input$schema}),
         tsa_selected = reactive({input$tsa_selected}),
-        scenario = reactive({input$scenario}),
+        scenario_names = reactive({input$scenario}),
+        scenarios = scenariosList,
         apply_scenario = reactive({input$apply_scenario}),
         data_seral_treemap = data_seral_treemap,
         status_thlb = status_thlb,
