@@ -2,7 +2,7 @@
 
 ### Disturbance
 
-```{r caribou_disturbance}
+```{r caribou_disturbance, dpi=300}
 chart_line_faceted(
   data = params$reportList$disturbance,
   x_var = timeperiod,
@@ -28,7 +28,7 @@ chart_line_faceted(
 
 ### Forest Age
 
-````{r caribou_forest_age}
+````{r caribou_forest_age, dpi=300}
 chart_line_faceted(
   data = params$reportList$survival,
   x_var = timeperiod,
@@ -65,7 +65,7 @@ chart_line_faceted(
 
 ### Population
 
-````{r caribou_population, results = 'asis'}
+````{r caribou_population, results = 'asis', dpi=300}
 if (!is.null(params$reportList$abundance)) {
   chart_line_faceted(
     data = params$reportList$abundance,
@@ -101,7 +101,7 @@ chart_line_faceted(
 
 ### Resource Selection
 
-````{r caribou_rsf, results='asis'}
+````{r caribou_rsf, results='asis', dpi=300}
 data <- as.data.table(params$reportList$rsf)
 
 if (nrow(data)) {

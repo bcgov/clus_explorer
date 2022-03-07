@@ -1,0 +1,135 @@
+
+## Current State
+
+### Landbase
+
+The following indicators highlight the current state of the landbase in the area of interest:
+
+-   **`r scales::percent(params$status_thlb, accuracy = 1, scale = 1)`** - Percentage of the timber harvesting landbase in the area of interest.
+-   **`r scales::percent(params$status_road, accuracy = 1, scale = 1)`** - Percentage of the are of interest within 100m from the road.
+-   **`r params$status_avg_vol`** - Average volume (`m3`) per `ha` in THLB.
+
+### Seral Stage
+
+The following chart represents the proportion of forest by forest age. Categories of forest age are defined as:
+
+-   Early (younger than 40 years old)
+
+-   Mature (60 - 120 years old)
+
+-   Old (Older than 120 years of age)
+
+```{r seral_stage, fig.height=2, fig.width=4, dpi=300}
+ggplot2::ggplot(
+    params$data_seral_treemap %>% 
+      dplyr::filter(!is.na(variable)) %>% 
+      mutate(
+        variable = forcats::fct_reorder(variable, V1, .desc = TRUE),
+        percentage = round(V1 / sum(V1) * 100, 1)
+      ),
+    aes(
+      area = V1, fill = variable, 
+      label = paste0(variable, " (", scales::percent(percentage, accuracy = 1, scale = 1), ")")
+    )
+  ) +
+  geom_treemap(alpha = 0.75) +
+  geom_treemap_text(size = 9, colour = "#323F4B", place = 'topleft', grow = FALSE, reflow = TRUE)+
+  theme_minimal() +
+  theme(
+    text = element_text(size = 10),
+    legend.position = 'none',
+    plot.title = element_text(size = 8, colour = '#3E4C59'),
+    plot.subtitle = element_text(hjust = 0, size = 7, colour = '#3E4C59', margin = margin(b = 0.25, t = 0, unit = "cm")),
+    plot.caption = element_text(face = 'italic', size = 6, colour = '#3E4C59', hjust = 1, margin = margin(t = 0.5, unit = "cm"))
+  ) +
+  scale_fill_brewer(palette = 'Greens') +
+  labs(
+    title = "Proportion of forest by age group",
+    subtitle = "Early (<40 yrs), mature (60 - 120 yrs) and old (> 120 yrs)"
+  )
+```
+
+## Summary
+
+We evaluate different scenarios, and compare various parameters against the baseline scenario. The following scenarios have been selected for analysis:
+
+```{r, results='asis'}
+selected_scenarios <- as.data.frame(
+  params$scenarios %>%
+    filter(scenario %in% params$scenario_names)
+)
+
+# Have to assign value even though it's not used, otherwise [[i]] NULL is printed
+s <- lapply(rownames(selected_scenarios), function(i) {
+  scenario_name <- selected_scenarios[i, 1]
+  scenario_description <- selected_scenarios[i, 2]
+  scenario_rank <- selected_scenarios[i, 3]
+  
+  cat(paste0('- **', scenario_name, '**: ', scenario_description, '\n\n'))
+})
+```
+
+### Baseline scenario
+
+Scenario `r params$baseline_scenario` has been selected as the baseline, with "Future importance" factor set to `r params$risk`. Charts and table below show the values of baseline scenario. The facet variables are Growing Stock (m_gs), Volume Harvested (vol_h), and individual herd names.
+
+```{r echo=FALSE, warning=FALSE, dpi=300}
+chart_line_faceted(
+  data = params$baseline_values,
+  x_var = timeperiod,
+  y_var = variable,
+  color_var = scenario,
+  facet_chart = TRUE,
+  facet_vars = ind_name,
+  facet_scales = 'free_y',
+  facet_ncol = 2,
+  xlab = "Future year",
+  ylab = "Proportion Age 0 to 40 years",
+  is_plotly = FALSE
+)
+```
+
+### Other scenarios compared to baseline
+
+Table and charts below show how other selected scenarios compare to the baseline scenario. Dimensions in those multi-dimensional plots are individual scenarios, Growing Stock (m_gs), Volume Harvested (vol_h), and individual herd names.
+
+```{r echo=FALSE, warning=FALSE}
+# knitr::kable(params$radar_list)
+kableExtra::kbl(
+    params$radar_list, 
+    # align = 'lrlcc', 
+    booktabs = TRUE, 
+    longtable = FALSE, 
+    # format = 'latex'
+  ) %>% 
+  # column_spec(1, width = "1.5in") %>%
+  # column_spec(3, width = "1.5in") %>%
+  # column_spec(4, width = "1in") %>%
+  kableExtra::kable_styling(latex_options = c('hold_position', 'scale_down', 'striped'), font_size = 7)
+
+```
+
+```{r summary_charts, fig.height=3.5, dpi=300}
+ggradar::ggradar(
+  params$radar_list, 
+  base.size = 5,
+  grid.min = min(params$radar_list_long$Ratio) * 1.1, 
+  grid.max = max(params$radar_list_long$Ratio) * 1.1,
+  grid.label.size = 3,
+  gridline.min.colour = "#CBD2D9",
+  gridline.mid.colour = "#CBD2D9",
+  gridline.max.colour = "#CBD2D9",
+  group.point.size = 1.5,
+  group.line.width = 0.5,
+  background.circle.colour = "#F5F7FA",
+  axis.line.colour = "#CBD2D9",
+  axis.label.size = 3,
+  legend.title = "",
+  legend.position = "right", 
+  legend.text.size = 6,
+)
+# knitr::kable(params$radar_list)
+# knitr::kable(params$radar_list_long$Ratio)
+
+chart_heatmap(data = params$radar_list_long, x = Herd, y = scenario.x, z = Ratio)
+```
