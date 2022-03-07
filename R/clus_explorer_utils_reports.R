@@ -65,9 +65,17 @@ chart_heatmap <- function(
 #' @param color_var Colour variable
 #' @param facet_chart Should the chart be faceted
 #' @param facet_vars Facet variables
+#' @param facet_scales Should scales be fixed ("fixed", the default), free ("free"), or free in one dimension ("free_x", "free_y")?
+#' @param facet_nrow	Number of facet rows
+#' @param facet_ncol	Number columns.
 #' @param xlab X-axis label
 #' @param ylab Y-axis label
 #' @param is_plotly Should the chart object be converted to plotly object
+#' @param legend_position Legend position
+#' @param add_x_intercept Whether to add vertical intercept line
+#' @param x_intercept Position of vertical intercept line
+#' @param add_y_intercept Whether to add horizontal intercept line
+#' @param y_intercept Position of vertical horizontal line
 #'
 #' @return
 #'
@@ -75,20 +83,23 @@ chart_heatmap <- function(
 #' @import plotly
 #' @export
 chart_line_faceted <- function(
-  data, x_var, y_var, color_var, facet_chart = FALSE, facet_vars = NULL, xlab = "",
-  ylab = "", is_plotly = FALSE, legend_position = "bottom",
+  data, x_var, y_var, color_var, facet_chart = FALSE, facet_vars = NULL, facet_scales = 'free',
+  facet_nrow = 3, facet_ncol = 3, xlab = "", ylab = "", is_plotly = FALSE,
   add_x_intercept = FALSE, x_intercept = 0,
-  add_y_intercept = FALSE, y_intercept = 0
+  add_y_intercept = FALSE, y_intercept = 0,
+  legend_position = "bottom"
 ) {
 
   p <-
-    ggplot(data,
-           aes (
-             x = {{ x_var }},
-             y = {{ y_var }},
-             color = {{ color_var }},
-             linetype = {{ color_var }}
-           )) +
+    ggplot(
+      data,
+      aes (
+        x = {{ x_var }},
+        y = {{ y_var }},
+        color = {{ color_var }},
+        linetype = {{ color_var }}
+      )
+    ) +
     geom_line() +
     xlab (xlab) +
     ylab (ylab) +
@@ -102,7 +113,12 @@ chart_line_faceted <- function(
 
   if (facet_chart) {
     p <- p +
-      facet_wrap(facets = vars({{ facet_vars }}))
+      facet_wrap(
+        facets = vars({{ facet_vars }}),
+        ncol = facet_ncol,
+        nrow = facet_nrow,
+        scales = facet_scales
+      )
   }
 
   if (add_x_intercept) {
@@ -113,6 +129,82 @@ chart_line_faceted <- function(
   if (add_y_intercept) {
     p <- p +
       geom_hline(yintercept = y_intercept, linetype = "dashed", color = "#3E4C59")
+  }
+
+  if (is_plotly) {
+    p <- plotly::ggplotly(p, height = 600) %>%
+      plotly::layout (
+        legend = list (orientation = "h", y = -0.1),
+        margin = list (
+          l = 50,
+          r = 20,
+          b = 40,
+          t = 40,
+          pad = 0
+        )
+      )
+  }
+
+  p
+}
+
+#' Reusable function to create a bar chart
+#'
+#' @param data Data to be plotted
+#' @param x_var X-axis variable
+#' @param y_var Y-axis variable
+#' @param facet_chart Should the chart be faceted
+#' @param facet_vars Facet variables
+#' @param xlab X-axis label
+#' @param facet_nrow	Number of facet rows
+#' @param facet_ncol	Number columns.
+#' @param ylab Y-axis label
+#' @param is_plotly Should the chart object be converted to plotly object
+#' @param legend_position Legend position
+#' @param scale_x_continuous_limits Character vector of scale X limits
+#' @param scale_x_continuous_breaks Character vector of scale X breaks
+#'
+#' @return
+#' @export
+#'
+#' @examples
+chart_bar_faceted <- function(
+  data, x_var, y_var, facet_chart = FALSE, facet_vars = NULL, facet_nrow = 3,
+  facet_ncol = 3, xlab = "", ylab = "", is_plotly = FALSE, scale_x_continuous_limits = c(),
+  scale_x_continuous_breaks = c(), legend_position = "bottom"
+){
+  p <-
+    ggplot(
+      data,
+      aes (
+        x = {{ x_var }},
+        y = {{ y_var }}
+      )
+    ) +
+    geom_bar(stat = "identity", width = 1) +
+    xlab (xlab) +
+    ylab (ylab) +
+    theme_bw() +
+    theme(
+      legend.title = element_blank(),
+      legend.position = legend_position
+    )
+
+  if (facet_chart) {
+    p <- p +
+      facet_wrap(
+        facets = vars({{ facet_vars }}),
+        nrow = facet_nrow,
+        ncol = facet_ncol
+      )
+  }
+
+  if (length(scale_x_continuous_limits) > 0 & length(scale_x_continuous_breaks) > 0) {
+    p <- p +
+      scale_x_continuous(
+        limits = scale_x_continuous_limits,
+        breaks = scale_x_continuous_breaks
+      )
   }
 
   if (is_plotly) {

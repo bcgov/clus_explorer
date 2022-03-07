@@ -101,8 +101,6 @@ mod_chart_bar_server <- function(
     yAxisFormat$exponentformat <- exponentformat
     yAxisFormat$automargin <- TRUE
 
-    # print(paste(ns('bar'), tickFormat))
-
     marginFormat <- list(
       l = 50,
       r = 50,

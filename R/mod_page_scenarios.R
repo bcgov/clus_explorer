@@ -11,6 +11,13 @@ mod_page_scenarios_ui <- function(id){
   ns <- NS(id)
 
   tagList(
+    # fluidRow(
+    #   actionButton(ns("help"), "Click for instructions") %>%
+    #     bsplus::bs_embed_tooltip(
+    #       "Click the button for instructions",
+    #       "right"
+    #     )
+    # ),
     fluidRow(
       column(
         width = 6,
@@ -65,7 +72,7 @@ mod_page_scenarios_ui <- function(id){
                     offset = 1,
                     div(
                       infoBoxOutput(ns("statusRoad")) %>%
-                        withSpinner(color.background = '#fff')
+                        withSpinner(color = '#ecf0f5', color.background = '#ffffff')
                     ) %>%
                       bsplus::bs_embed_tooltip(
                         "Percentage of the area of interest within 100m of a road",
@@ -104,7 +111,7 @@ mod_page_scenarios_ui <- function(id){
                       'Early (<40 yrs), mature (60 - 120 yrs) and old (> 120 yrs).'
                     ),
                     mod_chart_treemap_ui(ns('statusPlot'), chart_height = '350px') %>%
-                      withSpinner(color.background = '#fff')
+                      withSpinner(color = '#ecf0f5', color.background = '#ffffff')
                   )
                 )
               )
@@ -133,34 +140,45 @@ mod_page_scenarios_ui <- function(id){
       ),
       column(
         width = 6,
-        box(
-          title = tagList(
+        conditionalPanel(
+          condition = paste0("$('#", ns("schema"), "').val() != ''"),
+          box(
+            title = tagList(
 
-            span("Scenarios"),
-            icon('info-circle') %>%
-              bsplus::bs_embed_tooltip(
-                "Select the scenarios you wish to compare, then see Dashboard tab for indicators.",
-                "right"#,
-                # delay = seconds(5)
-              )
-          ),
-          width = 12,
-          solidHeader = TRUE,
-          p(
-            "Scenarios are ordered by ",
-            code("rank"),
-            ". The values of ",
-            code("rank"),
-            " correspond to the cubic meter of harvested volume per area of caribou
-              critical habitat disturbed. Scenarios with larger rank values are potentially better."
-          ),
-          # uiOutput(ns('selected_scenarios_list')),
-          # DT::dataTableOutput(ns('scenarios')),
-          # uiOutput(ns("scenarios"))
-          checkboxGroupInput(
-            inputId = ns("scenario"), label = NULL, selected = NULL, choiceNames = NULL
-          ),
-          actionButton(ns("apply_scenario"), label = "Apply", class = "btn-clus")
+              span("Scenarios"),
+              icon('info-circle') %>%
+                bsplus::bs_embed_tooltip(
+                  "After selecting an area of interest, select the scenarios you wish to compare, then see Dashboard tab for indicators.",
+                  "right"#,
+                  # delay = seconds(5)
+                )
+            ),
+            width = 12,
+            solidHeader = TRUE,
+            p(
+              "Scenarios are ordered by ",
+              code("rank"),
+              ". The values of ",
+              code("rank"),
+              " correspond to the cubic meter of harvested volume per area of caribou
+                critical habitat disturbed. Scenarios with larger rank values are potentially better."
+            ),
+            p(
+              strong("Select at least two scenarios")
+            ),
+            # uiOutput(ns('selected_scenarios_list')),
+            # DT::dataTableOutput(ns('scenarios')),
+            # uiOutput(ns("scenarios"))
+            checkboxGroupInput(
+              inputId = ns("scenario"), label = NULL, selected = NULL, choiceNames = NULL
+            ),
+            actionButton(
+              ns("apply_scenario"),
+              label = "Apply",
+              class = "btn-clus btn-apply-scenarios",
+              icon = icon("check-circle")
+            )
+          )
         )
       )
     )
@@ -173,6 +191,48 @@ mod_page_scenarios_ui <- function(id){
 mod_page_scenarios_server <- function(id){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
+
+    # .. introjs steps ----
+    # steps <- reactive(
+    #   data.frame(
+    #     element = c(
+    #       ".selectize",
+    #       ".settings",
+    #       ".treeview",
+    #       ".report"
+    #     ),
+    #     intro = c(
+    #       "This is the navigation sidebar where you can select various features in the app.",
+    #       "Step 1: This is where you select your area of interest and the various scenarios you wish to compare.",
+    #       "Step 2: This is where you can view outputs of various indicators by scenario.
+    #
+    #       You must have selected an area of interest and at least two scnearios in Step 1.",
+    #       "Step 3: Use this tab to generate and download summary or detailed report in PDF/Word/PowerPoint format.<br>You must have selected an area of interest and at least two scnearios in Step 1."
+    #     ),
+    #     position = c("right", "right", "right", "right")
+    #   )
+    # )
+    #
+    # observeEvent(
+    #   input$help,
+    #   introjs(
+    #     session,
+    #     options = list(
+    #       steps = steps(),
+    #       "nextLabel" = "Next",
+    #       "prevLabel" = "Previous",
+    #       "skipLabel" = "Skip"
+    #     )
+    #   )
+    # )
+
+    # Disable Apply button if no scenarios are selected
+    observe({
+      shinyjs::toggleState(
+        "apply_scenario",
+        condition = (length(input$scenario) >= 2)
+      )
+    })
 
     # Reactive values ----
 
@@ -400,26 +460,6 @@ mod_page_scenarios_server <- function(id){
       input$tsa_selected,
       ignoreInit = TRUE,
       {
-        # data_seral_treemap(),
-        # data_seral_treemap <- data.table(
-        #   reshape2::melt(
-        #     data()[, c("compartment", "early", "mature", "old")],
-        #     id.vars = "compartment",
-        #     measure.vars = c("early", "mature", "old")
-        #   )
-        # )
-        # data_seral_treemap <- data_seral_treemap[, sum(value), by = list(variable)]
-        #
-        # data_seral_treemap <- data_seral_treemap %>% mutate(
-        #   parent_col = 'Total area'
-        # )
-        # data_total <- data_seral_treemap %>%
-        #   group_by(parent_col) %>%
-        #   summarise(V1 = sum(V1)) %>%
-        #   ungroup()
-        #
-        # data_seral_treemap <- bind_rows(data_total, data_seral_treemap)
-
         mod_chart_treemap_server(
           'statusPlot',
           data = data_seral_treemap(),
@@ -474,7 +514,7 @@ mod_page_scenarios_server <- function(id){
 
     # Return reactive values ----
     # to be used in other modules
-    return(
+    return({
       list(
         schema = reactive({input$schema}),
         tsa_selected = reactive({input$tsa_selected}),
@@ -486,7 +526,7 @@ mod_page_scenarios_server <- function(id){
         status_avg_vol = status_avg_vol,
         status_road = status_road
       )
-    )
+    })
 
   })
 }

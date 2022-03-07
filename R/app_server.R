@@ -38,150 +38,6 @@ app_server <- function(input, output, session) {
   mod_page_home_server('page_home')
   schema_scenarios <- mod_page_scenarios_server('page_scenarios')
 
-  # Reactives ----
-  # .. column names ----
-  queryColumnNames <- reactive({
-    # req(schema_scenarios$schema()())
-    # data.table(getTableQuery(
-    #   paste0(
-    #     "SELECT column_name FROM information_schema.columns
-    #       WHERE table_schema = '",
-    #     schema_scenarios$schema()() ,
-    #     "' ",
-    #     "
-    #       AND table_name   = '",
-    #     input$queryTable,
-    #     "'"
-    #   )
-    # ))
-  })
-
-  # .. available column names ----
-  availableMapLayers <- reactive({
-    # req(schema_scenarios$schema()())
-    # req(schema_scenarios$scenario_names()())
-    # #print(paste0("SELECT r_table_name FROM public.raster_columns WHERE r_table_schema = '", schema_scenarios$schema() , "' ;"))
-    # #print(getSpatialQuery(paste0("SELECT r_table_name FROM public.raster_columns WHERE r_table_schema = '", schema_scenarios$schema() , "' ;")))
-    # getTableQuery(
-    #   paste0(
-    #     "SELECT r_table_name FROM public.raster_columns WHERE r_table_schema = '",
-    #     schema_scenarios$schema()() ,
-    #     "' ;"
-    #   )
-    # )$r_table_name
-  })
-
-  # Observers ----
-  observeEvent(input$getMapLayersButton, {
-    withProgress(message = 'Loading layers', value = 0.1, {
-      mapLayersStack <-
-        getRasterQuery(c(schema_scenarios$schema(), tolower(input$maplayers)))
-      mapLayersStack[mapLayersStack[] == 0] <- NA
-    })
-    cb <-
-      colorBin("Spectral", domain = 1:200,  na.color = "#00000000")
-    leafletProxy("resultSetRaster", session) %>%
-      clearTiles() %>%
-      clearImages() %>%
-      clearControls() %>%
-      addTiles() %>%
-      addProviderTiles("OpenStreetMap", group = "OpenStreetMap") %>%
-      addProviderTiles("Esri.WorldImagery", group = "WorldImagery") %>%
-      addProviderTiles("Esri.DeLorme", group = "DeLorme") %>%
-      addRasterImage(
-        mapLayersStack,
-        colors = cb,
-        opacity = 0.8,
-        project = TRUE,
-        group = "Selected"
-      ) %>%
-      addLegend(pal = cb, values = 1:200) %>%
-      addLayersControl(
-        baseGroups = c("OpenStreetMap", "WorldImagery", "DeLorme"),
-        overlayGroups = "Selected"
-      ) %>%
-      addScaleBar(position = "bottomleft")
-  })
-
-  observe({
-    updateSelectInput(
-      session,
-      "queryColumns",
-      choices = queryColumnNames()$column_name,
-      selected = character(0)
-    )
-    updateSelectInput(
-      session,
-      "queryRows",
-      choices = queryColumnNames()$column_name,
-      selected = character(0)
-    )
-  })
-
-  observe({
-    #print(availableMapLayers())
-    updateSelectInput(session,
-                      "maplayers",
-                      choices = availableMapLayers(),
-                      selected = character(0))
-  })
-
-  # observe({
-  #   # req(schema_scenarios$scenario_names())
-  #   updateSelectInput(
-  #     session,
-  #     "fisher_scenario_selected",
-  #     choices = schema_scenarios$scenario_names(),
-  #     selected = character(0)
-  #   )
-  # })
-
-  # Outputs ----
-
-
-  # # Query Builder
-  # output$resultSetTable <- renderDataTable({
-  #   #print(paste0("SELECT ", paste(c(input$queryRows,input$queryColumns), sep="' '", collapse=", "), " FROM ", schema_scenarios$schema(), ".", input$queryTable, " WHERE scenario IN ('", paste(schema_scenarios$scenario_names(), sep =  "' '", collapse = "', '"), "') GROUP BY ", input$queryColumns))
-  #   data.table(getTableQuery(
-  #     paste0(
-  #       "SELECT scenario, ",
-  #       paste(
-  #         c(
-  #           paste0(input$queryValue, "(", input$queryRows, ")"),
-  #           input$queryColumns
-  #         ),
-  #         sep = "' '",
-  #         collapse = ", "
-  #       ),
-  #       " FROM ",
-  #       schema_scenarios$schema(),
-  #       ".",
-  #       input$queryTable,
-  #       " WHERE scenario IN ('",
-  #       paste(schema_scenarios$scenario_names(), sep =  "' '", collapse = "', '"),
-  #       "') GROUP BY scenario, ",
-  #       input$queryColumns,
-  #       " ORDER BY ",
-  #       input$queryColumns
-  #     )
-  #   ))
-  # })
-  #
-  # # Mapviewer
-  # output$resultSetRaster <- renderLeaflet({
-  #   leaflet(options = leafletOptions(doubleClickZoom = TRUE)) %>%
-  #     setView(-124.87, 54.29, zoom = 5) %>%
-  #     addTiles() %>%
-  #     addProviderTiles("OpenStreetMap", group = "OpenStreetMap") %>%
-  #     addProviderTiles("Esri.WorldImagery", group = "WorldImagery") %>%
-  #     addProviderTiles("Esri.DeLorme", group = "DeLorme") %>%
-  #     addScaleBar(position = "bottomright") %>%
-  #     addLayersControl(baseGroups = c("OpenStreetMap", "WorldImagery", "DeLorme"))
-  #
-  # })
-  #
-  #
-
   reportList <- reactive({
 
     # .. report list ----
@@ -535,6 +391,7 @@ where ind_name is not null;", .con = conn),
           indicators = data.indicators
         )
 
+        # shinyjs::alert("Data has been prepared, please go to Dashboard or Generate Report tabs for further analysis.")
         # })
 
       })
@@ -561,10 +418,9 @@ where ind_name is not null;", .con = conn),
       radar_list = summary_data$radar_list,
       radar_list_long = summary_data$radar_list_long,
       baseline_values = summary_data$baseline_values,
-      baseline_scenario = summary_data$baseline_scenario,
+      baseline_scenario = isolate(summary_data$baseline_scenario),
       risk = summary_data$risk
     )
   })
-    # mod_page_report_server("page_report", list())
 
 }

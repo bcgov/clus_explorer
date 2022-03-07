@@ -12,27 +12,95 @@ mod_page_dashboard_summary_ui <- function(id){
   tagList(
     uiOutput(ns("heading")),
     fluidRow(
-      column(
-        width = 6,
-        selectizeInput(ns("baseline_scenario"), label = "Baseline scenario", choices = NULL),
-        selectizeInput(ns("discount_rate"), label = "Future importance", choices = list(
-          "Neutral" = 0,
-          "Low" = -0.01,
-          "Medium" = 0.01,
-          "High" = 0.05
-        )),
-                         # c(0, 0.05,0.01,-0.01)),
-        # actionButton(ns("baseline_scenario_apply"), label = "Apply"),
+      div(
+        class = 'col-lg-5 col-md-5 col-sm-12 col-xs-12',
+
+        h3('Scenario analysis'),
+        p(
+          'Select baseline scenario and compare other selected scenarios to the baseline values.
+          Use the controls below to change baseline scenario and the importance of caribou and land use in future years.'
+        )
+      )
+    ),
+    fluidRow(
+      div(
+        class = 'col-lg-5 col-md-5 col-sm-12 col-xs-12',
+        wellPanel(
+          selectizeInput(ns("baseline_scenario"), label = "Baseline scenario", choices = NULL),
+          p(
+            strong("Future importance"),
+            icon('info-circle') %>%
+              bsplus::bs_embed_tooltip(
+                "Select how important future years are for your analysis",
+                "right"
+              )
+          ),
+          selectizeInput(
+            ns("discount_rate"),
+            label = NULL,
+            choices = list(
+              "Neutral" = 0,
+              "Low" = -0.01,
+              "Medium" = 0.01,
+              "High" = 0.05
+            )
+          ),
+          actionButton(
+            ns("baseline_scenario_apply"),
+            label = "Apply",
+            class = "btn-clus btn-apply-scenarios",
+            icon = icon("check-circle")
+          )
+        )
+      )
+
         # mod_chart_bar_ui(ns("baseline_values"), ),
         # mod_chart_line_ui(ns("baseline_compare"))
-        div("Baseline chart here...")
+        # div("Baseline chart here...")
+    ),
+    fluidRow(
+      div(
+        class = 'col-lg-5 col-md-12 col-sm-12 col-xs-12',
+        h4('Baseline scenario values'),
+        p(
+          'Charts and table below show the values of baseline scenario.
+          The facet variables are Growing Stock (m_gs), Volume Harvested (vol_h),
+          and individual herd names.'
+        ),
+
+        div(
+          class = 'chart-container',
+          plotlyOutput(outputId = ns("baseline_scenario_charts"), height = "750px") %>%
+            withSpinner(color = '#ecf0f5', color.background = '#ffffff'),
+        ),
+
+        # div(
+        #   class = 'chart-container',
+          DT::dataTableOutput(ns('baseline_scneario_values'), width = '100%')
+        # )
       ),
-      column(
-        width = 6,
-        plotlyOutput(outputId = ns("radar"), height = "750px") %>%
-          withSpinner(color.background = '#ecf0f5', color = '#ffffff'),
-        mod_chart_heatmap_ui(ns("heatmap"), chart_height = "400px") %>%
-          withSpinner(color.background = '#ecf0f5', color = '#ffffff')
+
+      div(
+        class = 'col-lg-6 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12',
+        h4('Other scenarios compared to baseline'),
+        p(
+          'Charts below show how other selected scenarios compare
+          to the baseline scenario. Dimensions in those multi-dimensional plots are
+          individual scenarios, Growing Stock (m_gs), Volume Harvested (vol_h),
+          and individual herd names.'
+        ),
+
+        div(
+          class = 'chart-container',
+          plotlyOutput(outputId = ns("radar"), height = "750px") %>%
+            withSpinner(color = '#ecf0f5', color.background = '#ffffff'),
+        ),
+
+        div(
+          class = 'chart-container',
+          mod_chart_heatmap_ui(ns("heatmap"), chart_height = "400px") %>%
+            withSpinner(color = '#ecf0f5', color.background = '#ffffff')
+        )
       )
     )
   )
@@ -62,84 +130,92 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
 
     output$heading <- renderUI(
       tagList(
-        shiny::tags$h3(paste('Summary for', schema_label)),
-        shiny::tags$h4('TSA selected:'),
-        shiny::tags$ul(
-          list_to_li(schema_scenarios$tsa_selected())
-        )#,
-        # shiny::tags$h4('Scenarios:'),
-        # shiny::tags$ul(
-        #   list_to_li(schema_scenarios$scenario_names())
-        # )
+        fluidRow(
+          div(
+            class = 'col-lg-10 col-md-10 col-sm-12',
+            shiny::tags$h3(paste('Summary for', schema_label)),
+            shiny::tags$h4('Selected scenarios:'),
+            # shiny::tags$ul(
+            #   list_to_li(schema_scenarios$scenario_names())
+            # )
+            # DT::dataTableOutput(ns('scenarios'))
+            # Generate table rows
+            {
+              scenarios <- as.data.frame(schema_scenarios$scenarios())
+              scenarios <- scenarios%>%
+                dplyr::filter(scenario %in% schema_scenarios$scenario_names())
+
+              trows <- unlist(
+                lapply(1:nrow(scenarios), function(i) {
+                  paste0('
+                    <tr class="">
+                      <td>', scenarios[i, 1], '</td>
+                      <td>', round(scenarios[i, 3], 2), '</td>
+                      <td class="description">', scenarios[i, 2], '</td>
+                    </tr>'
+                  )
+                })
+              )
+
+              # Table header
+              scenarios_table <- paste0('
+                <table id="scenario-list" class="clus-explorer-table">
+                  <thead>
+                    <tr>
+                		  <th>Scenario</th>
+                		  <th>Rank</th>
+                		  <th>Description</th>
+                	  </tr>
+                  </thead>' ,
+                  paste(trows, collapse=" "), '
+                </table>'
+      	      )
+
+            	div(
+            	  id = "scenario-list-container",
+            		HTML(scenarios_table)
+            	)
+            }
+          )
+        )
       )
     )
 
     # .. radar list ----
     radarList <- reactive({
 
-      # req(input$baseline_scenario_apply)
+      input$baseline_scenario_apply
+
+      # browser()
+      req(schema_scenarios$apply_scenario())
       req(reportList()$indicators)
-      req(input$discount_rate)
+      req(isolate(input$discount_rate))
       req((baseline_values))
 
-#       if(FALSE){
-#
-#
-#       req(reportList()$harvest)
-#       req(reportList()$survival)
-#       req(schema_scenarios$scenario_names())
-#       # browser()
-#       DT.h <-
-#         reportList()$harvest[, sum(volume) / sum(target), by = c("scenario", "timeperiod")][V1 > 0.9, .N, by = c("scenario")][, N :=
-#                                                                                                                                 N / 100]
-#       setnames(DT.h, "N", "Timber")
-#       DT.s <-
-#         dcast(reportList()$survival[survival_rate > 0.75 &
-#                                       timeperiod > 0, .N / 100, by = c("scenario", "herd_bounds")], scenario ~
-#                 herd_bounds, value.var =  "V1")
-#       DT.all <- base::merge(DT.h, DT.s, by = "scenario")
-#       DT.g <-
-#         data.table(getTableQuery(
-#           paste0(
-#             "select foo1.scenario, gs_100/gs_0 as GrowingStock  from (
-# 	(select sum(m_gs) as gs_0, scenario from ",
-# 	schema_name,
-# 	".growingstock where timeperiod in (0)  and scenario IN ('",
-# 	paste(schema_scenarios$scenario_names(), sep =  "' '", collapse = "', '"),
-# 	"')
-# group by scenario, timeperiod) foo1
-# JOIN (select sum(m_gs) as gs_100, scenario from ",
-# schema_name,
-# ".growingstock where timeperiod in (100) and scenario IN ('",
-# paste(schema_scenarios$scenario_names(), sep =  "' '", collapse = "', '"),
-# "')
-# group by scenario, timeperiod) foo2
-# ON (foo1.scenario = foo2.scenario) )"
-#           )
-#         ))
-#       }
+      baseline_scenario <- isolate(input$baseline_scenario)
+      discount_rate <- isolate(input$discount_rate)
 
       # Copy the reactive object, otherwise the new object is the reference to
       # the reactive object
       dt.baseline <- data.table::copy(baseline_values())
       dt.indicators <- data.table::copy(
-        reportList()$indicators %>% dplyr::filter(!(`scenario` == input$baseline_scenario))
+        reportList()$indicators %>% dplyr::filter(!(`scenario` == baseline_scenario))
       )
       setnames(dt.baseline, "variable", "base_variable")
       dt.compare.indicators <- as.data.table(
         base::merge(
           dt.indicators,
           dt.baseline,
-          by.x =c("compartment", "timeperiod", "ind_name"),
-          by.y =c("compartment", "timeperiod", "ind_name")
+          by.x = c("compartment", "timeperiod", "ind_name"),
+          by.y = c("compartment", "timeperiod", "ind_name")
         )
       )
 
       out <- dt.compare.indicators[
         ,
         list(
-          scen = sum((variable) / (1 + as.numeric(input$discount_rate)) ** timeperiod),
-          base = sum((base_variable) / (1 + as.numeric(input$discount_rate)) ** timeperiod)
+          scen = sum((variable) / (1 + as.numeric(discount_rate)) ** timeperiod),
+          base = sum((base_variable) / (1 + as.numeric(discount_rate)) ** timeperiod)
         ),
         by = c("scenario.x", "ind_name")
       ][, ind := (scen - base) / base]
@@ -151,9 +227,9 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
         values_from = 'ind'
       )
     })
+
     rl <- radarList
     rl_long <- reactive({
-
       radarList() %>%
         tidyr::pivot_longer(
           cols = -1,
@@ -163,10 +239,34 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
     })
 
     baseline_values <- reactive({
+
+      input$baseline_scenario_apply
+
       # req(input$baseline_scenario_apply)
+      baseline_scenario <- isolate(input$baseline_scenario)
+
       req(reportList()$indicators)
-      reportList()$indicators %>% dplyr::filter(`scenario` == input$baseline_scenario)
+      # browser()
+      bv <- isolate(
+        reportList()$indicators %>%
+          dplyr::filter(`scenario` == baseline_scenario) %>%
+          arrange(compartment, ind_name, timeperiod)
+      )
+      bv
     })
+
+    output$baseline_scneario_values <- DT::renderDataTable(
+      {
+        req(baseline_values)
+        baseline_values()
+      },
+      escape = FALSE,
+      options = list(),
+      extensions = 'Buttons',
+      filter = 'none',              ## include column filters at the bottom
+      rownames = FALSE,
+      selection = 'none'
+    )
 
     radar_plot <- reactive({
       renderPlotly ({
@@ -222,17 +322,43 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
     rll <- rl_long()
     mod_chart_heatmap_server('heatmap', rl_long(), col_x = Herd, col_y = scenario.x, col_z = Ratio)
 
+    observe({
+      isolate(input$discount_rate)
+      output$baseline_scenario_charts <- renderPlotly ({
+        withProgress(message = 'Making Plots', value = 0.1, {
+          chart_line_faceted(
+            data = baseline_values(),
+            x_var = timeperiod,
+            y_var = variable,
+            color_var = scenario,
+            facet_chart = TRUE,
+            facet_vars = ind_name,
+            facet_scales = 'free_y',
+            facet_ncol = 2,
+            xlab = "Future year",
+            ylab = "Proportion Age 0 to 40 years",
+            is_plotly = TRUE
+          )
+        })
+      })
+    })
+
     # Return reactive values ----
     # to be used in other modules
-    return(
+    return({
+
+      input$baseline_scenario_apply
+
+      baseline_scenario <- isolate(input$baseline_scenario)
+      discount_rate <- isolate(input$discount_rate)
+
       list(
         radar_list = radarList,
         radar_list_long = rl_long,
         baseline_values = baseline_values,
-        baseline_scenario = input$baseline_scenario,
-        risk = input$discount_rate
+        baseline_scenario = baseline_scenario,
+        risk = discount_rate
       )
-    )
-
+    })
   })
 }

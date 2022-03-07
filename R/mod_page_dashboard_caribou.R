@@ -156,17 +156,19 @@ mod_page_dashboard_caribou_server <- function(id, reportList){
 
     output$abundancePlot <- renderPlotly ({
       withProgress(message = 'Making Plots', value = 0.1, {
-        chart_line_faceted(
-          data = reportList()$abundance,
-          x_var = timeperiod,
-          y_var = abundance_avg,
-          color_var = scenario,
-          facet_chart = TRUE,
-          facet_vars = subpop_name,
-          xlab = "Future year",
-          ylab = "Abundance",
-          is_plotly = TRUE
-        )
+        if (!is.null(reportList()$abundance)) {
+          chart_line_faceted(
+            data = reportList()$abundance,
+            x_var = timeperiod,
+            y_var = abundance_avg,
+            color_var = scenario,
+            facet_chart = TRUE,
+            facet_vars = subpop_name,
+            xlab = "Future year",
+            ylab = "Abundance",
+            is_plotly = TRUE
+          )
+        }
       })
     })
 

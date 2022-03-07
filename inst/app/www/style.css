@@ -43,6 +43,18 @@ a:hover, a:focus, a:active  {
   color: #38598A;
 }
 
+
+.content-wrapper {
+  background-color: #fff;
+}
+
+.chart-container {
+  border: 1px solid #c9c9c9;
+  border-radius: 4px;
+  box-shadow: 7px 7px 7px 0px rgba(170, 170, 170, 0.75);
+  margin-bottom: 50px;
+}
+
 /* Header ------------- */
 .skin-black .main-header {
   background-color: #036;
@@ -139,7 +151,7 @@ button.btn-clus {
 
 /* Scenarios table ------------- */
 table.clus-explorer-table {
-  margin-top: 25px;
+  margin: 25px 0;
   padding: 20px;
   width: 100%;
 }
@@ -160,6 +172,13 @@ table.clus-explorer-table td.checkbox-container {
 .tooltip .tooltiptext,
 .tooltip .tooltip-inner {
   background-color: #1A5A96;
+}
+
+/* Data tables ------------- */
+.dataTables_wrapper .dataTables_filter input {
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 5px;
 }
 
 /* Miscellaneous ------------- */

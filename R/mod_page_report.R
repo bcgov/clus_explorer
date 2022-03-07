@@ -10,45 +10,45 @@
 mod_page_report_ui <- function(id){
   ns <- NS(id)
   tagList(
-    # actionButton(inputId = ns("generate"), label = "Generate report")
     h2("Generate report"),
-    p(
-      "Press the button below to generate a PDF report for the selected area of interest and scenarios."
-    ),
-
-    shiny::tags$strong("Include sections"),
-    shiny::checkboxInput("report_summary", label = "Include summary"),
-    shiny::checkboxInput("report_details", label = "Include details"),
-    shiny::selectizeInput(
-      inputId = ns('details'),
-      label = 'Include details',
-      choices = c(
-        'Caribou' = 'caribou',
-        'Climate' = 'climate',
-        'Fire' = 'fire',
-        'Fisher' = 'fisher',
-        'Forestry' = 'forestry',
-        'Grizzly' = 'grizzly'
+    div(
+      id = "report-options",
+      p(
+        "Press the button below to generate a PDF report for the selected area of interest and scenarios."
       ),
-      selected = NULL,
-      multiple = TRUE,
-      width = '50%'
-    ),
 
-    shiny::radioButtons(
-      ns('format'),
-      label = "Select file format",
-      inline = FALSE,
-      choiceNames = list(
-        tagList(icon("file-pdf"), span(' PDF')),
-        tagList(icon("file-word"), span(' Word'))
+      shiny::selectizeInput(
+        inputId = ns('details'),
+        label = 'Include sections',
+        choices = c(
+          'Summary' = 'summary',
+          'Caribou' = 'caribou',
+          'Fire' = 'fire',
+          'Fisher' = 'fisher',
+          'Forestry' = 'forestry',
+          'Grizzly' = 'grizzly'
+        ),
+        selected = NULL,
+        multiple = TRUE,
+        width = '50%'
       ),
-      choiceValues = list(
-        "pdf", "word"
+
+      shiny::radioButtons(
+        ns('format'),
+        label = "Select file format",
+        inline = FALSE,
+        choiceNames = list(
+          tagList(icon("file-pdf"), span(' PDF')),
+          tagList(icon("file-word"), span(' Word')),
+          tagList(icon("file-powerpoint"), span(' PowerPoint'))
+        ),
+        choiceValues = list(
+          "pdf", "word", "powerpoint"
+        )
+      ),
+      shiny::downloadButton(
+        ns("generate_report"), "Download report", icon = shiny::icon("download"), class = "btn-clus"
       )
-    ),
-    shiny::downloadButton(
-      ns("generate_report"), "Download report", icon = shiny::icon("download"), class = "btn-clus"
     )
   )
 }
@@ -69,6 +69,14 @@ mod_page_report_server <- function(
     ns <- session$ns
 
     req(reportList)
+
+    # Disable Apply button if no scenarios are selected
+    observe({
+      shinyjs::toggleState(
+        "generate_report",
+        condition = (length(scenario_names()) >= 2)
+      )
+    })
 
     # Download handler - report ----
     render_report_async <- function(file, filepath, output_format, output_dir, params){
@@ -96,12 +104,7 @@ mod_page_report_server <- function(
       })
     }
 
-    # if (length(reportList()) == 0) {
-    #   shinyjs::alert('No scenarios have been selected.')
-    # } else {
-
     # Get rid of reactive values
-    # browser()
     schema = data.table::copy(schema())
     tsas = data.table::copy(tsas())
     scenario_names = data.table::copy(scenario_names())
@@ -113,7 +116,7 @@ mod_page_report_server <- function(
     reportList = data.table::copy(reportList())
     radar_list = data.table::copy(radar_list())
     radar_list_long = data.table::copy(radar_list_long())
-    baseline_values = data.table::copy(baseline_values)
+    baseline_values = data.table::copy(baseline_values())
     baseline_scenario = data.table::copy(baseline_scenario)
     risk = data.table::copy(risk)
 
@@ -121,7 +124,7 @@ mod_page_report_server <- function(
       filename = function() {
         paste(
           'CLUS report',
-          switch(input$format, pdf = 'pdf', word = 'docx'),
+          switch(input$format, pdf = 'pdf', word = 'docx', powerpoint = 'pptx'),
           sep = '.'
         )
       },
@@ -141,6 +144,7 @@ mod_page_report_server <- function(
           status_road = status_road,
           radar_list = radar_list,
           radar_list_long = radar_list_long,
+          baseline_values = baseline_values,
           baseline_scenario = baseline_scenario,
           risk = risk
         )
@@ -148,20 +152,20 @@ mod_page_report_server <- function(
         loc <- dirname(file)
         file_extension <- switch(
           input$format,
-          pdf = '.pdf', word = '.docx'
+          pdf = '.pdf', word = '.docx', powerpoint = '.pptx'
         )
         filepath <- paste0(as.character(as.numeric(Sys.time()) * 100000), file_extension)
 
         output_format <- switch(
           input$format,
           pdf = pdf_document(),
-          word = word_document()
+          word = word_document(),
+          powerpoint = powerpoint_presentation()
         )
 
         out <- render_report_async(file, filepath, output_format, loc, params)
       }
     )
-    # }
 
   })
 }
