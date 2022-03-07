@@ -12,7 +12,29 @@ Imports:
     attempt,
     DT,
     glue,
-    htmltools
+    htmltools,
+    DBI,
+    RPostgreSQL,
+    bsplus,
+    data.table,
+    dplyr,
+    future,
+    ggplot2,
+    igraph,
+    leaflet,
+    plotly,
+    promises,
+    purrr,
+    rintrojs,
+    rmarkdown,
+    rpostgis,
+    sf,
+    shinyBS,
+    shinycssloaders,
+    shinydashboard,
+    shinydashboardPlus,
+    shinyjs,
+    stats
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.2
