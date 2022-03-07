@@ -17,11 +17,13 @@ mod_page_dashboard_fire_ui <- function(id){
       ),
       tabPanel(
         "Fire history 1919 - 2018",
-        plotlyOutput(outputId = ns("fireByYearPlot"), height = "900px")
+        plotlyOutput(outputId = ns("fireByYearPlot"), height = "900px") %>%
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
       ),
       tabPanel(
         "40 year cummulative area burned",
-        plotlyOutput(outputId = ns("firecummulativePlot"), height = "900px")
+        plotlyOutput(outputId = ns("firecummulativePlot"), height = "900px") %>%
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
       )
     )
   )

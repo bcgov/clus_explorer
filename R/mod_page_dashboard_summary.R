@@ -71,7 +71,7 @@ mod_page_dashboard_summary_ui <- function(id){
         div(
           class = 'chart-container',
           plotlyOutput(outputId = ns("baseline_scenario_charts"), height = "750px") %>%
-            withSpinner(color = '#ecf0f5', color.background = '#ffffff'),
+            withSpinner(color = '#ecf0f5', color.background = '#ffffff')
         ),
 
         # div(

@@ -24,12 +24,14 @@ mod_page_dashboard_grizzly_ui <- function(id){
           value = c (0, 50),
           step = 5
         ),
-        plotlyOutput(outputId = ns("survival_grizzly_af_Plot"), height = "900px")
+        plotlyOutput(outputId = ns("survival_grizzly_af_Plot"), height = "900px") %>%
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
       ),
       tabPanel(
         "Grizzly Bear Population Unit Road Density",
         h4("Grizzly Bear Population Unit Road Density"),
-        plotlyOutput(outputId = ns("road_density_grizzly_Plot"), height = "900px")
+        plotlyOutput(outputId = ns("road_density_grizzly_Plot"), height = "900px") %>%
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
       )
     )
     # tags$div(

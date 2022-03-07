@@ -14,31 +14,31 @@ mod_page_dashboard_forestry_ui <- function(id){
       tabPanel(
         "Harvest Flow",
         plotlyOutput(outputId = ns("harvestAreaPlot"), height = "400px") %>%
-          withSpinner(color.background = '#ecf0f5', color = '#ffffff'),
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff'),
         plotlyOutput(outputId = ns("harvestVolumePlot"), height = "400px") %>%
-          withSpinner(color.background = '#ecf0f5', color = '#ffffff')
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
       ),
       tabPanel(
         "Transition Harvest",
         plotlyOutput(outputId = ns("managedAreaPlot"), height = "400px") %>%
-          withSpinner(color.background = '#ecf0f5', color = '#ffffff'),
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff'),
         plotlyOutput(outputId = ns("managedVolumePlot"), height = "400px") %>%
-          withSpinner(color.background = '#ecf0f5', color = '#ffffff')
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
       ),
       tabPanel(
         "Harvest Age",
         plotlyOutput(outputId = ns("harvestAgePlot"), height = "400px") %>%
-          withSpinner(color.background = '#ecf0f5', color = '#ffffff')
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
       ),
       tabPanel(
         "Available THLB",
         plotlyOutput(outputId = ns("availableTHLBPlot"), height = "400px") %>%
-          withSpinner(color.background = '#ecf0f5', color = '#ffffff')
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
       ),
       tabPanel(
         "Growingstock",
         plotlyOutput(outputId = ns("growingStockPlot"), height = "400px") %>%
-          withSpinner(color.background = '#ecf0f5', color = '#ffffff')
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
       )
     )
   )

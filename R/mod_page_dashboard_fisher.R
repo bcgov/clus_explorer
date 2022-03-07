@@ -18,7 +18,8 @@ mod_page_dashboard_fisher_ui <- function(id){
         solidHeader = TRUE,
         # background = "purple",
         width = 6,
-        plotlyOutput(outputId = ns("fisherOccupancyPlot"), height = "300px")
+        plotlyOutput(outputId = ns("fisherOccupancyPlot"), height = "300px") %>%
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
       ),
       box(
         title = "Territory",
@@ -39,11 +40,13 @@ mod_page_dashboard_fisher_ui <- function(id){
           step = 5,
           animate = TRUE
         ),
-        plotOutput(outputId = ns("fisherTerritoryPlot"), height = "200px")
+        plotOutput(outputId = ns("fisherTerritoryPlot"), height = "200px") %>%
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
       )
     ),
     fluidRow(
-      leafletOutput(ns("fishermapper"), height = 500, width = "100%"),
+      leafletOutput(ns("fishermapper"), height = 500, width = "100%") %>%
+        withSpinner(color = '#ecf0f5', color.background = '#ffffff'),
       absolutePanel(
         id = "fisher_map_control",
         class = "panel panel-default",

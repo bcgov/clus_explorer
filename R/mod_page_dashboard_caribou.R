@@ -17,11 +17,11 @@ mod_page_dashboard_caribou_ui <- function(id){
 
         h4("Proportion Disturbed"),
         plotlyOutput(outputId = ns("propDisturbPlot"), height = "600px") %>%
-          withSpinner(color.background = '#ecf0f5', color = '#ffffff'),
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff'),
 
         h4("Proportion Disturbed with 500m Buffer"),
         plotlyOutput(outputId = ns("propDisturbBuffPlot"), height = "600px") %>%
-          withSpinner(color.background = '#ecf0f5', color = '#ffffff')
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
       ),
 
       tabPanel(
@@ -29,15 +29,15 @@ mod_page_dashboard_caribou_ui <- function(id){
 
         h4("Early Forest"),
         plotlyOutput(outputId = ns("propEarlyPlot"), height = "600px") %>%
-          withSpinner(color.background = '#ecf0f5', color = '#ffffff'),
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff'),
 
         h4("Mature Forest"),
         plotlyOutput(outputId = ns("propMaturePlot"), height = "600px") %>%
-          withSpinner(color.background = '#ecf0f5', color = '#ffffff'),
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff'),
 
         h4("Old Forest"),
         plotlyOutput(outputId = ns("propOldPlot"), height = "600px") %>%
-          withSpinner(color.background = '#ecf0f5', color = '#ffffff')
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
       ),
 
       tabPanel(
@@ -45,14 +45,14 @@ mod_page_dashboard_caribou_ui <- function(id){
 
         h4("Abundance (Southern Group of Southern Mountain Caribou Only)"),
         plotlyOutput(outputId = ns("abundancePlot"), height = "600px") %>%
-          withSpinner(color.background = '#ecf0f5', color = '#ffffff'),
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff'),
         shiny::tags$small(
           '"Use abundance estimates with caution. The estimates assume the entire herd is in the area of interest, or forestry development is similar outside the area of interest."'
         ),
 
         h4("Survival (Southern Group of Southern Mountain Caribou Only)"),
         plotlyOutput(outputId = ns("survivalPlot"), height = "600px") %>%
-          withSpinner(color.background = '#ecf0f5', color = '#ffffff')
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
       ),
 
       tabPanel(
@@ -60,7 +60,7 @@ mod_page_dashboard_caribou_ui <- function(id){
 
         h4("Resource Selection"),
         plotlyOutput(outputId = ns("rsfPlot"), height = "600px") %>%
-          withSpinner(color.background = '#ecf0f5', color = '#ffffff')
+          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
       )
     )
   )
