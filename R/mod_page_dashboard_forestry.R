@@ -76,7 +76,7 @@ mod_page_dashboard_forestry_server <- function(id, reportList){
       withProgress(message = 'Making Plots', value = 0.1, {
         data <- reportList()$harvest
         data <-
-          data[, lapply(.SD, FUN = weighted.mean, x = age), by = c("timeperiod", "scenario"), .SDcols =
+          data[, lapply(.SD, FUN = weighted.mean, x = age), by = c("scenario", "timeperiod"), .SDcols =
                  'age']
         #data$scenario <- reorder(data$scenario, data$V1, function(x) -max(x) )
         data[, timeperiod := as.integer(timeperiod)]

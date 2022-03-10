@@ -89,47 +89,49 @@ chart_line_faceted(
 )
 ```
 
-### Other scenarios compared to baseline
+```{r echo=FALSE, warning=FALSE, fig.height=3.5, dpi=300}
 
-Table and charts below show how other selected scenarios compare to the baseline scenario. Dimensions in those multi-dimensional plots are individual scenarios, Growing Stock (m_gs), Volume Harvested (vol_h), and individual herd names.
+if (nrow(selected_scenarios) > 1) {
+  cat('\n\n')
+  cat('### Other scenarios compared to baseline')
+  cat('\n\n')
 
-```{r echo=FALSE, warning=FALSE}
-# knitr::kable(params$radar_list)
-kableExtra::kbl(
+  cat('Table and charts below show how other selected scenarios compare to the baseline scenario. Dimensions in those multi-dimensional plots are individual scenarios, Growing Stock (m_gs), Volume Harvested (vol_h), and individual herd names.')
+  cat('\n\n')
+
+  # knitr::kable(params$radar_list)
+  kableExtra::kbl(
+      params$radar_list, 
+      # align = 'lrlcc', 
+      booktabs = TRUE, 
+      longtable = FALSE, 
+      # format = 'latex'
+    ) %>% 
+    # column_spec(1, width = "1.5in") %>%
+    # column_spec(3, width = "1.5in") %>%
+    # column_spec(4, width = "1in") %>%
+    kableExtra::kable_styling(latex_options = c('hold_position', 'scale_down', 'striped'), font_size = 7)
+  
+  ggradar::ggradar(
     params$radar_list, 
-    # align = 'lrlcc', 
-    booktabs = TRUE, 
-    longtable = FALSE, 
-    # format = 'latex'
-  ) %>% 
-  # column_spec(1, width = "1.5in") %>%
-  # column_spec(3, width = "1.5in") %>%
-  # column_spec(4, width = "1in") %>%
-  kableExtra::kable_styling(latex_options = c('hold_position', 'scale_down', 'striped'), font_size = 7)
+    base.size = 5,
+    grid.min = min(params$radar_list_long$Ratio) * 1.1, 
+    grid.max = max(params$radar_list_long$Ratio) * 1.1,
+    grid.label.size = 3,
+    gridline.min.colour = "#CBD2D9",
+    gridline.mid.colour = "#CBD2D9",
+    gridline.max.colour = "#CBD2D9",
+    group.point.size = 1.5,
+    group.line.width = 0.5,
+    background.circle.colour = "#F5F7FA",
+    axis.line.colour = "#CBD2D9",
+    axis.label.size = 3,
+    legend.title = "",
+    legend.position = "right", 
+    legend.text.size = 6,
+  )
+  
+  chart_heatmap(data = params$radar_list_long, x = Herd, y = scenario.x, z = Ratio)
+}
 
-```
-
-```{r summary_charts, fig.height=3.5, dpi=300}
-ggradar::ggradar(
-  params$radar_list, 
-  base.size = 5,
-  grid.min = min(params$radar_list_long$Ratio) * 1.1, 
-  grid.max = max(params$radar_list_long$Ratio) * 1.1,
-  grid.label.size = 3,
-  gridline.min.colour = "#CBD2D9",
-  gridline.mid.colour = "#CBD2D9",
-  gridline.max.colour = "#CBD2D9",
-  group.point.size = 1.5,
-  group.line.width = 0.5,
-  background.circle.colour = "#F5F7FA",
-  axis.line.colour = "#CBD2D9",
-  axis.label.size = 3,
-  legend.title = "",
-  legend.position = "right", 
-  legend.text.size = 6,
-)
-# knitr::kable(params$radar_list)
-# knitr::kable(params$radar_list_long$Ratio)
-
-chart_heatmap(data = params$radar_list_long, x = Herd, y = scenario.x, z = Ratio)
 ```
