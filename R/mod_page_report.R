@@ -70,6 +70,14 @@ mod_page_report_server <- function(
 
     req(reportList)
 
+    # Disable Apply button if no scenarios are selected
+    observe({
+      shinyjs::toggleState(
+        "generate_report",
+        condition = (length(scenario_names()) > 0)
+      )
+    })
+
     # Download handler - report ----
     render_report_async <- function(file, filepath, output_format, output_dir, params){
 

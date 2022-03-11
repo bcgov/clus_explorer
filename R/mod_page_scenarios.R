@@ -226,6 +226,14 @@ mod_page_scenarios_server <- function(id){
     #   )
     # )
 
+    # Disable Apply button if no scenarios are selected
+    observe({
+      shinyjs::toggleState(
+        "apply_scenario",
+        condition = (length(input$scenario) > 0)
+      )
+    })
+
     # Reactive values ----
 
     # .. available scenarios ----
