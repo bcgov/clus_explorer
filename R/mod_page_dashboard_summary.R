@@ -128,7 +128,8 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
     updateSelectizeInput(
       session = getDefaultReactiveDomain(),
       inputId = "baseline_scenario",
-      choices = c(NULL, schema_scenarios$scenario_names())
+      choices = schema_scenarios$scenario_names()#,
+      # selected = ''
     )
 
     observeEvent(
@@ -187,156 +188,157 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
           )
         )
 
-        print(schema_scenarios$scenario_names())
-        print(length(schema_scenarios$scenario_names()))
-      if (length(schema_scenarios$scenario_names()) > 1) {
-        output$baseline_comparison <- renderUI({
-          tagList(
-            fluidRow(
+        if (length(schema_scenarios$scenario_names()) > 1) {
+          output$baseline_comparison <- renderUI({
+            tagList(
+              fluidRow(
 
-              div(
-                class = 'col-lg-6 col-md-12 col-sm-12 col-xs-12',
-                h4('Other scenarios compared to baseline'),
-                p(
-                  'Charts below show how other selected scenarios compare
-            to the baseline scenario. Dimensions in those multi-dimensional plots are
-            individual scenarios, Growing Stock (m_gs), Volume Harvested (vol_h),
-            and individual herd names.'
-                )
-              )
-            ),
-            fluidRow(
-              div(
-                class = 'col-lg-6 col-md-12 col-sm-12 col-xs-12',
                 div(
-                  class = 'chart-container',
-                  plotlyOutput(outputId = ns("radar"), height = "750px") %>%
-                    withSpinner(color = '#ecf0f5', color.background = '#ffffff'),
+                  class = 'col-lg-6 col-md-12 col-sm-12 col-xs-12',
+                  h4('Other scenarios compared to baseline'),
+                  p(
+                    'Charts below show how other selected scenarios compare
+              to the baseline scenario. Dimensions in those multi-dimensional plots are
+              individual scenarios, Growing Stock (m_gs), Volume Harvested (vol_h),
+              and individual herd names.'
+                  )
                 )
               ),
-              div(
-                class = 'col-lg-6 col-md-12 col-sm-12 col-xs-12',
+              fluidRow(
                 div(
-                  class = 'chart-container',
-                  mod_chart_heatmap_ui(ns("heatmap"), chart_height = "400px") %>%
-                    withSpinner(color = '#ecf0f5', color.background = '#ffffff')
+                  class = 'col-lg-6 col-md-12 col-sm-12 col-xs-12',
+                  div(
+                    class = 'chart-container',
+                    plotlyOutput(outputId = ns("radar"), height = "750px") %>%
+                      withSpinner(color = '#ecf0f5', color.background = '#ffffff'),
+                  )
+                ),
+                div(
+                  class = 'col-lg-6 col-md-12 col-sm-12 col-xs-12',
+                  div(
+                    class = 'chart-container',
+                    mod_chart_heatmap_ui(ns("heatmap"), chart_height = "400px") %>%
+                      withSpinner(color = '#ecf0f5', color.background = '#ffffff')
+                  )
                 )
               )
             )
-          )
-        })
-        # .. radar list ----
-        radarList <- reactive({
-
-          input$baseline_scenario_apply
-
-          # browser()
-          # req(schema_scenarios$apply_scenario())
-          # req(reportList()$indicators)
-          # req(isolate(input$discount_rate))
-          # req((baseline_values))
-
-          baseline_scenario <- isolate(input$baseline_scenario)
-          discount_rate <- isolate(input$discount_rate)
-
-          # Copy the reactive object, otherwise the new object is the reference to
-          # the reactive object
-          dt.baseline <- data.table::copy(baseline_values())
-          dt.indicators <- data.table::copy(
-            reportList()$indicators %>% dplyr::filter(!(`scenario` == baseline_scenario))
-          )
-          setnames(dt.baseline, "variable", "base_variable")
-          dt.compare.indicators <- as.data.table(
-            base::merge(
-              dt.indicators,
-              dt.baseline,
-              by.x = c("compartment", "timeperiod", "ind_name"),
-              by.y = c("compartment", "timeperiod", "ind_name")
-            )
-          )
-
-          out <- dt.compare.indicators[
-            ,
-            list(
-              scen = sum((variable) / (1 + as.numeric(discount_rate)) ** timeperiod),
-              base = sum((base_variable) / (1 + as.numeric(discount_rate)) ** timeperiod)
-            ),
-            by = c("scenario.x", "ind_name")
-          ][, ind := (scen - base) / base]
-          #base::merge(DT.all, DT.g, by = "scenario")
-
-          out %>% tidyr::pivot_wider(
-            id_cols = 1,
-            names_from = 'ind_name',
-            values_from = 'ind'
-          )
-        })
-
-        rl <- radarList
-        rl_long <- reactive({
-          radarList() %>%
-            tidyr::pivot_longer(
-              cols = -1,
-              names_to = 'Herd',
-              values_to = 'Ratio'
-            )
-        })
-
-        radar_plot <- reactive({
-          renderPlotly ({
-
-            rl <- as.data.table(radarList())
-            radarLength <<- 1:nrow(rl)
-            radarNames <-
-              paste(c(names(rl)[2:length(rl)], names(rl)[2]), collapse = "', '")
-            radarData <-
-              rl[, data := paste(.SD, collapse = ',')  , .SDcols = c(names(rl)[2:length(rl)], names(rl)[2]), by = scenario.x]
-
-            eval(parse(
-              text = paste0(
-                "plot_ly(
-    type = 'scatterpolar',
-    mode = 'lines+markers',
-    fill = 'toself'
-    ) %>%",
-    paste(sapply(radarLength, function(x) {
-      paste0(
-        "add_trace(
-        r = c(",
-        radarData$data[x[]],
-        "),
-        theta = c('",
-        radarNames,
-        "'),
-        name = '",
-        rl$scenario.x[x[]],
-        "'
-      ) %>%"
-      )
-    }), collapse = ''),
-    "
-    layout(
-      polar = list(
-        radialaxis = list(
-          visible = T,
-          range = c(-1, 1)
-        )
-      ),
-      legend = list (orientation = 'h'),
-      margin = list(t = 75, r = 75, b = 75, l = 75)
-    ) "
-              )
-            ))
           })
-        })
 
-        output$radar <- radar_plot()
-        # output$baseline_values <- baseline_values()
+          # .. radar list ----
+          radarList <- reactive({
 
-        rll <- rl_long()
-        mod_chart_heatmap_server('heatmap', rl_long(), col_x = Herd, col_y = scenario.x, col_z = Ratio)
+            input$baseline_scenario_apply
 
+            # browser()
+            # req(schema_scenarios$apply_scenario())
+            # req(reportList()$indicators)
+            # req(isolate(input$discount_rate))
+            # req((baseline_values))
 
+            baseline_scenario <- isolate(input$baseline_scenario)
+            discount_rate <- isolate(input$discount_rate)
+
+            # Copy the reactive object, otherwise the new object is the reference to
+            # the reactive object
+            dt.baseline <- data.table::copy(baseline_values())
+            dt.indicators <- data.table::copy(
+              reportList()$indicators %>% dplyr::filter(!(`scenario` == baseline_scenario))
+            )
+            setnames(dt.baseline, "variable", "base_variable")
+            dt.compare.indicators <- as.data.table(
+              base::merge(
+                dt.indicators,
+                dt.baseline,
+                by.x = c("compartment", "timeperiod", "ind_name"),
+                by.y = c("compartment", "timeperiod", "ind_name")
+              )
+            )
+
+            out <- dt.compare.indicators[
+              ,
+              list(
+                scen = sum((variable) / (1 + as.numeric(discount_rate)) ** timeperiod),
+                base = sum((base_variable) / (1 + as.numeric(discount_rate)) ** timeperiod)
+              ),
+              by = c("scenario.x", "ind_name")
+            ][, ind := (scen - base) / base]
+            #base::merge(DT.all, DT.g, by = "scenario")
+
+            out %>% tidyr::pivot_wider(
+              id_cols = 1,
+              names_from = 'ind_name',
+              values_from = 'ind'
+            )
+          })
+
+          rl <- radarList
+          if (nrow(radarList()) > 0) {
+            rl_long <- reactive({
+              radarList() %>%
+                tidyr::pivot_longer(
+                  cols = -1,
+                  names_to = 'Herd',
+                  values_to = 'Ratio'
+                )
+            })
+          }
+
+          radar_plot <- reactive({
+            renderPlotly ({
+
+              rl <- as.data.table(radarList())
+              radarLength <<- 1:nrow(rl)
+              radarNames <-
+                paste(c(names(rl)[2:length(rl)], names(rl)[2]), collapse = "', '")
+              radarData <-
+                rl[, data := paste(.SD, collapse = ',')  , .SDcols = c(names(rl)[2:length(rl)], names(rl)[2]), by = scenario.x]
+
+              eval(parse(
+                text = paste0(
+                  "plot_ly(
+      type = 'scatterpolar',
+      mode = 'lines+markers',
+      fill = 'toself'
+      ) %>%",
+      paste(sapply(radarLength, function(x) {
+        paste0(
+          "add_trace(
+          r = c(",
+          radarData$data[x[]],
+          "),
+          theta = c('",
+          radarNames,
+          "'),
+          name = '",
+          rl$scenario.x[x[]],
+          "'
+        ) %>%"
+        )
+      }), collapse = ''),
+      "
+      layout(
+        polar = list(
+          radialaxis = list(
+            visible = T,
+            range = c(-1, 1)
+          )
+        ),
+        legend = list (orientation = 'h'),
+        margin = list(t = 75, r = 75, b = 75, l = 75)
+      ) "
+                )
+              ))
+            })
+          })
+
+          output$radar <- radar_plot()
+
+          if(!is.null(rl_long())) {
+            if(nrow(rl_long()) > 0) {
+              mod_chart_heatmap_server('heatmap', rl_long(), col_x = Herd, col_y = scenario.x, col_z = Ratio)
+            }
+          }
         }
       }
     )

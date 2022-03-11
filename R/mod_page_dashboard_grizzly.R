@@ -80,67 +80,71 @@ mod_page_dashboard_grizzly_server <- function(id, reportList){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    output$road_density_grizzly_Plot <- renderPlotly ({
-      withProgress(message = 'Making Plots', value = 0.1, {
-        data <- reportList()$grizzly_survival
+    if (!is.null(reportList()$grizzly_survival)) {
+      if (nrow(reportList()$grizzly_survival) > 0) {
+        output$road_density_grizzly_Plot <- renderPlotly ({
+          withProgress(message = 'Making Plots', value = 0.1, {
+            data <- reportList()$grizzly_survival
 
-        # if want to look at difference:
-        # grizzly_data[, survival_rate_change := survival_rate - first(survival_rate), by = .(scenario, gbpu_name)]  # replace first() with shift() to get difference with previous year value instead of first year value
+            # if want to look at difference:
+            # grizzly_data[, survival_rate_change := survival_rate - first(survival_rate), by = .(scenario, gbpu_name)]  # replace first() with shift() to get difference with previous year value instead of first year value
 
-        p <- ggplot(data, aes (x = timeperiod, y = road_density, color = scenario)) +
-          facet_grid (rows = vars(gbpu_name)) +
-          geom_line() +
-          xlab ("Future year") +
-          ylab ("Grizzly Bear Population Unit Road Density (km/km2)") +
-          theme_bw() +
-          theme (legend.title = element_blank()) +
-          scale_x_continuous(limits = c (input$grizzlyYear[1], input$grizzlyYear[2]))
+            p <- ggplot(data, aes (x = timeperiod, y = road_density, color = scenario)) +
+              facet_grid (rows = vars(gbpu_name)) +
+              geom_line() +
+              xlab ("Future year") +
+              ylab ("Grizzly Bear Population Unit Road Density (km/km2)") +
+              theme_bw() +
+              theme (legend.title = element_blank()) +
+              scale_x_continuous(limits = c (input$grizzlyYear[1], input$grizzlyYear[2]))
 
-        ggplotly(p, height = 900) %>%
-          plotly::layout (
-            legend = list (orientation = "h", y = -0.1),
-            margin = list (
-              l = 50,
-              r = 40,
-              b = 50,
-              t = 40,
-              pad = 0
-            )
-          )
-      })
-    })
+            ggplotly(p, height = 900) %>%
+              plotly::layout (
+                legend = list (orientation = "h", y = -0.1),
+                margin = list (
+                  l = 50,
+                  r = 40,
+                  b = 50,
+                  t = 40,
+                  pad = 0
+                )
+              )
+          })
+        })
 
-    output$survival_grizzly_af_Plot <- renderPlotly ({
-      withProgress(message = 'Making Plots', value = 0.1, {
-        data <- reportList()$grizzly_survival
+        output$survival_grizzly_af_Plot <- renderPlotly ({
+          withProgress(message = 'Making Plots', value = 0.1, {
+            data <- reportList()$grizzly_survival
 
-        # if want to look at difference:
-        # grizzly_data[, survival_rate_change := survival_rate - first(survival_rate), by = .(scenario, gbpu_name)]  # replace first() with shift() to get difference with previous year value instead of first year value
+            # if want to look at difference:
+            # grizzly_data[, survival_rate_change := survival_rate - first(survival_rate), by = .(scenario, gbpu_name)]  # replace first() with shift() to get difference with previous year value instead of first year value
 
-        p <-
-          ggplot(data,
-                 aes (x = timeperiod, y = survival_rate, color = scenario)) +
-          facet_grid (rows = vars(gbpu_name)) +
-          geom_line() +
-          xlab ("Future year") +
-          ylab ("Adult Female Survival Rate") +
-          theme_bw() +
-          theme (legend.title = element_blank()) +
-          scale_x_continuous(limits = c (input$grizzlyYear[1], input$grizzlyYear[2]))
+            p <-
+              ggplot(data,
+                     aes (x = timeperiod, y = survival_rate, color = scenario)) +
+              facet_grid (rows = vars(gbpu_name)) +
+              geom_line() +
+              xlab ("Future year") +
+              ylab ("Adult Female Survival Rate") +
+              theme_bw() +
+              theme (legend.title = element_blank()) +
+              scale_x_continuous(limits = c (input$grizzlyYear[1], input$grizzlyYear[2]))
 
-        ggplotly(p, height = 900) %>%
-          layout (
-            legend = list (orientation = "h", y = -0.1),
-            margin = list (
-              l = 50,
-              r = 40,
-              b = 50,
-              t = 40,
-              pad = 0
-            )
-          )
-      })
-    })
+            ggplotly(p, height = 900) %>%
+               plotly::layout (
+                legend = list (orientation = "h", y = -0.1),
+                margin = list (
+                  l = 50,
+                  r = 40,
+                  b = 50,
+                  t = 40,
+                  pad = 0
+                )
+              )
+          })
+        })
+      }
+    }
 
   })
 }

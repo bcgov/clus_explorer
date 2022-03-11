@@ -52,7 +52,7 @@ app_server <- function(input, output, session) {
 
       # req(schema_scenarios$apply_scenario())
       # .. report list ----
-      req(schema_scenarios$apply_scenario())
+      # req(schema_scenarios$apply_scenario())
       # req(schema_scenarios$schema())
       # req(schema_scenarios$scenario_names())
     # isolate({
@@ -414,8 +414,8 @@ app_server <- function(input, output, session) {
       summary_data <- mod_page_dashboard_summary_server("page_dashboard_summary", schema_scenarios, reportList)
       mod_page_dashboard_caribou_server("page_dashboard_caribou", reportList)
       mod_page_dashboard_grizzly_server("page_dashboard_grizzly", reportList)
-      mod_page_dashboard_climate_server("page_dashboard_climate", reportList)
       mod_page_dashboard_forestry_server("page_dashboard_forestry", reportList)
+      # mod_page_dashboard_fisher_server("page_dashboard_fisher", reportList)
       mod_page_dashboard_fire_server("page_dashboard_fire", reportList)
       mod_page_report_server(
         "page_report",
