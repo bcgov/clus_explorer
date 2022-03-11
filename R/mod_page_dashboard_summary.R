@@ -360,31 +360,23 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
       bv
     })
 
-    observeEvent(
-      input$baseline_scenario_apply,
-      # ignoreInit = TRUE,
-      {
-        isolate(input$baseline_scenario)
-        isolate(input$discount_rate)
-        output$baseline_scenario_charts <- renderPlotly ({
-          withProgress(message = 'Making Plots', value = 0.1, {
-            chart_line_faceted(
-              data = baseline_values(),
-              x_var = timeperiod,
-              y_var = variable,
-              color_var = scenario,
-              facet_chart = TRUE,
-              facet_vars = ind_name,
-              facet_scales = 'free_y',
-              facet_ncol = 2,
-              xlab = "Future year",
-              ylab = "Proportion Age 0 to 40 years",
-              is_plotly = TRUE
-            )
-          })
-        })
-      }
-    )
+    output$baseline_scenario_charts <- renderPlotly ({
+      withProgress(message = 'Making Plots', value = 0.1, {
+        chart_line_faceted(
+          data = baseline_values(),
+          x_var = timeperiod,
+          y_var = variable,
+          color_var = scenario,
+          facet_chart = TRUE,
+          facet_vars = ind_name,
+          facet_scales = 'free_y',
+          facet_ncol = 2,
+          xlab = "Future year",
+          ylab = "Proportion Age 0 to 40 years",
+          is_plotly = TRUE
+        )
+      })
+    })
 
     # Return reactive values ----
     # to be used in other modules
