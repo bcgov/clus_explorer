@@ -17,7 +17,8 @@ chart_bar_faceted(
   is_plotly = FALSE,
   scale_x_continuous_limits = c(),
   scale_x_continuous_breaks = c(),
-  legend_position = "bottom"
+  legend_position = "bottom",
+  height = 600
 )
 }
 \arguments{
@@ -46,6 +47,8 @@ chart_bar_faceted(
 \item{scale_x_continuous_breaks}{Character vector of scale X breaks}
 
 \item{legend_position}{Legend position}
+
+\item{height}{Chart height}
 }
 \value{
 

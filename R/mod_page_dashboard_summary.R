@@ -20,7 +20,7 @@ mod_page_dashboard_summary_ui <- function(id){
     ),
     fluidRow(
       div(
-        class = 'col-lg-5 col-md-5 col-sm-12 col-xs-12',
+        class = 'col-lg-3 col-md-3 col-sm-12 col-xs-12',
         p(
           'Select baseline scenario and compare other selected scenarios to the baseline values.
           Use the controls below to change baseline scenario and the importance of caribou and land use in future years.'
@@ -54,7 +54,7 @@ mod_page_dashboard_summary_ui <- function(id){
         )
       ),
       div(
-        class = 'col-lg-6 col-lg-offset-1 col-md-6 col-md-offset-1 col-sm-12 col-xs-12',
+        class = 'col-lg-8 col-lg-offset-1 col-md-8 col-md-offset-1 col-sm-12 col-xs-12',
         h4('Baseline scenario values'),
         p(
           'Charts and table below show the values of baseline scenario.
@@ -63,7 +63,7 @@ mod_page_dashboard_summary_ui <- function(id){
         ),
         div(
           class = 'chart-container',
-          plotlyOutput(outputId = ns("baseline_scenario_charts"), height = "600px") %>%
+          plotlyOutput(outputId = ns("baseline_scenario_charts"), height = "450px") %>%
             withSpinner(color = '#ecf0f5', color.background = '#ffffff')
         )
       )
@@ -362,6 +362,23 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
 
     output$baseline_scenario_charts <- renderPlotly ({
       withProgress(message = 'Making Plots', value = 0.1, {
+
+        isolate(baseline_values())
+        # labeller_data <- c()
+        labeller_data <- baseline_values() %>%
+          distinct(ind_name) %>%
+          mutate(
+            ind_name = ifelse(
+              ind_name == 'm_gs',
+              'Growing Stock (m3)',
+              ifelse(
+                ind_name == 'vol_h',
+                "Harvested volume (m3)",
+                paste(ind_name, ("ha disturbed"))
+              )
+            )
+          )
+
         chart_line_faceted(
           data = baseline_values(),
           x_var = timeperiod,
@@ -373,7 +390,10 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
           facet_ncol = 2,
           xlab = "Future year",
           ylab = "Proportion Age 0 to 40 years",
-          is_plotly = TRUE
+          is_plotly = TRUE,
+          strip.position = "left",
+          labeller_data = labeller_data,
+          height = 450
         )
       })
     })

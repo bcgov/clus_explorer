@@ -21,7 +21,10 @@ chart_line_faceted(
   x_intercept = 0,
   add_y_intercept = FALSE,
   y_intercept = 0,
-  legend_position = "bottom"
+  legend_position = "bottom",
+  strip.position = "top",
+  labeller_data = c(),
+  height = 600
 )
 }
 \arguments{
@@ -58,6 +61,12 @@ chart_line_faceted(
 \item{y_intercept}{Position of vertical horizontal line}
 
 \item{legend_position}{Legend position}
+
+\item{labeller_data}{Facet labeller data}
+
+\item{height}{Chart height}
+
+\item{strip_position}{Facet strip position}
 }
 \value{
 

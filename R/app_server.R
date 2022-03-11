@@ -388,6 +388,11 @@ app_server <- function(input, output, session) {
           conn = conn
         )
 
+          shiny::showNotification(
+            "Data has been prepared, please go to pages under Dashboard tab for further analysis.",
+            duration = 5, closeButton = TRUE, type = "message"
+          )
+
           list(
             harvest = data.harvest,
             growingstock = data.growingstock,
@@ -403,9 +408,6 @@ app_server <- function(input, output, session) {
             indicators = data.indicators
           )
 
-          # shinyjs::alert("Data has been prepared, please go to Dashboard or Generate Report tabs for further analysis.")
-          # })
-
         })
     })
     })
@@ -415,7 +417,7 @@ app_server <- function(input, output, session) {
       mod_page_dashboard_caribou_server("page_dashboard_caribou", reportList)
       mod_page_dashboard_grizzly_server("page_dashboard_grizzly", reportList)
       mod_page_dashboard_forestry_server("page_dashboard_forestry", reportList)
-      # mod_page_dashboard_fisher_server("page_dashboard_fisher", reportList)
+      mod_page_dashboard_fisher_server("page_dashboard_fisher", reportList)
       mod_page_dashboard_fire_server("page_dashboard_fire", reportList)
       mod_page_report_server(
         "page_report",

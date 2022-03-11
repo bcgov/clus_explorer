@@ -71,11 +71,14 @@ chart_heatmap <- function(
 #' @param xlab X-axis label
 #' @param ylab Y-axis label
 #' @param is_plotly Should the chart object be converted to plotly object
-#' @param legend_position Legend position
 #' @param add_x_intercept Whether to add vertical intercept line
 #' @param x_intercept Position of vertical intercept line
 #' @param add_y_intercept Whether to add horizontal intercept line
 #' @param y_intercept Position of vertical horizontal line
+#' @param legend_position Legend position
+#' @param strip_position Facet strip position
+#' @param labeller_data Facet labeller data
+#' @param height Chart height
 #'
 #' @return
 #'
@@ -87,7 +90,7 @@ chart_line_faceted <- function(
   facet_nrow = 3, facet_ncol = 3, xlab = "", ylab = "", is_plotly = FALSE,
   add_x_intercept = FALSE, x_intercept = 0,
   add_y_intercept = FALSE, y_intercept = 0,
-  legend_position = "bottom"
+  legend_position = "bottom", strip.position = "top", labeller_data = c(), height = 600
 ) {
 
   p <-
@@ -112,12 +115,20 @@ chart_line_faceted <- function(
     )
 
   if (facet_chart) {
+    # browser()
+    if (length(labeller_data) == 0) {
+      labeller_data <- data %>%
+        distinct({{ facet_vars }})
+    }
+
     p <- p +
       facet_wrap(
         facets = vars({{ facet_vars }}),
         ncol = facet_ncol,
         nrow = facet_nrow,
-        scales = facet_scales
+        scales = facet_scales,
+        strip.position = strip.position,
+        labeller = as_labeller(labeller_data)
       )
   }
 
@@ -132,7 +143,7 @@ chart_line_faceted <- function(
   }
 
   if (is_plotly) {
-    p <- plotly::ggplotly(p, height = 600) %>%
+    p <- plotly::ggplotly(p, height = height) %>%
       plotly::layout (
         legend = list (orientation = "h", y = -0.1),
         margin = list (
@@ -163,6 +174,7 @@ chart_line_faceted <- function(
 #' @param legend_position Legend position
 #' @param scale_x_continuous_limits Character vector of scale X limits
 #' @param scale_x_continuous_breaks Character vector of scale X breaks
+#' @param height Chart height
 #'
 #' @return
 #' @export
@@ -171,7 +183,7 @@ chart_line_faceted <- function(
 chart_bar_faceted <- function(
   data, x_var, y_var, facet_chart = FALSE, facet_vars = NULL, facet_nrow = 3,
   facet_ncol = 3, xlab = "", ylab = "", is_plotly = FALSE, scale_x_continuous_limits = c(),
-  scale_x_continuous_breaks = c(), legend_position = "bottom"
+  scale_x_continuous_breaks = c(), legend_position = "bottom", height = 600
 ){
   p <-
     ggplot(
@@ -208,7 +220,7 @@ chart_bar_faceted <- function(
   }
 
   if (is_plotly) {
-    p <- plotly::ggplotly(p, height = 600) %>%
+    p <- plotly::ggplotly(p, height = height) %>%
       plotly::layout (
         legend = list (orientation = "h", y = -0.1),
         margin = list (
