@@ -365,22 +365,21 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
 
         isolate(baseline_values())
         # labeller_data <- c()
-        labeller_data <- baseline_values() %>%
-          distinct(ind_name) %>%
+        baseline_values_annotated <- baseline_values() %>%
           mutate(
             ind_name = ifelse(
               ind_name == 'm_gs',
               'Growing Stock (m3)',
               ifelse(
                 ind_name == 'vol_h',
-                "Harvested volume (m3)",
-                paste(ind_name, ("ha disturbed"))
+                'Harvested volume (m3)',
+                paste(ind_name, '(ha disturbed)')
               )
             )
           )
 
         chart_line_faceted(
-          data = baseline_values(),
+          data = baseline_values_annotated,
           x_var = timeperiod,
           y_var = variable,
           color_var = scenario,
@@ -391,8 +390,8 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
           xlab = "Future year",
           ylab = "Proportion Age 0 to 40 years",
           is_plotly = TRUE,
-          strip.position = "left",
-          labeller_data = labeller_data,
+          # strip.position = "left",
+          # labeller_data = labeller_data,
           height = 450
         )
       })
