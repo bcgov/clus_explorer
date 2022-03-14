@@ -339,6 +339,10 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
               mod_chart_heatmap_server('heatmap', rl_long(), col_x = Herd, col_y = scenario.x, col_z = Ratio)
             }
           }
+        } else {
+          output$baseline_comparison <- renderUI({
+            tagList()
+          })
         }
       }
     )
