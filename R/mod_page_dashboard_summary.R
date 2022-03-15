@@ -28,12 +28,13 @@ mod_page_dashboard_summary_ui <- function(id){
         wellPanel(
           selectizeInput(ns("baseline_scenario"), label = "Baseline scenario", choices = NULL),
           p(
-            strong("Future importance"),
-            icon('info-circle') %>%
-              bsplus::bs_embed_tooltip(
-                "Select how important future years are for your analysis",
-                "right"
-              )
+            strong("Future Importance Adjustment"),
+            actionLink(ns('discount_rate_help'), label = '', icon = icon('info-circle'))
+            # icon('info-circle') %>%
+            #   bsplus::bs_embed_tooltip(
+            #     "Select how important future years are for your analysis",
+            #     "right"
+            #   )
           ),
           selectizeInput(
             ns("discount_rate"),
@@ -70,39 +71,107 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    # # .. introjs steps ----
-    # steps <- reactive(
-    #   data.frame(
-    #     element = c(
-    #       ".sidebar-menu",
-    #       ".settings",
-    #       ".treeview",
-    #       ".report"
-    #     ),
-    #     intro = c(
-    #       "This is the navigation sidebar where you can select various features in the app.",
-    #       "Step 1: This is where you select your area of interest and the various scenarios you wish to compare.",
-    #       "Step 2: This is where you can view outputs of various indicators by scenario.
-    #
-    #       You must have selected an area of interest and at least two scnearios in Step 1.",
-    #       "Step 3: Use this tab to generate and download summary or detailed report in PDF/Word/PowerPoint format.<br>You must have selected an area of interest and at least two scnearios in Step 1."
-    #     ),
-    #     position = c("right", "right", "right", "right")
-    #   )
-    # )
-    #
-    # observeEvent(
-    #   input$help,
-    #   introjs(
-    #     session,
-    #     options = list(
-    #       steps = steps(),
-    #       "nextLabel" = "Next",
-    #       "prevLabel" = "Previous",
-    #       "skipLabel" = "Skip"
-    #     )
-    #   )
-    # )
+    # Description of Future Importance Adjustment modal ----
+    observeEvent(
+      input$discount_rate_help,
+      ignoreInit = TRUE,
+      {
+        showModal(
+          modalDialog(
+            title = "Future Importance Adjustment Description",
+            tagList(
+              p(
+                "The radar plot and heat maps are based on the total indicator value
+                across the planning horizon of the simulation (e.g., over a 200 years period).
+                However, there may be interest in weighting the indicator scores
+                according to whether they are more or less important to occur
+                in the short or long-term."
+              ),
+              hr(),
+              div(
+                id = 'discount-rate-description-example',
+                class = 'discount-rate-description-example',
+                strong(em("Example:")),
+                "The ‘future importance’ adjustment allows you to weight the importance
+                of the indicators towards the short or long term.
+                A ‘high’ future importance
+                results in greater weight on the long term then the short term;
+                A ‘Neutral’ results in all time periods being equally weighted;
+                A ‘Low’ future importance results in greater weight on the short term;
+                A ‘Very Low’ future importance results in even greater weight on the short term.
+                As an example, if you want to prioritize the value of the indicators
+                in the long-term, select the “High” value."
+              )
+            ),
+            size = 'm',
+            easyClose = TRUE,
+            footer = modalButton("Dismiss")
+          )
+        )
+      }
+    )
+
+    # Description of Plots modal ----
+    observeEvent(
+      input$plot_descriptions_help,
+      ignoreInit = TRUE,
+      {
+        showModal(
+          modalDialog(
+            title = "Description of Plots",
+            tagList(
+              p(
+                "The radar plot and heat map are designed to help you quickly compare
+                the relative score of several landscape indicators
+                (see “Description of Indicators”) between selected scenarios."
+              ),
+              p(
+                "The indicator scores, which are scaled between -1 and 1,
+                represent a percent change relative to the selected baseline scenario
+                (which is scaled to have a value of 0 for each indicator).
+                Scenarios with scores greater than 0 for a given indicator
+                have more of that value than the selected baseline scenario,
+                and scenarios  with scores less than 0 have less of that value
+                than the selected baseline scenario. Thus, the indicator values
+                depicted in the plots are not absolute and do not represent
+                a specific measurement scale, but are intended to quickly show
+                how scenarios compare to each other."
+              ),
+              p(
+                "The heat map shows this with colours, where darker colours represent
+                larger scores and lighter colours represent smaller scores."
+              ),
+              p(
+                "Note that some indicator scores may be greater than 1 or less than -1,
+                and will look as if they are extending outside of the range of the plot.
+                These should be considered as very different scenarios from the selected baseline,
+                and more detailed review of the indicators is recommended."
+              ),
+              hr(),
+              div(
+                id = 'plot-description-example',
+                class = 'plot-description-example',
+                strong(em("Example:")),
+                "a scenario with a score of 1 for a given indicator would equate to
+                doubling (100%) that indicator compared to the baseline,
+                a score of -0.5 has half (50%) of the baseline,
+                and a score of zero would equate to the same indicator value as the baseline."
+              )
+            ),
+            size = 'm',
+            easyClose = TRUE,
+            footer = modalButton("Dismiss")
+          )
+        )
+      }
+    )
+
+    observe({
+      shinyjs::toggleState(
+        "baseline_scenario_apply",
+        condition = (input$baseline_scenario != '')
+      )
+    })
 
     radarList = reactive(NULL)
     rl_long = reactive(NULL)
@@ -120,6 +189,7 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
       selected = input$baseline_scenario
     )
 
+    # Apply scenario observer ----
     observeEvent(
       schema_scenarios$apply_scenario(),
       ignoreInit = TRUE,
@@ -179,6 +249,7 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
       }
     )
 
+    # Apply baseline scenario observer ----
     observeEvent(
       input$baseline_scenario_apply,
       ignoreInit = TRUE,
@@ -205,15 +276,50 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
             output$baseline_comparison <- renderUI({
               tagList(
                 fluidRow(
-
                   div(
                     class = 'col-lg-6 col-md-12 col-sm-12 col-xs-12',
-                    h4('Other scenarios compared to baseline'),
+                    h4(
+                      'Other scenarios compared to baseline',
+                      actionLink(ns('plot_descriptions_help'), label = '', icon = icon('info-circle'))
+                    )
+                  )
+                ),
+                fluidRow(
+                  div(
+                    class = 'col-lg-6 col-md-12 col-sm-12 col-xs-12',
                     p(
                       'Charts below show how other selected scenarios compare
                 to the baseline scenario. Dimensions in those multi-dimensional plots are
                 individual scenarios, Growing Stock (m_gs), Volume Harvested (vol_h),
                 and individual herd names.'
+                    ),
+                    h5('Description of Indicators'),
+                    p(
+                      'In both the radar plot and heat map, the caribou indicators
+                      represent the relative proportion disturbed
+                      (i.e., cutblocks less than 40 years old and roads buffered by 50m)
+                      of a caribou subpopulation range (as named on the plot)
+                      in the area of interest. The forestry indicators show
+                      the total merchantable growing stock (m_gs) and total volume
+                      of timber harvested (vol_h).
+                      Click here for an example on how to interpret the plot.'
+                    ),
+                  ),
+                  div(
+                    class = 'col-lg-6 col-md-12 col-sm-12 col-xs-12',
+                    p(
+                      strong(em("Example: ")),
+                      'Let’s say our baseline scenario results in:
+                      1,000 ha of disturbance in the Tweedsmuir subpopulation range;
+                      100,000 m3 harvested and 1,000,000 m3 of merchantable growing stock.
+                      As this is the selected baseline scenario, the indicator values
+                      for this scenario are scaled to 0 in the radar plot.
+                      An alternative scenario that results in:
+                      250 ha disturbance in the Tweedsmuir subpopulation;
+                      75,000 m3 harvested, and 1,500,000 m3 of merchantable growing stock
+                      would have indicator scores of -0.75, -0.25, and 0.5, respectively,
+                      indicating that the alternative scenario produces 75% less disturbance,
+                      25% less timber volume and 50% more growing stock than the baseline scenario.'
                     )
                   )
                 ),
@@ -232,6 +338,31 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
                       class = 'chart-container',
                       mod_chart_heatmap_ui(ns("heatmap"), chart_height = "400px") %>%
                         withSpinner(color = '#ecf0f5', color.background = '#ffffff')
+                    ),
+                    h5('Description of Indicators'),
+                    p(
+                      'In both the radar plot and heat map, the caribou indicators
+                    represent the relative proportion disturbed
+                    (i.e., cutblocks less than 40 years old and roads buffered by 50m)
+                    of a caribou subpopulation range (as named on the plot)
+                    in the area of interest. The forestry indicators show
+                    the total merchantable growing stock (m_gs) and total volume
+                    of timber harvested (vol_h).
+                    Click here for an example on how to interpret the plot.'
+                    ),
+                    p(
+                      strong(em("Example: ")),
+                      'Let’s say our baseline scenario results in:
+                    1,000 ha of disturbance in the Tweedsmuir subpopulation range;
+                    100,000 m3 harvested and 1,000,000 m3 of merchantable growing stock.
+                    As this is the selected baseline scenario, the indicator values
+                    for this scenario are scaled to 0 in the radar plot.
+                    An alternative scenario that results in:
+                    250 ha disturbance in the Tweedsmuir subpopulation;
+                    75,000 m3 harvested, and 1,500,000 m3 of merchantable growing stock
+                    would have indicator scores of -0.75, -0.25, and 0.5, respectively,
+                    indicating that the alternative scenario produces 75% less disturbance,
+                    25% less timber volume and 50% more growing stock than the baseline scenario.'
                     )
                   )
                 )
