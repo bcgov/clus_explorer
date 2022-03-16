@@ -166,6 +166,39 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
       }
     )
 
+    # Description of Indicators example modal ----
+    observeEvent(
+      input$indicators_descriptions_help,
+      ignoreInit = TRUE,
+      {
+        showModal(
+          modalDialog(
+            title = "Indicators Example",
+            tagList(
+              p(
+                "Let's say our baseline scenario results in:
+                1,000 ha of disturbance in the Tweedsmuir subpopulation range;
+                100,000 m3 harvested and 1,000,000 m3 of merchantable growing stock.
+                As this is the selected baseline scenario, the indicator values
+                for this scenario are scaled to 0 in the radar plot."
+              ),
+              p(
+                "An alternative scenario that results in:
+                250 ha disturbance in the Tweedsmuir subpopulation;
+                75,000 m3 harvested, and 1,500,000 m3 of merchantable growing stock
+                would have indicator scores of -0.75, -0.25, and 0.5, respectively,
+                indicating that the alternative scenario produces 75% less disturbance,
+                25% less timber volume and 50% more growing stock than the baseline scenario."
+              )
+            ),
+            size = 'm',
+            easyClose = TRUE,
+            footer = modalButton("Dismiss")
+          )
+        )
+      }
+    )
+
     observe({
       shinyjs::toggleState(
         "baseline_scenario_apply",
@@ -245,7 +278,75 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
             )
           )
         )
+      }
+    )
 
+    baseline_values <- eventReactive(
+
+      input$baseline_scenario_apply,
+      {
+        bv <- isolate(
+          reportList()$indicators %>%
+            dplyr::filter(`scenario` == isolate(input$baseline_scenario)) %>%
+            arrange(compartment, ind_name, timeperiod)
+        )
+        bv
+      }
+    )
+
+
+    radarList <- eventReactive(
+      input$baseline_scenario_apply,
+      {
+        baseline_scenario <- isolate(input$baseline_scenario)
+        discount_rate <- isolate(input$discount_rate)
+
+        # Copy the reactive object, otherwise the new object is the reference to
+        # the reactive object
+        dt.baseline <- data.table::copy(baseline_values())
+        dt.indicators <- data.table::copy(
+          reportList()$indicators %>% dplyr::filter(!(`scenario` == baseline_scenario))
+        )
+        setnames(dt.baseline, "variable", "base_variable")
+        dt.compare.indicators <- as.data.table(
+          base::merge(
+            dt.indicators,
+            dt.baseline,
+            by.x = c("compartment", "timeperiod", "ind_name"),
+            by.y = c("compartment", "timeperiod", "ind_name")
+          )
+        )
+
+        out <- dt.compare.indicators[
+          ,
+          list(
+            scen = sum((variable) / (1 + as.numeric(discount_rate)) ** timeperiod),
+            base = sum((base_variable) / (1 + as.numeric(discount_rate)) ** timeperiod)
+          ),
+          by = c("scenario.x", "ind_name")
+        ][, ind := (scen - base) / base]
+        #base::merge(DT.all, DT.g, by = "scenario")
+
+        out %>% tidyr::pivot_wider(
+          id_cols = 1,
+          names_from = 'ind_name',
+          values_from = 'ind'
+        )
+      }
+    )
+
+    rl <- radarList
+    rl_long <- eventReactive(
+      radarList(),
+      {
+        if (nrow(radarList()) > 0) {
+          radarList() %>%
+            tidyr::pivot_longer(
+              cols = -1,
+              names_to = 'Herd',
+              values_to = 'Ratio'
+            )
+        }
       }
     )
 
@@ -288,39 +389,15 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
                   div(
                     class = 'col-lg-6 col-md-12 col-sm-12 col-xs-12',
                     p(
-                      'Charts below show how other selected scenarios compare
-                to the baseline scenario. Dimensions in those multi-dimensional plots are
-                individual scenarios, Growing Stock (m_gs), Volume Harvested (vol_h),
-                and individual herd names.'
-                    ),
-                    h5('Description of Indicators'),
-                    p(
                       'In both the radar plot and heat map, the caribou indicators
                       represent the relative proportion disturbed
                       (i.e., cutblocks less than 40 years old and roads buffered by 50m)
                       of a caribou subpopulation range (as named on the plot)
                       in the area of interest. The forestry indicators show
                       the total merchantable growing stock (m_gs) and total volume
-                      of timber harvested (vol_h).
-                      Click here for an example on how to interpret the plot.'
+                      of timber harvested (vol_h).'
                     ),
-                  ),
-                  div(
-                    class = 'col-lg-6 col-md-12 col-sm-12 col-xs-12',
-                    p(
-                      strong(em("Example: ")),
-                      'Let’s say our baseline scenario results in:
-                      1,000 ha of disturbance in the Tweedsmuir subpopulation range;
-                      100,000 m3 harvested and 1,000,000 m3 of merchantable growing stock.
-                      As this is the selected baseline scenario, the indicator values
-                      for this scenario are scaled to 0 in the radar plot.
-                      An alternative scenario that results in:
-                      250 ha disturbance in the Tweedsmuir subpopulation;
-                      75,000 m3 harvested, and 1,500,000 m3 of merchantable growing stock
-                      would have indicator scores of -0.75, -0.25, and 0.5, respectively,
-                      indicating that the alternative scenario produces 75% less disturbance,
-                      25% less timber volume and 50% more growing stock than the baseline scenario.'
-                    )
+                    actionButton(ns('indicators_descriptions_help'), label = 'Click here for an example'),
                   )
                 ),
                 fluidRow(
@@ -339,110 +416,85 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
                       mod_chart_heatmap_ui(ns("heatmap"), chart_height = "400px") %>%
                         withSpinner(color = '#ecf0f5', color.background = '#ffffff')
                     ),
-                    h5('Description of Indicators'),
-                    p(
-                      'In both the radar plot and heat map, the caribou indicators
-                    represent the relative proportion disturbed
-                    (i.e., cutblocks less than 40 years old and roads buffered by 50m)
-                    of a caribou subpopulation range (as named on the plot)
-                    in the area of interest. The forestry indicators show
-                    the total merchantable growing stock (m_gs) and total volume
-                    of timber harvested (vol_h).
-                    Click here for an example on how to interpret the plot.'
-                    ),
-                    p(
-                      strong(em("Example: ")),
-                      'Let’s say our baseline scenario results in:
-                    1,000 ha of disturbance in the Tweedsmuir subpopulation range;
-                    100,000 m3 harvested and 1,000,000 m3 of merchantable growing stock.
-                    As this is the selected baseline scenario, the indicator values
-                    for this scenario are scaled to 0 in the radar plot.
-                    An alternative scenario that results in:
-                    250 ha disturbance in the Tweedsmuir subpopulation;
-                    75,000 m3 harvested, and 1,500,000 m3 of merchantable growing stock
-                    would have indicator scores of -0.75, -0.25, and 0.5, respectively,
-                    indicating that the alternative scenario produces 75% less disturbance,
-                    25% less timber volume and 50% more growing stock than the baseline scenario.'
-                    )
                   )
                 )
               )
             })
 
-            baseline_values <- reactive({
-
-              # input$baseline_scenario_apply
-
-              # baseline_scenario <- isolate(input$baseline_scenario)
-
-              # req(reportList()$indicators)
-              # browser()
-              bv <- isolate(
-                reportList()$indicators %>%
-                  dplyr::filter(`scenario` == isolate(input$baseline_scenario)) %>%
-                  arrange(compartment, ind_name, timeperiod)
-              )
-              bv
-            })
+            # baseline_values <- reactive({
+            #
+            #   # input$baseline_scenario_apply
+            #
+            #   # baseline_scenario <- isolate(input$baseline_scenario)
+            #
+            #   # req(reportList()$indicators)
+            #   # browser()
+            #   bv <- isolate(
+            #     reportList()$indicators %>%
+            #       dplyr::filter(`scenario` == isolate(input$baseline_scenario)) %>%
+            #       arrange(compartment, ind_name, timeperiod)
+            #   )
+            #   bv
+            # })
 
             # .. radar list ----
-            radarList <- reactive({
-
-              # input$baseline_scenario_apply
-
-              # browser()
-              # req(schema_scenarios$apply_scenario())
-              # req(reportList()$indicators)
-              # req(isolate(input$discount_rate))
-              # req((baseline_values))
-
-              baseline_scenario <- isolate(input$baseline_scenario)
-              discount_rate <- isolate(input$discount_rate)
-
-              # Copy the reactive object, otherwise the new object is the reference to
-              # the reactive object
-              dt.baseline <- data.table::copy(baseline_values())
-              dt.indicators <- data.table::copy(
-                reportList()$indicators %>% dplyr::filter(!(`scenario` == baseline_scenario))
-              )
-              setnames(dt.baseline, "variable", "base_variable")
-              dt.compare.indicators <- as.data.table(
-                base::merge(
-                  dt.indicators,
-                  dt.baseline,
-                  by.x = c("compartment", "timeperiod", "ind_name"),
-                  by.y = c("compartment", "timeperiod", "ind_name")
-                )
-              )
-
-              out <- dt.compare.indicators[
-                ,
-                list(
-                  scen = sum((variable) / (1 + as.numeric(discount_rate)) ** timeperiod),
-                  base = sum((base_variable) / (1 + as.numeric(discount_rate)) ** timeperiod)
-                ),
-                by = c("scenario.x", "ind_name")
-              ][, ind := (scen - base) / base]
-              #base::merge(DT.all, DT.g, by = "scenario")
-
-              out %>% tidyr::pivot_wider(
-                id_cols = 1,
-                names_from = 'ind_name',
-                values_from = 'ind'
-              )
-            })
-
-            rl <- radarList
-            if (nrow(radarList()) > 0) {
-              rl_long <- reactive({
-                radarList() %>%
-                  tidyr::pivot_longer(
-                    cols = -1,
-                    names_to = 'Herd',
-                    values_to = 'Ratio'
-                  )
-              })
-            }
+            # radarList <- reactive({
+            #
+            #   # input$baseline_scenario_apply
+            #
+            #   # browser()
+            #   # req(schema_scenarios$apply_scenario())
+            #   # req(reportList()$indicators)
+            #   # req(isolate(input$discount_rate))
+            #   # req((baseline_values))
+            #
+            #   baseline_scenario <- isolate(input$baseline_scenario)
+            #   discount_rate <- isolate(input$discount_rate)
+            #
+            #   # Copy the reactive object, otherwise the new object is the reference to
+            #   # the reactive object
+            #   dt.baseline <- data.table::copy(baseline_values())
+            #   dt.indicators <- data.table::copy(
+            #     reportList()$indicators %>% dplyr::filter(!(`scenario` == baseline_scenario))
+            #   )
+            #   setnames(dt.baseline, "variable", "base_variable")
+            #   dt.compare.indicators <- as.data.table(
+            #     base::merge(
+            #       dt.indicators,
+            #       dt.baseline,
+            #       by.x = c("compartment", "timeperiod", "ind_name"),
+            #       by.y = c("compartment", "timeperiod", "ind_name")
+            #     )
+            #   )
+            #
+            #   out <- dt.compare.indicators[
+            #     ,
+            #     list(
+            #       scen = sum((variable) / (1 + as.numeric(discount_rate)) ** timeperiod),
+            #       base = sum((base_variable) / (1 + as.numeric(discount_rate)) ** timeperiod)
+            #     ),
+            #     by = c("scenario.x", "ind_name")
+            #   ][, ind := (scen - base) / base]
+            #   #base::merge(DT.all, DT.g, by = "scenario")
+            #
+            #   out %>% tidyr::pivot_wider(
+            #     id_cols = 1,
+            #     names_from = 'ind_name',
+            #     values_from = 'ind'
+            #   )
+            # })
+            #
+            # rl <- radarList
+            # if (nrow(radarList()) > 0) {
+            #   rl_long <- reactive({
+            #     radarList() %>%
+            #       tidyr::pivot_longer(
+            #         cols = -1,
+            #         names_to = 'Herd',
+            #         values_to = 'Ratio'
+            #       )
+            #   })
+            # }
 
             radar_plot <- reactive({
               renderPlotly ({
@@ -548,20 +600,27 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
 
     # Return reactive values ----
     # to be used in other modules
-    return({
 
-      input$baseline_scenario_apply
+      if (input$baseline_scenario_apply == 0) {
+        return(NULL)
+      } else {
+        return({
+          isolate({
 
-      baseline_scenario <- isolate(input$baseline_scenario)
-      discount_rate <- isolate(input$discount_rate)
+          # browser()
+          rl <- radarList()
+          rll <- rl_long()
 
-      list(
-        radar_list = radarList,
-        radar_list_long = rl_long,
-        baseline_values = baseline_values,
-        baseline_scenario = baseline_scenario,
-        risk = discount_rate
-      )
-    })
+          list(
+            radar_list = radarList,
+            radar_list_long = rl_long,
+            baseline_values = baseline_values,
+            baseline_scenario = isolate(input$baseline_scenario),
+            risk = isolate(input$discount_rate)
+          )
+          })
+        })
+      }
+
   })
 }

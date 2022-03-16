@@ -53,6 +53,7 @@ a:hover, a:focus, a:active  {
   border-radius: 4px;
   box-shadow: 7px 7px 7px 0px rgba(170, 170, 170, 0.75);
   margin-bottom: 50px;
+  margin-top: 25px;
 }
 
 /* Header ------------- */
