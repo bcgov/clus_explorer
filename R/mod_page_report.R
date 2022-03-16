@@ -105,20 +105,15 @@ mod_page_report_server <- function(
     }
 
     # Get rid of reactive values
-    schema = data.table::copy(schema())
-    tsas = data.table::copy(tsas())
-    scenario_names = data.table::copy(scenario_names())
-    scenarios = data.table::copy(scenarios())
-    data_seral_treemap = data.table::copy(data_seral_treemap())
-    status_thlb = data.table::copy(status_thlb())
-    status_avg_vol = data.table::copy(status_avg_vol())
-    status_road = data.table::copy(status_road())
-    reportList = data.table::copy(reportList())
-    radar_list = data.table::copy(radar_list())
-    radar_list_long = data.table::copy(radar_list_long())
-    baseline_values = data.table::copy(baseline_values())
-    baseline_scenario = data.table::copy(baseline_scenario)
-    risk = data.table::copy(risk)
+    schema <- data.table::copy(schema())
+    tsas <- data.table::copy(tsas())
+    scenario_names <- data.table::copy(scenario_names())
+    scenarios <- data.table::copy(scenarios())
+    data_seral_treemap <- data.table::copy(data_seral_treemap())
+    status_thlb <- data.table::copy(status_thlb())
+    status_avg_vol <- data.table::copy(status_avg_vol())
+    status_road <- data.table::copy(status_road())
+    reportList <- data.table::copy(reportList())
 
     output$generate_report <- downloadHandler(
       filename = function() {
@@ -142,11 +137,11 @@ mod_page_report_server <- function(
           status_thlb = status_thlb,
           status_avg_vol = status_avg_vol,
           status_road = status_road,
-          radar_list = radar_list,
-          radar_list_long = radar_list_long,
-          baseline_values = baseline_values,
-          baseline_scenario = baseline_scenario,
-          risk = risk
+          radar_list = data.table::copy(radar_list()),
+          radar_list_long = data.table::copy(radar_list_long()),
+          baseline_values = data.table::copy(baseline_values()),
+          baseline_scenario = data.table::copy(baseline_scenario),
+          risk = data.table::copy(risk)
         )
 
         loc <- dirname(file)

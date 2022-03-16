@@ -430,8 +430,8 @@ app_server <- function(input, output, session) {
         status_thlb = schema_scenarios$status_thlb,
         status_avg_vol = schema_scenarios$status_avg_vol,
         status_road = schema_scenarios$status_road,
-        radar_list = summary_data$radar_list,
-        radar_list_long = summary_data$radar_list_long,
+        radar_list = data.table::copy(summary_data$radar_list),
+        radar_list_long = data.table::copy(summary_data$radar_list_long),
         baseline_values = summary_data$baseline_values,
         baseline_scenario = isolate(summary_data$baseline_scenario),
         risk = summary_data$risk

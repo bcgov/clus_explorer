@@ -54,6 +54,7 @@ ggplot2::ggplot(
 We evaluate different scenarios, and compare various parameters against the baseline scenario. The following scenarios have been selected for analysis:
 
 ```{r, results='asis'}
+
 selected_scenarios <- as.data.frame(
   params$scenarios %>%
     filter(scenario %in% params$scenario_names)
@@ -64,14 +65,23 @@ s <- lapply(rownames(selected_scenarios), function(i) {
   scenario_name <- selected_scenarios[i, 1]
   scenario_description <- selected_scenarios[i, 2]
   scenario_rank <- selected_scenarios[i, 3]
-  
+
   cat(paste0('- **', scenario_name, '**: ', scenario_description, '\n\n'))
 })
 ```
 
 ### Baseline scenario
 
-Scenario `r params$baseline_scenario` has been selected as the baseline, with "Future importance" factor set to `r params$risk`. Charts and table below show the values of baseline scenario. The facet variables are Growing Stock (m_gs), Volume Harvested (vol_h), and individual herd names.
+```{r echo=FALSE, warning=FALSE}
+risk <- switch(
+  params$risk,
+  '0' = "Neutral",
+  '-0.01' = "Low",
+  '0.01' = "Medium",
+  '0.05' = "High"
+)
+```
+Scenario `r params$baseline_scenario` has been selected as the baseline, with "Future importance" factor set to `r risk`. Charts and table below show the values of baseline scenario. The facet variables are Growing Stock (m_gs), Volume Harvested (vol_h), and individual herd names.
 
 ```{r echo=FALSE, warning=FALSE, dpi=300}
 chart_line_faceted(
@@ -89,7 +99,7 @@ chart_line_faceted(
 )
 ```
 
-```{r echo=FALSE, warning=FALSE, fig.height=3.5, dpi=300}
+```{r echo=FALSE, warning=FALSE, fig.height=3.5, dpi=300, results='asis'}
 
 if (nrow(selected_scenarios) > 1) {
   cat('\n\n')
@@ -98,24 +108,26 @@ if (nrow(selected_scenarios) > 1) {
 
   cat('Table and charts below show how other selected scenarios compare to the baseline scenario. Dimensions in those multi-dimensional plots are individual scenarios, Growing Stock (m_gs), Volume Harvested (vol_h), and individual herd names.')
   cat('\n\n')
-
-  # knitr::kable(params$radar_list)
+}
+if (nrow(selected_scenarios) > 1) {
   kableExtra::kbl(
-      params$radar_list, 
-      # align = 'lrlcc', 
-      booktabs = TRUE, 
-      longtable = FALSE, 
+      params$radar_list,
+      # align = 'lrlcc',
+      booktabs = TRUE,
+      longtable = FALSE,
       # format = 'latex'
-    ) %>% 
+    ) %>%
     # column_spec(1, width = "1.5in") %>%
     # column_spec(3, width = "1.5in") %>%
     # column_spec(4, width = "1in") %>%
     kableExtra::kable_styling(latex_options = c('hold_position', 'scale_down', 'striped'), font_size = 7)
-  
+
+}
+if (nrow(selected_scenarios) > 1) {
   ggradar::ggradar(
-    params$radar_list, 
+    params$radar_list,
     base.size = 5,
-    grid.min = min(params$radar_list_long$Ratio) * 1.1, 
+    grid.min = min(params$radar_list_long$Ratio) * 1.1,
     grid.max = max(params$radar_list_long$Ratio) * 1.1,
     grid.label.size = 3,
     gridline.min.colour = "#CBD2D9",
@@ -127,10 +139,12 @@ if (nrow(selected_scenarios) > 1) {
     axis.line.colour = "#CBD2D9",
     axis.label.size = 3,
     legend.title = "",
-    legend.position = "right", 
+    legend.position = "right",
     legend.text.size = 6,
   )
-  
+
+}
+if (nrow(selected_scenarios) > 1) {
   chart_heatmap(data = params$radar_list_long, x = Herd, y = scenario.x, z = Ratio)
 }
 

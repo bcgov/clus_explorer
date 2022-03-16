@@ -320,8 +320,8 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
         out <- dt.compare.indicators[
           ,
           list(
-            scen = sum((variable) / (1 + as.numeric(discount_rate)) ** timeperiod),
-            base = sum((base_variable) / (1 + as.numeric(discount_rate)) ** timeperiod)
+            scen = sum((variable) / (1 + as.numeric(input$discount_rate)) ** timeperiod),
+            base = sum((base_variable) / (1 + as.numeric(input$discount_rate)) ** timeperiod)
           ),
           by = c("scenario.x", "ind_name")
         ][, ind := (scen - base) / base]
@@ -415,7 +415,7 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
                       class = 'chart-container',
                       mod_chart_heatmap_ui(ns("heatmap"), chart_height = "400px") %>%
                         withSpinner(color = '#ecf0f5', color.background = '#ffffff')
-                    ),
+                    )
                   )
                 )
               )
@@ -597,30 +597,23 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
       }
     )
 
-
     # Return reactive values ----
     # to be used in other modules
-
-      if (input$baseline_scenario_apply == 0) {
-        return(NULL)
-      } else {
-        return({
-          isolate({
-
-          # browser()
-          rl <- radarList()
-          rll <- rl_long()
-
+    if (input$baseline_scenario_apply == 0) {
+      return(NULL)
+    } else {
+      return({
+        isolate({
           list(
             radar_list = radarList,
             radar_list_long = rl_long,
             baseline_values = baseline_values,
-            baseline_scenario = isolate(input$baseline_scenario),
-            risk = isolate(input$discount_rate)
+            baseline_scenario = input$baseline_scenario,
+            risk = input$discount_rate
           )
-          })
         })
-      }
+      })
+    }
 
   })
 }
