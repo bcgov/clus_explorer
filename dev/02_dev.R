@@ -70,6 +70,7 @@ golem::add_module( name = "page_dashboard_insects" )
 golem::add_module( name = "page_dashboard_mining" )
 golem::add_module( name = "page_dashboard_oil_and_gas" )
 golem::add_module( name = "page_dashboard_recreation" )
+golem::add_module( name = "html_alert" )
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*

@@ -10,6 +10,8 @@
 mod_page_scenarios_ui <- function(id){
   ns <- NS(id)
 
+  available_study_areas <- getAvailableStudyAreas()
+
   tagList(
     # fluidRow(
     #   actionButton(ns("help"), "Click for instructions") %>%
@@ -38,7 +40,7 @@ mod_page_scenarios_ui <- function(id){
             selected = "" ,
             choices = c(
               list("Select an area" = ""),
-              data_global$available_study_areas
+              available_study_areas
             )
           )
         ),

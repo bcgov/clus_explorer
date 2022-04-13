@@ -13,17 +13,21 @@ mod_page_dashboard_fire_ui <- function(id){
     tabsetPanel(
       tabPanel(
         "Summary of area burned",
-        DT::dataTableOutput(ns("fireTable"), width = '100%')
+        h4("Summary of area burned"),
+        div(
+          class = "table-container",
+          DT::dataTableOutput(ns("fireTable"), width = '100%')
+        )
       ),
       tabPanel(
         "Fire history 1919 - 2018",
-        plotlyOutput(outputId = ns("fireByYearPlot"), height = "900px") %>%
-          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
+        h4("Fire history 1919 - 2018"),
+        uiOutput(ns("fireByYearPlotUI"))
       ),
       tabPanel(
         "40 year cummulative area burned",
-        plotlyOutput(outputId = ns("firecummulativePlot"), height = "900px") %>%
-          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
+        h4("40 year cummulative area burned"),
+        uiOutput(ns("firecummulativePlotUI"))
       )
     )
   )
@@ -37,6 +41,13 @@ mod_page_dashboard_fire_server <- function(id, reportList){
     ns <- session$ns
 
     if (nrow(reportList()$fire) > 0) {
+      output$fireByYearPlotUI <- renderUI({
+        tagList(
+          plotlyOutput(outputId = ns("fireByYearPlot"), height = "900px") %>%
+            withSpinner(color = '#ecf0f5', color.background = '#ffffff')
+        )
+      })
+
       output$fireByYearPlot <- renderPlotly ({
         withProgress(message = 'Making Plot', value = 0.1, {
           chart_bar_faceted(
@@ -54,13 +65,23 @@ mod_page_dashboard_fire_server <- function(id, reportList){
           )
         })
       })
+    } else {
+      output$fireByYearPlotUI <- renderUI({
+        mod_html_alert_ui('fireByYearPlot')
+      })
     }
 
     if (nrow(reportList()$fire) > 0) {
+      output$fireByYearPlotUI <- renderPlotly ({
+        tagList(
+          plotlyOutput(outputId = ns("firecummulativePlot"), height = "900px") %>%
+            withSpinner(color = '#ecf0f5', color.background = '#ffffff')
+        )
+      })
+
       output$firecummulativePlot <- renderPlotly ({
         withProgress(message = 'Making Plot', value = 0.1, {
           data <- reportList()$fire
-
 
           ##Calculating cummulative area burned over a 40 year moving window for each herd across each habitat type
           Years <- 1919:2018
@@ -95,6 +116,10 @@ mod_page_dashboard_fire_server <- function(id, reportList){
             is_plotly = TRUE
           )
         })
+      })
+    } else {
+      output$firecummulativePlotUI <- renderUI({
+        mod_html_alert_ui('firecummulativePlot')
       })
     }
 

@@ -16,60 +16,14 @@ mod_page_dashboard_grizzly_ui <- function(id){
         "Adult Female Survival",
 
         h4("Adult Female Survival"),
-        sliderInput(
-          ns("grizzlyYear"),
-          label = "Enter Year Range to Plot",
-          0,
-          200,
-          value = c (0, 50),
-          step = 5
-        ),
-        plotlyOutput(outputId = ns("survival_grizzly_af_Plot"), height = "900px") %>%
-          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
+        uiOutput(ns("survival_grizzly_af_Plot_UI"))
       ),
       tabPanel(
         "Grizzly Bear Population Unit Road Density",
         h4("Grizzly Bear Population Unit Road Density"),
-        plotlyOutput(outputId = ns("road_density_grizzly_Plot"), height = "900px") %>%
-          withSpinner(color = '#ecf0f5', color.background = '#ffffff')
+        uiOutput(ns("road_density_grizzly_Plot_UI"))
       )
     )
-    # tags$div(
-    #   "Click on the boxes below to obtain information on estimated road density and adult female  survival. Esitmates are provided for grizzly bear population units (GBPUs). Survival estimates are calculated by adapting a model developed by ",
-    #   tags$a(href = "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0115535", "Boulanger and Stenhouse (2014).")
-    # ),
-    # br(),
-    # line break
-    # fluidRow(
-    #   box(
-    #     title = "Adult Female Survival",
-    #     collapsible = TRUE,
-    #     collapsed = TRUE,
-    #     solidHeader = TRUE,
-    #     # background = "purple",
-    #     width = 12,
-    #     sliderInput(
-    #       ns("grizzlyYear"),
-    #       label = "Enter Year Range to Plot",
-    #       0,
-    #       200,
-    #       value = c (0, 50),
-    #       step = 5
-    #     ),
-    #     plotlyOutput(outputId = ns("survival_grizzly_af_Plot"), height = "900px")
-    #   )
-    # ),
-    # fluidRow(
-    #   box(
-    #     title = "Grizzly Bear Population Unit Road Density",
-    #     collapsible = TRUE,
-    #     collapsed = TRUE,
-    #     solidHeader = TRUE,
-    #     # background = "purple",
-    #     width = 12,
-    #     plotlyOutput(outputId = ns("road_density_grizzly_Plot"), height = "900px")
-    #   )
-    # )
   )
 }
 
@@ -82,6 +36,26 @@ mod_page_dashboard_grizzly_server <- function(id, reportList){
 
     if (!is.null(reportList()$grizzly_survival)) {
       if (nrow(reportList()$grizzly_survival) > 0) {
+
+
+        output$survival_grizzly_af_Plot_UI <- renderUI({
+          plotlyOutput(outputId = ns("road_density_grizzly_Plot"), height = "900px") %>%
+            withSpinner(color = '#ecf0f5', color.background = '#ffffff')
+        })
+
+        output$road_density_grizzly_Plot_UI <- renderUI({
+          sliderInput(
+            ns("grizzlyYear"),
+            label = "Enter Year Range to Plot",
+            0,
+            200,
+            value = c (0, 50),
+            step = 5
+          )
+          plotlyOutput(outputId = ns("survival_grizzly_af_Plot"), height = "900px") %>%
+            withSpinner(color = '#ecf0f5', color.background = '#ffffff')
+        })
+
         output$road_density_grizzly_Plot <- renderPlotly ({
           withProgress(message = 'Making Plots', value = 0.1, {
             data <- reportList()$grizzly_survival
@@ -143,7 +117,23 @@ mod_page_dashboard_grizzly_server <- function(id, reportList){
               )
           })
         })
+      } else {
+        output$survival_grizzly_af_Plot_UI <- renderUI({
+          mod_html_alert_ui('propDisturbPlot')
+        })
+
+        output$road_density_grizzly_Plot_UI <- renderUI({
+          mod_html_alert_ui('propDisturbBuffPlot')
+        })
       }
+    } else {
+      output$survival_grizzly_af_Plot_UI <- renderUI({
+        mod_html_alert_ui('propDisturbPlot')
+      })
+
+      output$road_density_grizzly_Plot_UI <- renderUI({
+        mod_html_alert_ui('propDisturbBuffPlot')
+      })
     }
 
   })

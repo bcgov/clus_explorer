@@ -53,15 +53,10 @@ app_ui <- function(request) {
             icon = icon("dashboard"),
             menuSubItem("Summary", tabName = "summary", icon = icon("balance-scale")),
             menuSubItem("Caribou", tabName = "caribou", icon = icon("paw")),
-            # menuSubItem("Climate", tabName = "climate", icon = icon("thermometer-half")),
             menuSubItem("Fire", tabName = "fire", icon = icon("fire")),
             menuSubItem("Fisher", tabName = "fisher", icon = icon("otter", lib = "font-awesome")),
             menuSubItem("Forestry", tabName = "forestry", icon = icon("tree")),
             menuSubItem("Grizzly Bear", tabName = "grizzly_bear", icon = icon("leaf"))#,
-            # menuSubItem("Insects", tabName = "insects", icon = icon("bug")),
-            # menuSubItem("Mining", tabName = "mining", icon = icon("gem")),
-            # menuSubItem("Oil and Gas", tabName = "oilandgas", icon = icon("bolt")),
-            # menuSubItem("Recreation", tabName = "recreation", icon = icon("shoe-prints"))
           ),
           add_class(
             menuItem(
@@ -70,23 +65,7 @@ app_ui <- function(request) {
               icon = icon("file-pdf")
             ),
             "report"
-          )#,
-          # add_class(
-          #   menuItem(
-          #     "Query Builder",
-          #     tabName = "querybuilder",
-          #     icon = icon("search")
-          #   ),
-          #   "querybuilder"
-          # ),
-          # add_class(
-          #   menuItem(
-          #     "Map Viewer",
-          #     tabName = "mapviewer",
-          #     icon = icon("layer-group")
-          #   ),
-          #   "mapviewer"
-          # )
+          )
         )
       ),
       dashboardBody(
@@ -139,45 +118,10 @@ app_ui <- function(request) {
             mod_page_dashboard_grizzly_ui("page_dashboard_grizzly")
           ),
 
-          # tabItem(
-          #   tabName = "insects",
-          #   mod_page_dashboard_insects_ui("page_dashboard_insects")
-          # ),
-
-          # tabItem(
-          #   tabName = "climate",
-          #   mod_page_dashboard_climate_ui("page_dashboard_climate")
-          # ),
-
-          # tabItem(
-          #   tabName = "oilandgas",
-          #   mod_page_dashboard_oil_and_gas_ui("page_dashboard_oil_and_gas")
-          # ),
-
-          # tabItem(
-          #   tabName = "mining",
-          #   mod_page_dashboard_mining_ui("page_dashboard_mining")
-          # ),
-
-          # tabItem(
-          #   tabName = "recreation",
-          #   mod_page_dashboard_recreation_ui("page_dashboard_recreation")
-          # ),
-
           tabItem(
             tabName = "report",
             mod_page_report_ui("page_report")
-          )#,
-
-          # tabItem(
-          #   tabName = "querybuilder",
-          #   mod_page_query_builder_ui("page_querybuilder")
-          # ),
-
-          # tabItem(
-          #   tabName = "mapviewer",
-          #   mod_page_map_viewer_ui("page_mapviewer")
-          # )
+          )
         )
       )
     ),
