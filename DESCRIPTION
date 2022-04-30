@@ -29,7 +29,6 @@ Imports:
     rmarkdown,
     rpostgis,
     sf,
-    shinyBS,
     shinycssloaders,
     shinydashboard,
     shinydashboardPlus,

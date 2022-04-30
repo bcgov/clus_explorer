@@ -47,8 +47,20 @@ mod_page_report_ui <- function(id){
         )
       ),
       shiny::downloadButton(
-        ns("generate_report"), "Download report", icon = shiny::icon("download"), class = "btn-clus"
-      )
+        ns("generate_report"),
+        "Download report",
+        icon = shiny::icon("download"),
+        class = "btn-clus disabled"
+      ),
+      icon('info-circle') %>%
+        bsplus::bs_embed_tooltip(
+          'To enable this function, you have to select Area of Interest and
+          scenarios on the "Scenarios" page, as well as select a baseline scenario
+          and click Apply button on the "Dashboard -> Summary" page',
+          "top",
+          delay = "5s"
+        )
+
     )
   )
 }
@@ -69,6 +81,8 @@ mod_page_report_server <- function(
     ns <- session$ns
 
     req(reportList)
+    req(scenario_names)
+    req(radar_list)
 
     # Disable Apply button if no scenarios are selected
     observe({

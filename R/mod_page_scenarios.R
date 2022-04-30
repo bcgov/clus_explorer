@@ -13,13 +13,6 @@ mod_page_scenarios_ui <- function(id){
   available_study_areas <- getAvailableStudyAreas()
 
   tagList(
-    # fluidRow(
-    #   actionButton(ns("help"), "Click for instructions") %>%
-    #     bsplus::bs_embed_tooltip(
-    #       "Click the button for instructions",
-    #       "right"
-    #     )
-    # ),
     fluidRow(
       column(
         width = 6,
@@ -128,12 +121,6 @@ mod_page_scenarios_ui <- function(id){
                   label = '',
                   width = '100%',
                   multiple = T
-                ),
-                bsTooltip(
-                  "tsa_selected",
-                  "Select timber supply area(s).",
-                  "bottom",
-                  options = list(container = "body")
                 )
               )
             )
@@ -168,12 +155,7 @@ mod_page_scenarios_ui <- function(id){
             p(
               strong("Select at least two scenarios")
             ),
-            # uiOutput(ns('selected_scenarios_list')),
-            # DT::dataTableOutput(ns('scenarios')),
-            # uiOutput(ns("scenarios"))
-            checkboxGroupInput(
-              inputId = ns("scenario"), label = NULL, selected = NULL, choiceNames = NULL
-            ),
+            uiOutput(ns("rendered")), # https://stackoverflow.com/questions/61112013/shiny-tooltip-for-each-check-able-box-basic
             actionButton(
               ns("apply_scenario"),
               label = "Apply",
@@ -194,40 +176,6 @@ mod_page_scenarios_server <- function(id){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    # .. introjs steps ----
-    # steps <- reactive(
-    #   data.frame(
-    #     element = c(
-    #       ".selectize",
-    #       ".settings",
-    #       ".treeview",
-    #       ".report"
-    #     ),
-    #     intro = c(
-    #       "This is the navigation sidebar where you can select various features in the app.",
-    #       "Step 1: This is where you select your area of interest and the various scenarios you wish to compare.",
-    #       "Step 2: This is where you can view outputs of various indicators by scenario.
-    #
-    #       You must have selected an area of interest and at least two scnearios in Step 1.",
-    #       "Step 3: Use this tab to generate and download summary or detailed report in PDF/Word/PowerPoint format.<br>You must have selected an area of interest and at least two scnearios in Step 1."
-    #     ),
-    #     position = c("right", "right", "right", "right")
-    #   )
-    # )
-    #
-    # observeEvent(
-    #   input$help,
-    #   introjs(
-    #     session,
-    #     options = list(
-    #       steps = steps(),
-    #       "nextLabel" = "Next",
-    #       "prevLabel" = "Previous",
-    #       "skipLabel" = "Skip"
-    #     )
-    #   )
-    # )
-
     # Disable Apply button if no scenarios are selected
     observe({
       shinyjs::toggleState(
@@ -237,7 +185,6 @@ mod_page_scenarios_server <- function(id){
     })
 
     # Reactive values ----
-
     # .. available scenarios ----
     scenariosList <- reactive({
       req(input$schema)
@@ -358,103 +305,57 @@ mod_page_scenarios_server <- function(id){
       )
     })
 
-    # Render data table ----
-#    observe({
-#     sl <- scenariosList()
-#     sl <- sl %>%
-#       mutate(
-#         selection = sprintf('<input type="checkbox" name="scenario_cbg" value="%s"/>', scenario),
-#         rank = round(rank, 2),
-#         tooltip = sprintf('
-# <i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon" title="" data-toggle="tooltip" data-placement="top" data-delay="5s" data-original-title="%s"></i>
-#         ', description)
-#       ) %>%
-#       select(selection, scenario, rank, tooltip)
-#
-#     output$scenarios = DT::renderDataTable(
-#         sl, escape = FALSE, selection = 'none', server = FALSE,
-#         colnames = c('', 'Scenario', 'Rank', 'Description'),
-#         options = list(dom = 't', paging = FALSE, ordering = FALSE, rownames = FALSE),
-#         callback = JS("table.rows().every(function(i, tab, row) {
-#             var $this = $(this.node());
-#             $this.attr('id', this.data()[0]);
-#             $this.addClass('shiny-input-checkboxgroup');
-#             $this.addClass('shiny-options-group');
-#           });")
-#           # Shiny.unbindAll(table.table().node());
-#           # Shiny.bindAll(table.table().node());
-#       )
-#   })
-
-    # .. render scenarios table ----
-#     observe({
-#       output$scenarios <- renderUI({
-#         scenarios <- scenariosList()
-#
-#         # Generate table rows
-#         trows <- unlist(
-#           lapply(1:nrow(scenarios), function(i) {
-#             paste0('
-#               <tr class="shiny-input-checkboxgroup shiny-bound-input">
-#                 <td class="checkbox-container">', tags$input(type = "checkbox", name = ns("scenario"), value = scenarios[i, 1]), '</td>
-#                 <td>', scenarios[i, 1], '</td>
-#                 <td>', round(scenarios[i, 3], 2), '</td>
-#                 <td class="description">',
-#                   icon('info-circle') %>%
-#                     bsplus::bs_embed_tooltip(scenarios[i, 2], "top", delay = "5s"),
-#                 '</td>
-#               </tr>'
-#             )
-#           })
-#         )
-#
-#         # Table header
-#         scenarios_table <- paste0('
-#           <table id="scenario-list" class="clus-explorer-table">
-#             <thead>
-#               <tr>
-#           		  <th></th>
-#           		  <th>Scenario</th>
-#           		  <th>Rank</th>
-#           		  <th>Description</th>
-#           	  </tr>
-#             </thead>' ,
-#             paste(trows, collapse=" "), '
-#           </table>'
-# 	      )
-#
-#       	div(
-#       	  id = "scenario-list-container",
-#       	  class="form-group shiny-input-checkboxgroup shiny-input-container",
-#       		HTML(scenarios_table)
-#       	)
-#       })
-#     })
-
-
    # Update Checkbox Group ----
     observe({ #Scenarios based on the area of interest selected
-      updateCheckboxGroupInput(
-        session, "scenario",
-        # label = sprintf(
-        #   '%s (Rank %s) $s',
-        #   scenariosList()$scenario,
-        #   round(scenariosList()$rank, 2),
-        #   '<i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon" title="" data-toggle="tooltip" data-placement="top" data-delay="5s" data-original-title="%s"></i>'
-        # ),
-        # choices = scenariosList()$scenario,
-        choiceValues = scenariosList()$scenario,
-        choiceNames = sprintf(
-          '%s (Rank %s)',
-          scenariosList()$scenario,
-          round(scenariosList()$rank, 2)
-            # ),
-         #  ),
-         # icon('info-circle') %>%
-         #   bsplus::bs_embed_tooltip(scenariosList()$description, "top", delay = "5s")
-        ),
-        selected = character(0)
+
+      extendedCheckboxGroup <- function(..., extensions = list()) {
+        cbg <- checkboxGroupInput(...)
+        nExtensions <- length(extensions)
+        nChoices <- length(cbg$children[[2]]$children[[1]])
+
+        if (nExtensions > 0 && nChoices > 0) {
+          lapply(1:min(nExtensions, nChoices), function(i) {
+            # For each Extension, add the element as a child (to one of the checkboxes)
+            cbg$children[[2]]$children[[1]][[i]]$children[[2]] <<- extensions[[i]]
+          })
+        }
+        cbg
+      }
+
+      checkBoxHelpList <- function(id, text) {
+        extensionsList <- icon('info-circle') %>%
+          bsplus::bs_embed_tooltip(text, "top", delay = "5s")
+        return(extensionsList)
+      }
+
+      row_names <- factor(
+        rownames(scenariosList()),
+        levels = rownames(scenariosList())
       )
+
+      helpList <- base::split(scenariosList(), f = row_names)
+      checkboxExtensions <- lapply(
+        helpList,
+        function(x) {
+          checkBoxHelpList(
+            x %>% pull(scenario),
+            x %>% pull(description)
+          )
+        }
+      )
+      output$rendered <- renderUI({
+        extendedCheckboxGroup(
+          ns("scenario"),
+          label = "High Throughput Experiment",
+          choiceNames  = sprintf(
+            '%s (Rank %s)',
+            scenariosList()$scenario,
+            round(scenariosList()$rank, 2)
+          ),
+          choiceValues = scenariosList()$scenario,
+          extensions = checkboxExtensions
+        )
+      })
     })
 
     # .. render treemap chart ----

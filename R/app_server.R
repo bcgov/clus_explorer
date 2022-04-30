@@ -12,7 +12,6 @@
 #' @import bsplus
 #' @import igraph
 #' @import sf
-#' @import shinyBS
 #' @import DT
 #' @import dplyr
 #' @import rintrojs
