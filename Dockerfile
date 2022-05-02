@@ -27,7 +27,6 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
   && gdebi -n ss-latest.deb \
   && rm -f version.txt ss-latest.deb \
   && install2.r --error tinytex \
-#  && R -e "tinytex::install_tinytex()" \
   ## Admin-based install of TinyTeX:
   && wget -qO- \
     "https://github.com/yihui/tinytex/raw/main/tools/install-unx.sh" | \
@@ -44,7 +43,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
       && rm -r /tmp/install-tl-*; \
     fi \
   && /opt/TinyTeX/bin/*/tlmgr path add \
-  && tlmgr install ae inconsolata listings metafont mfware parskip pdfcrop tex \
+  && tlmgr install ae colortbl environ fancyhdr fontaxes grfext inconsolata listings makecell metafont mfware multirow parskip pdfcrop pdflscape ragged2e roboto setspace tabu tex threeparttable trimspaces ulem varwidth wrapfig \
   && tlmgr path add \
   && Rscript -e "tinytex::r_texmf()" \
   && chown -R root:staff /opt/TinyTeX \
@@ -55,12 +54,13 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
   && cd /tmp/ \
   && wget https://github.com/jgm/pandoc/releases/download/2.16.2/pandoc-2.16.2-1-amd64.deb \
   && DEB="/tmp/pandoc-2.16.2-1-amd64.deb" \
-  && sudo dpkg -i $DEB
+  && sudo dpkg -i $DEB \
+  && rm -rf /srv/shiny-server/
 
-ENV RENV_VERSION 0.14.0
+COPY ./ /srv/shiny-server/
 
-# basic shiny functionality
 RUN R -e "install.packages('remotes', repos = c(CRAN = 'https://cloud.r-project.org'))" \
-    && R -e "remotes::install_github('rstudio/renv@${RENV_VERSION}')"
+    && R -e "remotes::install_github('rstudio/renv@0.15.4')" \
+    && R -e "setwd('/srv/shiny-server/'); renv::restore();"
 
 EXPOSE 3838
