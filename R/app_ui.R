@@ -43,13 +43,13 @@ app_ui <- function(request) {
         sidebarMenu(
           menuItem("Home", tabName = "home", icon = icon("home")),
           add_class(
-            menuItem("Scenarios", tabName = "settings", icon = icon("gears")),
+            menuItem("Scenarios", tabName = "settings", icon = icon("cogs")),
             "settings"
           ),
           menuItem(
             "Dashboard",
             tabName = "dashboard",
-            icon = icon("dashboard"),
+            icon = icon("tachometer-alt"),
             menuSubItem("Summary", tabName = "summary", icon = icon("balance-scale")),
             menuSubItem("Caribou", tabName = "caribou", icon = icon("paw")),
             menuSubItem("Fire", tabName = "fire", icon = icon("fire")),
