@@ -43,7 +43,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
       && rm -r /tmp/install-tl-*; \
     fi \
   && /opt/TinyTeX/bin/*/tlmgr path add \
-  && tlmgr install ae colortbl environ fancyhdr fontaxes grfext inconsolata listings makecell metafont mfware multirow parskip pdfcrop pdflscape ragged2e roboto setspace tabu tex threeparttable trimspaces ulem varwidth wrapfig \
+  && tlmgr install ae colortbl environ fancyhdr fontaxes grfext inconsolata listings makecell metafont mfware multirow parskip pdfcrop pdflscape ragged2e roboto setspace tabu tex threeparttable threeparttablex trimspaces ulem varwidth wrapfig \
   && tlmgr path add \
   && Rscript -e "tinytex::r_texmf()" \
   && chown -R root:staff /opt/TinyTeX \
