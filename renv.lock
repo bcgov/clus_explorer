@@ -121,6 +121,14 @@
         "rlang"
       ]
     },
+    "backports": {
+      "Package": "backports",
+      "Version": "1.1.6",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "3997fd62345a616e59e8161ee0a5816f",
+      "Requirements": []
+    },
     "base64enc": {
       "Package": "base64enc",
       "Version": "0.1-3",
@@ -128,6 +136,16 @@
       "Repository": "CRAN",
       "Hash": "543776ae6848fde2f48ff3816d0628bc",
       "Requirements": []
+    },
+    "base64url": {
+      "Package": "base64url",
+      "Version": "1.4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "0c54cf3a08cc0e550fbd64ad33166143",
+      "Requirements": [
+        "backports"
+      ]
     },
     "brew": {
       "Package": "brew",
@@ -462,6 +480,14 @@
       "Hash": "77bd60a6157420d4ffa93b27cf6a58b8",
       "Requirements": []
     },
+    "filelock": {
+      "Package": "filelock",
+      "Version": "1.0.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "38ec653c2613bed60052ba3787bd8a2c",
+      "Requirements": []
+    },
     "fontawesome": {
       "Package": "fontawesome",
       "Version": "0.2.2",
@@ -773,6 +799,18 @@
       "Repository": "CRAN",
       "Hash": "6154ec2223172bce8162d4153cda21f7",
       "Requirements": []
+    },
+    "ipc": {
+      "Package": "ipc",
+      "Version": "0.1.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "43b9e88c7e2e1518c8e87060f5f5c2ab",
+      "Requirements": [
+        "R6",
+        "shiny",
+        "txtq"
+      ]
     },
     "isoband": {
       "Package": "isoband",
@@ -1560,17 +1598,6 @@
         "xtable"
       ]
     },
-    "shinyBS": {
-      "Package": "shinyBS",
-      "Version": "0.61",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "f895dafd39733c4a70d425f605a832e7",
-      "Requirements": [
-        "htmltools",
-        "shiny"
-      ]
-    },
     "shinycssloaders": {
       "Package": "shinycssloaders",
       "Version": "1.0.0.9000",
@@ -1815,6 +1842,18 @@
       "Requirements": [
         "ggfittext",
         "ggplot2"
+      ]
+    },
+    "txtq": {
+      "Package": "txtq",
+      "Version": "0.2.4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "47bc241ac3efaa6b75109c00ad708448",
+      "Requirements": [
+        "R6",
+        "base64url",
+        "filelock"
       ]
     },
     "units": {

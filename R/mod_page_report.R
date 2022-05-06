@@ -71,6 +71,7 @@ mod_page_report_ui <- function(id){
 #' @import rmarkdown
 #' @import promises
 #' @import future
+#' @import ipc
 mod_page_report_server <- function(
   id, schema = NULL, tsas = NULL, scenario_names = NULL, scenarios = NULL, data_seral_treemap = NULL,
   reportList = NULL, status_thlb = NULL, status_avg_vol = NULL, status_road = NULL,
@@ -94,8 +95,17 @@ mod_page_report_server <- function(
 
     # Download handler - report ----
     render_report_async <- function(file, filepath, output_format, output_dir, params){
-
+# browser()
+library(ipc)
+      progress <- ipc::AsyncProgress$new(
+        # session,
+        message = "Generating report",
+        detail = "Please wait"
+      )
       future({
+# browser()
+        progress$inc(8/10) # Increment progress bar
+
         id <- shiny::showNotification(
           "Generating report...",
           duration = NULL,
@@ -114,6 +124,8 @@ mod_page_report_server <- function(
           clean = TRUE,
           quiet = TRUE
         )
+        progress$inc(2/10)
+        progress$close()
         file.rename(out, file)
       })
     }
