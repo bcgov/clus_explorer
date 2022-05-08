@@ -1,14 +1,14 @@
-FROM rocker/shiny:3.5.1
+FROM rocker/geospatial:4.1
 
 WORKDIR /srv/shiny-server
 
 # system libraries of general use
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     libsodium-dev \
-    libmariadbclient-dev \
+#    libmariadbclient-dev \
     libudunits2-dev \
-    libgdal-dev \
-    libproj-dev \
+#    libgdal-dev \
+#    libproj-dev \
     vim \
     curl \
     git \
