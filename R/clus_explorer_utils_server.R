@@ -48,19 +48,6 @@ getSpatialQuery <- function(sql) {
   data
 }
 
-#' Get the rasters from a PostGIS table
-#'
-#' @param srcRaster A character string specifying a PostgreSQL schema and table/view name holding the geometry (e.g., name = c("schema","table"))
-#'
-#' @return
-#' @export
-getRasterQuery <- function(srcRaster) {
-  conn <- getDbConnection()
-  data <- pgGetRast(conn, srcRaster)
-  dbDisconnect(conn)
-  data
-}
-
 #' Get schema tables from information_schema database
 #'
 #' @param schema
