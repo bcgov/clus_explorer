@@ -1,9 +1,10 @@
 ---
-path_logo: www/img/clus-logo.png
+# logo needs an update
+# path_logo: www/img/clus-logo.png 
+# add this to title parameter: ![](www/img/clus-logo.png){width=1in}  
 title: |
-  ![](www/img/clus-logo.png){width=1in}  
-  B.C Caribou Recovery Program
-author: "Ministry of Forests, Lands, Natural Resource Operations and Rural Development"
+  Strategic Analysis Team, Forest Analysis and Inventory Branch
+author: "Ministry of Forests"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
   pdf_document:
@@ -82,7 +83,7 @@ library(kableExtra, quietly = TRUE, warn.conflicts = FALSE)
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 ```
 
-In this document we evaluate different scenarios that model the impact of timber harvesting to the wildlife habitat, including caribou, grizzly bears and others. We also take into account climate events such as wildfires.
+In this document we summarize the outputs from a forest simulation model of alternative forest management scenarios.
 
 The selected area of interest is `r params$schema`.
 

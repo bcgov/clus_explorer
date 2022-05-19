@@ -370,7 +370,7 @@ app_server <- function(input, output, session) {
    SELECT scenario, compartment, timeperiod, volume as variable, 'vol_h' as ind_name
   	FROM {`schema_scenarios$schema()`}.harvest where scenario in ({schema_scenarios$scenario_names()*})
   Union all
-  SELECT scenario, compartment, timeperiod, sum(cut80) as variable, split_part(critical_hab, ' ', 1) AS ind_name
+  SELECT scenario, compartment, timeperiod, sum(c40r50) as variable, split_part(critical_hab, ' ', 1) AS ind_name
   	FROM {`schema_scenarios$schema()`}.disturbance where scenario in ({schema_scenarios$scenario_names()*})
   		group by scenario, compartment, timeperiod, ind_name)
   select scenario, compartment, timeperiod, COALESCE(variable, 0) as variable, ind_name from view1

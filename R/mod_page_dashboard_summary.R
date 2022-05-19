@@ -94,11 +94,11 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
                 strong(em("Example:")),
                 "The ‘future importance’ adjustment allows you to weight the importance
                 of the indicators towards the short or long term.
-                A ‘high’ future importance
+                A ‘High’ future importance
                 results in greater weight on the long term then the short term;
                 A ‘Neutral’ results in all time periods being equally weighted;
-                A ‘Low’ future importance results in greater weight on the short term;
-                A ‘Very Low’ future importance results in even greater weight on the short term.
+                A ‘Medium’ future importance results in greater weight on the short term;
+                A ‘Low’ future importance results in even greater weight on the short term.
                 As an example, if you want to prioritize the value of the indicators
                 in the long-term, select the “High” value."
               )
@@ -537,7 +537,7 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
             )
           ),
           legend = list (orientation = 'h'),
-          margin = list(t = 75, r = 75, b = 75, l = 75)
+          margin = list(t = 75, r = 125, b = 75, l = 125)
         ) "
                   )
                 ))
@@ -563,6 +563,8 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
               isolate(baseline_values())
               # labeller_data <- c()
               baseline_values_annotated <- baseline_values() %>%
+                group_by (scenario, ind_name, timeperiod) %>%
+                summarise (variable = sum(variable)) %>%
                 mutate(
                   ind_name = ifelse(
                     ind_name == 'm_gs',
@@ -585,7 +587,7 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
                 facet_scales = 'free_y',
                 facet_ncol = 2,
                 xlab = "Future year",
-                ylab = "Proportion Age 0 to 40 years",
+                ylab = "",
                 is_plotly = TRUE,
                 # strip.position = "left",
                 # labeller_data = labeller_data,

@@ -153,7 +153,7 @@ mod_page_scenarios_ui <- function(id){
                 critical habitat disturbed. Scenarios with larger rank values are potentially better."
             ),
             p(
-              strong("Select at least two scenarios")
+              strong("Select at least two scenarios and then click the Apply button")
             ),
             uiOutput(ns("rendered")), # https://stackoverflow.com/questions/61112013/shiny-tooltip-for-each-check-able-box-basic
             actionButton(
@@ -346,7 +346,7 @@ mod_page_scenarios_server <- function(id){
       output$rendered <- renderUI({
         extendedCheckboxGroup(
           ns("scenario"),
-          label = "High Throughput Experiment",
+          label = "Scenario List:",
           choiceNames  = sprintf(
             '%s (Rank %s)',
             scenariosList()$scenario,

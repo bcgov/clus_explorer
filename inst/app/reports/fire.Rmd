@@ -1,6 +1,6 @@
 ## Fire
 
-The following table is the summary of area burned by the wildfires:
+The following table is the summary of area burned by wildfires:
 
 ```{r fire_table, results = 'asis', dpi=300}
 if (nrow(params$reportList$fire2) > 0) {
@@ -39,7 +39,7 @@ if (!is.null(params$reportList$fire) & nrow(params$reportList$fire) > 0) {
 }
 ```
 
-The following chart shows 40-year cummulative area burned:
+The following chart shows 40-year cumulative area burned:
 
 ```{r cummulative_fire_history, results = 'asis', dpi=300}
 if (!is.null(params$reportList$fire) & nrow(params$reportList$fire) > 0) {

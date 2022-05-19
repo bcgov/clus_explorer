@@ -39,7 +39,7 @@ mod_page_dashboard_grizzly_server <- function(id, reportList){
 
 
         output$survival_grizzly_af_Plot_UI <- renderUI({
-          plotlyOutput(outputId = ns("road_density_grizzly_Plot"), height = "900px") %>%
+          plotlyOutput(outputId = ns("survival_grizzly_af_Plot"), height = "900px") %>% # road_density_grizzly_Plot
             withSpinner(color = '#ecf0f5', color.background = '#ffffff')
         })
 
@@ -52,7 +52,7 @@ mod_page_dashboard_grizzly_server <- function(id, reportList){
             value = c (0, 50),
             step = 5
           )
-          plotlyOutput(outputId = ns("survival_grizzly_af_Plot"), height = "900px") %>%
+          plotlyOutput(outputId = ns("road_density_grizzly_Plot"), height = "900px") %>% # survival_grizzly_af_Plot
             withSpinner(color = '#ecf0f5', color.background = '#ffffff')
         })
 

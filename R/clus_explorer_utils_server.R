@@ -82,5 +82,5 @@ WHERE nspname NOT IN (
     'TSA'
   )
 
-  available_study_areas <- setNames(as.list(areas$nspname), area_names)
+  available_study_areas <- setNames(as.list(sort(areas$nspname)), sort (area_names))
 }

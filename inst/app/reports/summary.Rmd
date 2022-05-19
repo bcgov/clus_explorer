@@ -6,7 +6,7 @@
 The following indicators highlight the current state of the landbase in the area of interest:
 
 -   **`r scales::percent(params$status_thlb, accuracy = 1, scale = 1)`** - Percentage of the timber harvesting landbase in the area of interest.
--   **`r scales::percent(params$status_road, accuracy = 1, scale = 1)`** - Percentage of the are of interest within 100m from the road.
+-   **`r scales::percent(params$status_road, accuracy = 1, scale = 1)`** - Percentage of the area of interest within 100m from the road.
 -   **`r params$status_avg_vol`** - Average volume (`m3`) per `ha` in THLB.
 
 ### Seral Stage
@@ -51,7 +51,7 @@ ggplot2::ggplot(
 
 ## Summary
 
-We evaluate different scenarios, and compare various parameters against the baseline scenario. The following scenarios have been selected for analysis:
+Below you can compare outputs from different scenarios against the baseline scenario. The following scenarios have been selected for comparison:
 
 ```{r, results='asis'}
 
@@ -81,7 +81,7 @@ risk <- switch(
   '0.05' = "High"
 )
 ```
-Scenario `r params$baseline_scenario` has been selected as the baseline, with "Future importance" factor set to `r risk`. Charts and table below show the values of baseline scenario. The facet variables are Growing Stock (m_gs), Volume Harvested (vol_h), and individual herd names.
+Scenario `r params$baseline_scenario` has been selected as the baseline, with the "Future importance" factor set to `r risk`. The charts and tables below show the indicator values from the baseline scenario. The indicator variables are Growing Stock (m_gs), Volume Harvested (vol_h), and area of forest disturbed within individual caribou herds (indicated by their names).
 
 ```{r echo=FALSE, warning=FALSE, dpi=300}
 chart_line_faceted(
@@ -94,7 +94,7 @@ chart_line_faceted(
   facet_scales = 'free_y',
   facet_ncol = 2,
   xlab = "Future year",
-  ylab = "Proportion Age 0 to 40 years",
+  ylab = "",
   is_plotly = FALSE
 )
 ```
@@ -106,7 +106,10 @@ if (nrow(selected_scenarios) > 1) {
   cat('### Other scenarios compared to baseline')
   cat('\n\n')
 
-  cat('Table and charts below show how other selected scenarios compare to the baseline scenario. Dimensions in those multi-dimensional plots are individual scenarios, Growing Stock (m_gs), Volume Harvested (vol_h), and individual herd names.')
+  cat('The tables and charts below show how other selected scenarios compare to the baseline scenario. Dimensions in the multi-dimensional plots are Growing Stock (m_gs), Volume Harvested (vol_h), and area of forest disturbed within individual caribou herds (indicated by their names).')
+  cat('\n\n')
+  
+  cat('In both the radar plot and heat map, the caribou indicators represent the relative proportion disturbed (i.e., cutblocks less than 40 years old and roads buffered by 50m) of a caribou subpopulation range (as named on the plot) in the area of interest. The forestry indicators are relative merchantable growing stock (m_gs) and relative volume of timber harvested (vol_h).')
   cat('\n\n')
 }
 if (nrow(selected_scenarios) > 1) {

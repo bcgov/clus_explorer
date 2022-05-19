@@ -1,1 +1,38 @@
 ## Grizzly Bear
+
+### Adult Female Survival Rate
+
+The following chart shows the modeled adult female survival rate by grizzly bear population unit:
+
+```{r, grizz survival rate, dpi = 300}
+chart_line_faceted(
+  data = params$reportList$grizzly_survival,
+  x_var = timeperiod,
+  y_var = survival_rate,
+  color_var = scenario,
+  facet_chart = TRUE,
+  facet_vars = gbpu_name,
+  xlab = "Future year",
+  ylab = "Adult Female Survival Rate"
+)
+
+```
+
+### Road Density
+
+The following chart shows road density by grizzly bear population unit:
+
+```{r, road density,dpi = 300}
+chart_line_faceted(
+  data = params$reportList$grizzly_survival,
+  x_var = timeperiod,
+  y_var = road_density,
+  color_var = scenario,
+  facet_chart = TRUE,
+  facet_vars = gbpu_name,
+  xlab = "Future year",
+  ylab = "Grizzly Bear Population Unit Road Density (km/km2)"
+)
+
+```
+
