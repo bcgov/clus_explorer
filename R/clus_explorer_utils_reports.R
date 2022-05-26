@@ -129,7 +129,8 @@ chart_line_faceted <- function(
         scales = facet_scales,
         strip.position = strip.position,
         labeller = as_labeller(labeller_data)
-      )
+      ) +
+      ggplot2::theme(panel.spacing = unit(0.5, "cm"))
   }
 
   if (add_x_intercept) {

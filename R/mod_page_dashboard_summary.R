@@ -290,10 +290,18 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
             dplyr::filter(`scenario` == isolate(input$baseline_scenario)) %>%
             arrange(compartment, ind_name, timeperiod)
         )
-        bv
+        indicator_count <- length(
+          bv %>%
+            distinct(ind_name) %>%
+            pull(ind_name)
+        )
+
+        list(
+          data = bv,
+          indicator_count = indicator_count
+        )
       }
     )
-
 
     radarList <- eventReactive(
       input$baseline_scenario_apply,
@@ -303,7 +311,7 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
 
         # Copy the reactive object, otherwise the new object is the reference to
         # the reactive object
-        dt.baseline <- data.table::copy(baseline_values())
+        dt.baseline <- data.table::copy(baseline_values()$data)
         dt.indicators <- data.table::copy(
           reportList()$indicators %>% dplyr::filter(!(`scenario` == baseline_scenario))
         )
@@ -367,8 +375,14 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
               ),
               div(
                 class = 'chart-container',
-                plotlyOutput(outputId = ns("baseline_scenario_charts"), height = "450px") %>%
-                  withSpinner(color = '#ecf0f5', color.background = '#ffffff')
+                plotlyOutput(
+                  outputId = ns("baseline_scenario_charts"),
+                  height = 250 * baseline_values()$indicator_count / 2
+                ) %>%
+                  withSpinner(
+                    color = '#ecf0f5',
+                    color.background = '#ffffff'
+                  )
               )
             )
           })
@@ -560,9 +574,9 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
           output$baseline_scenario_charts <- renderPlotly ({
             withProgress(message = 'Making Plots', value = 0.1, {
 
-              isolate(baseline_values())
+              isolate(baseline_values()$data)
               # labeller_data <- c()
-              baseline_values_annotated <- baseline_values() %>%
+              baseline_values_annotated <- baseline_values()$data %>%
                 group_by (scenario, ind_name, timeperiod) %>%
                 summarise (variable = sum(variable)) %>%
                 mutate(
@@ -586,12 +600,16 @@ mod_page_dashboard_summary_server <- function(id, schema_scenarios, reportList){
                 facet_vars = ind_name,
                 facet_scales = 'free_y',
                 facet_ncol = 2,
+                facet_nrow = ceiling(
+                  baseline_values()$indicator_count / 2
+                ),
                 xlab = "Future year",
                 ylab = "",
                 is_plotly = TRUE,
                 # strip.position = "left",
                 # labeller_data = labeller_data,
-                height = 450
+                # 2 columns in each row, 225px for each row
+                height = 250 * baseline_values()$indicator_count / 2 #450
               )
             })
           })

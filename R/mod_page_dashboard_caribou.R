@@ -66,10 +66,21 @@ mod_page_dashboard_caribou_server <- function(id, reportList){
     if (!is.null(reportList()$disturbance)) {
       if (nrow(reportList()$disturbance) > 0) {
 
+        indicator_count_disturbance <- length(
+          reportList()$disturbance %>%
+            distinct(critical_hab) %>%
+            pull(critical_hab)
+        )
+        facet_ncol_disturbance <- 3
+        facet_chart_height_disturbance <- 300 * indicator_count_disturbance / facet_ncol_disturbance
+
         output$propDisturbPlotUI <- renderUI ({
           tagList(
-            plotlyOutput(outputId = ns("propDisturbPlot"), height = "600px") %>%
-              withSpinner(color = '#ecf0f5', color.background = '#ffffff'),
+            plotlyOutput(
+              outputId = ns("propDisturbPlot"),
+              height = facet_chart_height_disturbance
+            ) %>%
+              withSpinner(color = '#ecf0f5', color.background = '#ffffff')
           )
         })
 
@@ -83,17 +94,29 @@ mod_page_dashboard_caribou_server <- function(id, reportList){
               color_var = scenario,
               facet_chart = TRUE,
               facet_vars = critical_hab,
+              facet_ncol = facet_ncol_disturbance,
+              facet_nrow = ceiling(
+                indicator_count_disturbance / facet_ncol_disturbance
+              ),
+              facet_scales = 'fixed',
               xlab = "Future year",
               ylab = "Percent Disturbed",
-              is_plotly = TRUE
+              is_plotly = TRUE,
+              height = facet_chart_height_disturbance
             )
           })
         })
 
         output$propDisturbBuffPlotUI <- renderUI ({
           tagList(
-            plotlyOutput(outputId = ns("propDisturbBuffPlot"), height = "600px") %>%
-              withSpinner(color = '#ecf0f5', color.background = '#ffffff')
+            plotlyOutput(
+              outputId = ns("propDisturbBuffPlot"),
+              height = facet_chart_height_disturbance
+            ) %>%
+              withSpinner(
+                color = '#ecf0f5',
+                color.background = '#ffffff'
+              )
           )
         })
 
@@ -106,9 +129,15 @@ mod_page_dashboard_caribou_server <- function(id, reportList){
               color_var = scenario,
               facet_chart = TRUE,
               facet_vars = critical_hab,
+              facet_ncol = facet_ncol_disturbance,
+              facet_nrow = ceiling(
+                indicator_count_disturbance / facet_ncol_disturbance
+              ),
+              facet_scales = 'fixed',
               xlab = "Future year",
               ylab = "Percent Disturbed",
-              is_plotly = TRUE
+              is_plotly = TRUE,
+              height = facet_chart_height_disturbance
             )
           })
         })
