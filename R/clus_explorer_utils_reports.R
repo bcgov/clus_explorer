@@ -106,8 +106,13 @@ chart_line_faceted <- function(
     geom_line() +
     xlab (xlab) +
     ylab (ylab) +
-    scale_x_continuous(limits = c(0, 50),
-                       breaks = seq(0, 50, by = 10)) +
+    scale_x_continuous(
+      limits = c(0, 50),
+      breaks = seq(0, 50, by = 10)
+    ) +
+    scale_y_continuous(
+      labels = scales::comma_format(big.mark = ",", decimal.mark = ".")
+    ) +
     theme_bw() +
     theme(
       legend.title = element_blank(),
@@ -219,6 +224,12 @@ chart_bar_faceted <- function(
         breaks = scale_x_continuous_breaks
       )
   }
+
+  p <- p +
+    scale_y_continuous(
+      labels = scales::comma_format(big.mark = ",", decimal.mark = ".")
+    )
+
 
   if (is_plotly) {
     p <- plotly::ggplotly(p, height = height) %>%

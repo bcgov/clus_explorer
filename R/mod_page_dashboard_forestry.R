@@ -67,6 +67,9 @@ mod_page_dashboard_forestry_server <- function(id, reportList){
             xlab ("Future year") +
             ylab ("Area Harvested (ha)") +
             scale_x_continuous(breaks = seq(0, max(data$timeperiod), by = 10)) +
+            scale_y_continuous(
+              labels = scales::comma_format(big.mark = ",", decimal.mark = ".")
+            ) +
             scale_alpha_discrete(range = c(0.4, 0.8)) +
             scale_fill_grey(start = 0.8, end = 0.2) +
             theme_bw()
@@ -87,6 +90,9 @@ mod_page_dashboard_forestry_server <- function(id, reportList){
             xlab ("Future year") +
             ylab ("Average Harvest Age (yrs)") +
             scale_x_continuous(breaks = seq(0, max(data$timeperiod), by = 10)) +
+            scale_y_continuous(
+              labels = scales::comma_format(big.mark = ",", decimal.mark = ".")
+            ) +
             scale_alpha_discrete(range = c(0.4, 0.8)) +
             scale_fill_grey(start = 0.8, end = 0.2) +
             theme_bw()
@@ -106,6 +112,9 @@ mod_page_dashboard_forestry_server <- function(id, reportList){
           xlab ("Future year") +
           ylab ("Volume Harvested (m3)") +
           scale_x_continuous(breaks = seq(0, max(data$timeperiod), by = 10)) +
+          scale_y_continuous(
+            labels = scales::comma_format(big.mark = ",", decimal.mark = ".")
+          ) +
           scale_alpha_discrete(range = c(0.4, 0.8)) +
           scale_fill_grey(start = 0.8, end = 0.2) +
           theme_bw()
@@ -124,6 +133,9 @@ mod_page_dashboard_forestry_server <- function(id, reportList){
           xlab ("Future year") +
           ylab ("Managed Area Harvested (ha)") +
           scale_x_continuous(breaks = seq(0, max(data$timeperiod), by = 10)) +
+          scale_y_continuous(
+            labels = scales::comma_format(big.mark = ",", decimal.mark = ".")
+          ) +
           scale_alpha_discrete(range = c(0.4, 0.8)) +
           scale_fill_grey(start = 0.8, end = 0.2) +
           theme_bw()
@@ -142,6 +154,9 @@ mod_page_dashboard_forestry_server <- function(id, reportList){
           xlab ("Future year") +
           ylab ("Managed Volume Harvested (m3)") +
           scale_x_continuous(breaks = seq(0, max(data$timeperiod), by = 10)) +
+          scale_y_continuous(
+            labels = scales::comma_format(big.mark = ",", decimal.mark = ".")
+          ) +
           scale_alpha_discrete(range = c(0.4, 0.8)) +
           scale_fill_grey(start = 0.8, end = 0.2) +
           theme_bw()
@@ -160,6 +175,9 @@ mod_page_dashboard_forestry_server <- function(id, reportList){
           xlab ("Future year") +
           ylab ("Available THLB (ha)") +
           scale_x_continuous(breaks = seq(0, max(data$timeperiod), by = 10)) +
+          scale_y_continuous(
+            labels = scales::comma_format(big.mark = ",", decimal.mark = ".")
+          ) +
           scale_alpha_discrete(range = c(0.4, 0.8)) +
           scale_fill_grey(start = 0.8, end = 0.2) +
           theme_bw()
@@ -179,6 +197,9 @@ mod_page_dashboard_forestry_server <- function(id, reportList){
           xlab ("Future year") +
           ylab ("Growing Stock (m3)") +
           scale_x_continuous(breaks = seq(0, max(data$timeperiod), by = 10)) +
+          scale_y_continuous(
+            labels = scales::comma_format(big.mark = ",", decimal.mark = ".")
+          ) +
           scale_alpha_discrete(range = c(0.4, 0.8)) +
           scale_fill_grey(start = 0.8, end = 0.2) +
           theme_bw()
