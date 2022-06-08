@@ -19,13 +19,8 @@
 #' @import config
 #' @import ggplot2
 #' @importFrom glue glue glue_sql
-#' @import promises
-#' @import future
-#' @import ipc
 #' @param input,output,session Internal parameters for {shiny}.
 #'     DO NOT REMOVE.
-
-future::plan(future::multiprocess())
 
 app_server <- function(input, output, session) {
   # Your application server logic
@@ -34,8 +29,6 @@ app_server <- function(input, output, session) {
   options(spinner.color = "#F0F4F8")
   options(spinner.size = 1)
   options(spinner.type = 3)
-
-  future::plan(future::multicore())
 
   config <- config::get()
 

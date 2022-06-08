@@ -21,7 +21,7 @@ The following chart represents the proportion of forest by forest age. Categorie
 
 ```{r seral_stage, fig.height=2, fig.width=4, dpi=300}
 ggplot2::ggplot(
-    params$data_seral_treemap %>% 
+    as.data.frame(params$data_seral_treemap) %>% 
       dplyr::filter(!is.na(variable)) %>% 
       mutate(
         variable = forcats::fct_reorder(variable, V1, .desc = TRUE),
@@ -85,7 +85,7 @@ Scenario `r params$baseline_scenario` has been selected as the baseline, with th
 
 ```{r echo=FALSE, warning=FALSE, dpi=300}
 chart_line_faceted(
-  data = params$baseline_values,
+  data = as.data.frame(params$baseline_values$data),
   x_var = timeperiod,
   y_var = variable,
   color_var = scenario,
@@ -93,9 +93,13 @@ chart_line_faceted(
   facet_vars = ind_name,
   facet_scales = 'free_y',
   facet_ncol = 2,
+  facet_nrow = ceiling(
+    params$baseline_values$indicator_count / 2
+  ),
   xlab = "Future year",
   ylab = "",
-  is_plotly = FALSE
+  is_plotly = FALSE#,
+  # height = 250 * params$baseline_values$indicator_count / 2
 )
 ```
 
@@ -114,7 +118,7 @@ if (nrow(selected_scenarios) > 1) {
 }
 if (nrow(selected_scenarios) > 1) {
   kableExtra::kbl(
-      params$radar_list,
+      as.data.frame(params$radar_list),
       # align = 'lrlcc',
       booktabs = TRUE,
       longtable = FALSE,
@@ -128,7 +132,7 @@ if (nrow(selected_scenarios) > 1) {
 }
 if (nrow(selected_scenarios) > 1) {
   ggradar::ggradar(
-    params$radar_list,
+    as.data.frame(params$radar_list),
     base.size = 5,
     grid.min = min(params$radar_list_long$Ratio) * 1.1,
     grid.max = max(params$radar_list_long$Ratio) * 1.1,
@@ -148,7 +152,7 @@ if (nrow(selected_scenarios) > 1) {
 
 }
 if (nrow(selected_scenarios) > 1) {
-  chart_heatmap(data = params$radar_list_long, x = Herd, y = scenario.x, z = Ratio)
+  chart_heatmap(data = as.data.frame(params$radar_list_long), x = Herd, y = scenario.x, z = Ratio)
 }
 
 ```

@@ -1,8 +1,18 @@
 ## Caribou
 
-### Disturbance
+```{r echo=FALSE, warning=FALSE}
+indicator_count_disturbance <- length(
+  params$reportList$disturbance %>%
+    distinct(critical_hab) %>%
+    pull(critical_hab)
+)
+facet_ncol_disturbance <- 3
+facet_chart_height_disturbance <- 1.25 * indicator_count_disturbance / facet_ncol_disturbance
+```
 
-```{r caribou_disturbance, dpi=300}
+### Proportion Disturbed
+
+```{r caribou_disturbance, dpi=300, fig.height=facet_chart_height_disturbance}
 chart_line_faceted(
   data = params$reportList$disturbance,
   x_var = timeperiod,
@@ -10,10 +20,20 @@ chart_line_faceted(
   color_var = scenario,
   facet_chart = TRUE,
   facet_vars = critical_hab,
+  facet_ncol = facet_ncol_disturbance,
+  facet_nrow = ceiling(
+    indicator_count_disturbance / facet_ncol_disturbance
+  ),
+  facet_scales = 'fixed',
   xlab = "Future year",
-  ylab = "Percent Disturbed"
+  ylab = "Percent Disturbed",
+  is_plotly = FALSE
 )
+```
 
+### Proportion Disturbed with 500m Buffer
+
+```{r caribou_disturbance_500, dpi=300, fig.height=facet_chart_height_disturbance}
 chart_line_faceted(
   data = params$reportList$disturbance,
   x_var = timeperiod,
@@ -21,8 +41,14 @@ chart_line_faceted(
   color_var = scenario,
   facet_chart = TRUE,
   facet_vars = critical_hab,
+  facet_ncol = facet_ncol_disturbance,
+  facet_nrow = ceiling(
+    indicator_count_disturbance / facet_ncol_disturbance
+  ),
+  facet_scales = 'fixed',
   xlab = "Future year",
-  ylab = "Percent Disturbed"
+  ylab = "Percent Disturbed",
+  is_plotly = FALSE
 )
 ```
 
@@ -39,7 +65,9 @@ chart_line_faceted(
   xlab = "Future year",
   ylab = "Proportion Age 0 to 40 years"
 )
+```
 
+````{r caribou_forest_age_80, dpi=300}
 chart_line_faceted(
   data = params$reportList$survival,
   x_var = timeperiod,
@@ -50,7 +78,9 @@ chart_line_faceted(
   xlab = "Future year",
   ylab = "Proportion Age 80 to 120 years"
 )
+```
 
+````{r caribou_forest_age_120, dpi=300}
 chart_line_faceted(
   data = params$reportList$survival,
   x_var = timeperiod,
@@ -83,7 +113,9 @@ if (!is.null(params$reportList$abundance)) {
   cat('\n')
   cat('\n')
 }
+```
 
+````{r caribou_population_change, results = 'asis', dpi=300}
 data <- params$reportList$survival
 data[, survival_rate_change := survival_rate - first(survival_rate), by = .(scenario, herd_bounds)]
 

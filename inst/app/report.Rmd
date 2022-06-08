@@ -70,6 +70,7 @@ linestretch: 1.15
 \color{TextGreyColour}
 
 ```{r setup, include=FALSE}
+
 library(dplyr, quietly = TRUE, warn.conflicts = FALSE)
 library(magrittr, quietly = TRUE, warn.conflicts = FALSE)
 library(forcats, quietly = TRUE, warn.conflicts = FALSE)

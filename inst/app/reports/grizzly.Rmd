@@ -2,19 +2,33 @@
 
 ### Adult Female Survival Rate
 
-The following chart shows the modeled adult female survival rate by grizzly bear population unit:
+The following chart shows the modelled adult female survival rate by grizzly bear population unit:
 
-```{r, grizz survival rate, dpi = 300}
-chart_line_faceted(
-  data = params$reportList$grizzly_survival,
-  x_var = timeperiod,
-  y_var = survival_rate,
-  color_var = scenario,
-  facet_chart = TRUE,
-  facet_vars = gbpu_name,
-  xlab = "Future year",
-  ylab = "Adult Female Survival Rate"
-)
+```{r, grizz survival rate, results = 'asis', dpi=300}
+if (!is.null(params$reportList$grizzly_survival)) {
+  if (nrow(params$reportList$grizzly_survival) > 0) {
+    chart_line_faceted(
+      data = params$reportList$grizzly_survival,
+      x_var = timeperiod,
+      y_var = survival_rate,
+      color_var = scenario,
+      facet_chart = TRUE,
+      facet_vars = gbpu_name,
+      xlab = "Future year",
+      ylab = "Adult Female Survival Rate"
+    )
+  } else {
+    cat('\n')
+    cat('No data found for selection.')
+    cat('\n')
+    cat('\n')
+  }
+} else {
+  cat('\n')
+  cat('No data found for selection.')
+  cat('\n')
+  cat('\n')
+}
 
 ```
 
@@ -22,17 +36,31 @@ chart_line_faceted(
 
 The following chart shows road density by grizzly bear population unit:
 
-```{r, road density,dpi = 300}
-chart_line_faceted(
-  data = params$reportList$grizzly_survival,
-  x_var = timeperiod,
-  y_var = road_density,
-  color_var = scenario,
-  facet_chart = TRUE,
-  facet_vars = gbpu_name,
-  xlab = "Future year",
-  ylab = "Grizzly Bear Population Unit Road Density (km/km2)"
-)
+```{r, road density, results = 'asis', dpi=300}
+if (!is.null(params$reportList$grizzly_survival)) {
+  if (nrow(params$reportList$grizzly_survival) > 0) {
+    chart_line_faceted(
+      data = params$reportList$grizzly_survival,
+      x_var = timeperiod,
+      y_var = road_density,
+      color_var = scenario,
+      facet_chart = TRUE,
+      facet_vars = gbpu_name,
+      xlab = "Future year",
+      ylab = "Grizzly Bear Population Unit Road Density (km/km2)"
+    )
+  } else {
+    cat('\n')
+    cat('No data found for selection.')
+    cat('\n')
+    cat('\n')
+  }
+} else {
+  cat('\n')
+  cat('No data found for selection.')
+  cat('\n')
+  cat('\n')
+}
 
 ```
 

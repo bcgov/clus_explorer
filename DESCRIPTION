@@ -18,7 +18,6 @@ Imports:
     bsplus,
     data.table,
     dplyr,
-    future,
     ggplot2,
     igraph,
     leaflet,

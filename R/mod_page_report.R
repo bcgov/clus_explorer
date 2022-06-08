@@ -69,9 +69,6 @@ mod_page_report_ui <- function(id){
 #'
 #' @noRd
 #' @import rmarkdown
-#' @import promises
-#' @import future
-#' @import ipc
 mod_page_report_server <- function(
   id, schema = NULL, tsas = NULL, scenario_names = NULL, scenarios = NULL, data_seral_treemap = NULL,
   reportList = NULL, status_thlb = NULL, status_avg_vol = NULL, status_road = NULL,
@@ -94,42 +91,6 @@ mod_page_report_server <- function(
     })
 
     # Download handler - report ----
-    render_report_async <- function(file, filepath, output_format, output_dir, params){
-# browser()
-library(ipc)
-      progress <- ipc::AsyncProgress$new(
-        # session,
-        message = "Generating report",
-        detail = "Please wait"
-      )
-      future({
-# browser()
-        progress$inc(8/10) # Increment progress bar
-
-        id <- shiny::showNotification(
-          "Generating report...",
-          duration = NULL,
-          closeButton = FALSE
-        )
-        on.exit(shiny::removeNotification(id), add = TRUE)
-
-        out <- rmarkdown::render(
-          input = 'inst/app/report.Rmd',
-          output_format = output_format,
-          output_file = filepath,
-          output_dir = output_dir,
-          params = params,
-          run_pandoc = TRUE,
-          envir = new.env(parent = globalenv()),
-          clean = TRUE,
-          quiet = TRUE
-        )
-        progress$inc(2/10)
-        progress$close()
-        file.rename(out, file)
-      })
-    }
-
     # Get rid of reactive values
     schema <- data.table::copy(schema())
     tsas <- data.table::copy(tsas())
@@ -140,6 +101,10 @@ library(ipc)
     status_avg_vol <- data.table::copy(status_avg_vol())
     status_road <- data.table::copy(status_road())
     reportList <- data.table::copy(reportList())
+    radar_list <- data.table::copy(radar_list())
+    radar_list_long <- data.table::copy(radar_list_long())
+    baseline_values <- data.table::copy(baseline_values())
+
 
     output$generate_report <- downloadHandler(
       filename = function() {
@@ -163,9 +128,9 @@ library(ipc)
           status_thlb = status_thlb,
           status_avg_vol = status_avg_vol,
           status_road = status_road,
-          radar_list = data.table::copy(radar_list()),
-          radar_list_long = data.table::copy(radar_list_long()),
-          baseline_values = data.table::copy(baseline_values()),
+          radar_list = radar_list,
+          radar_list_long = radar_list_long,
+          baseline_values = baseline_values,
           baseline_scenario = data.table::copy(baseline_scenario),
           risk = data.table::copy(risk)
         )
@@ -184,7 +149,22 @@ library(ipc)
           powerpoint = powerpoint_presentation()
         )
 
-        out <- render_report_async(file, filepath, output_format, loc, params)
+        shiny::withProgress(message = 'Generating report', value = 0.8, {
+            out <- rmarkdown::render(
+            input = 'inst/app/report.Rmd',
+            output_format = output_format,
+            output_file = filepath,
+            output_dir = loc,
+            params = params,
+            run_pandoc = TRUE,
+            envir = new.env(parent = globalenv()),
+            clean = TRUE,
+            quiet = TRUE
+          )
+          # progress$inc(2/10)
+          # progress$close()
+          file.rename(out, file)
+        })
       }
     )
 
