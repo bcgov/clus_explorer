@@ -68,11 +68,13 @@ s <- lapply(rownames(selected_scenarios), function(i) {
 
   cat(paste0('- **', scenario_name, '**: ', scenario_description, '\n\n'))
 })
+
 ```
 
 ### Baseline scenario
 
 ```{r echo=FALSE, warning=FALSE}
+
 risk <- switch(
   params$risk,
   '0' = "Neutral",
@@ -101,9 +103,10 @@ chart_line_faceted(
   is_plotly = FALSE#,
   # height = 250 * params$baseline_values$indicator_count / 2
 )
+
 ```
 
-```{r echo=FALSE, warning=FALSE, fig.height=3.5, dpi=300, results='asis'}
+```{r echo=FALSE, warning=FALSE, fig.height=4.5, dpi=300, results='asis'}
 
 if (nrow(selected_scenarios) > 1) {
   cat('\n\n')
@@ -116,41 +119,82 @@ if (nrow(selected_scenarios) > 1) {
   cat('In both the radar plot and heat map, the caribou indicators represent the relative proportion disturbed (i.e., cutblocks less than 40 years old and roads buffered by 50m) of a caribou subpopulation range (as named on the plot) in the area of interest. The forestry indicators are relative merchantable growing stock (m_gs) and relative volume of timber harvested (vol_h).')
   cat('\n\n')
 }
+
 if (nrow(selected_scenarios) > 1) {
   kableExtra::kbl(
       as.data.frame(params$radar_list),
       # align = 'lrlcc',
       booktabs = TRUE,
-      longtable = FALSE,
+      longtable = FALSE
       # format = 'latex'
     ) %>%
     # column_spec(1, width = "1.5in") %>%
     # column_spec(3, width = "1.5in") %>%
     # column_spec(4, width = "1in") %>%
-    kableExtra::kable_styling(latex_options = c('hold_position', 'scale_down', 'striped'), font_size = 7)
+    kableExtra::kable_styling(
+      latex_options = c('hold_position', 'scale_down', 'striped'), font_size = 7
+    )
 
-}
-if (nrow(selected_scenarios) > 1) {
-  ggradar::ggradar(
-    as.data.frame(params$radar_list),
-    base.size = 5,
-    grid.min = min(params$radar_list_long$Ratio) * 1.1,
-    grid.max = max(params$radar_list_long$Ratio) * 1.1,
-    grid.label.size = 3,
-    gridline.min.colour = "#CBD2D9",
-    gridline.mid.colour = "#CBD2D9",
-    gridline.max.colour = "#CBD2D9",
-    group.point.size = 1.5,
-    group.line.width = 0.5,
-    background.circle.colour = "#F5F7FA",
-    axis.line.colour = "#CBD2D9",
-    axis.label.size = 3,
-    legend.title = "",
-    legend.position = "right",
-    legend.text.size = 6,
+  # browser()
+  radar_data <- as.data.frame(params$radar_list)
+  rownames(radar_data) <- radar_data$scenario.x
+  radar_data <- radar_data %>% 
+    select(-scenario.x)
+
+  col_max <- rep(1, length(colnames(radar_data)))
+  col_min <- rep(-1, 8)
+
+  # Bind variables summary to the data
+  radar_data <- as.data.frame(rbind(col_min, col_max, radar_data))
+  
+  op <- par(mfrow = c(1, 1), mar = c(rep(2, 4)), xpd=TRUE)
+  fmsb::radarchart(
+    radar_data,
+    axistype = 1,
+    # Customize the polygon
+    pcol = c("#00AFBB", "#E7B800", "#FC4E07"),
+    # pfcol = scales::alpha('#00AFBB', 0.5),
+    plwd = 2,
+    plty = 1,
+    # Customize the grid
+    cglcol = "grey",
+    cglty = 1,
+    cglwd = 0.8,
+    # Customize the axis
+    axislabcol = "#393939",
+    # Variable labels
+    vlcex = 0.7,
+    calcex = 0.7,
+    caxislabels = c(-1, -0.5, 0, 0.5, 1),
+    centerzero = TRUE
   )
-
+  
+  legend(
+    x = "bottom", legend = rownames(radar_data[-c(1,2),]), horiz = TRUE,
+    bty = "n", pch = 20 , col = c("#00AFBB", "#E7B800", "#FC4E07"),
+    text.col = "black", cex = 0.5, pt.cex = 0.5, inset=c(0, 1)
+  )
+  par(op)
+  # ggradar::ggradar(
+  #   radar_data,
+  #   base.size = 5,
+  #   grid.min = -1.1, # min(params$radar_list_long$Ratio) * 0.9,
+  #   grid.max = 1.1, # max(params$radar_list_long$Ratio) * 1.1,
+  #   grid.label.size = 3,
+  #   gridline.min.colour = "#CBD2D9",
+  #   gridline.mid.colour = "#CBD2D9",
+  #   gridline.max.colour = "#CBD2D9",
+  #   group.point.size = 1.5,
+  #   group.line.width = 0.5,
+  #   background.circle.colour = "#F5F7FA",
+  #   axis.line.colour = "#CBD2D9",
+  #   axis.label.size = 3,
+  #   legend.title = "",
+  #   legend.position = "right",
+  #   legend.text.size = 6
+  # )
 }
+
 if (nrow(selected_scenarios) > 1) {
   chart_heatmap(data = as.data.frame(params$radar_list_long), x = Herd, y = scenario.x, z = Ratio)
 }

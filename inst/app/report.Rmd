@@ -11,7 +11,11 @@ output:
     df_print: kable
     fontsize: 10pt
     keep_tex: no
-    always_allow_html: true
+    always_allow_html: yes
+  word_document:
+    always_allow_html: yes
+  powerpoint_presentation:
+    always_allow_html: yes
 params:
   details: list()
   schema: NA
@@ -80,6 +84,8 @@ library(ggplot2, quietly = TRUE, warn.conflicts = FALSE)
 library(ggradar, quietly = TRUE, warn.conflicts = FALSE)
 library(treemapify, quietly = TRUE, warn.conflicts = FALSE)
 library(kableExtra, quietly = TRUE, warn.conflicts = FALSE)
+library(webshot, quietly = TRUE, warn.conflicts = FALSE)
+library(fmsb, quietly = TRUE, warn.conflicts = FALSE)
 
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 ```

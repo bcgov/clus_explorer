@@ -77,10 +77,10 @@
     },
     "RPostgreSQL": {
       "Package": "RPostgreSQL",
-      "Version": "0.7-3",
+      "Version": "0.7-4",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "d1258c16d609c27a3ba022d50c054b34",
+      "Hash": "895cae73af25cb3770836d641511ad28",
       "Requirements": [
         "DBI"
       ]
@@ -236,14 +236,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "3f038e5ac7f41d4ac41ce658c85e3042",
-      "Requirements": []
-    },
-    "codetools": {
-      "Package": "codetools",
-      "Version": "0.2-18",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "019388fc48e48b3da0d3a76ff94608a8",
       "Requirements": []
     },
     "colorspace": {
@@ -462,6 +454,14 @@
       "Hash": "77bd60a6157420d4ffa93b27cf6a58b8",
       "Requirements": []
     },
+    "fmsb": {
+      "Package": "fmsb",
+      "Version": "0.7.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "14e7313a7a1ab51a5771c2e959fe86d6",
+      "Requirements": []
+    },
     "fontawesome": {
       "Package": "fontawesome",
       "Version": "0.2.2",
@@ -506,19 +506,6 @@
       "Repository": "CRAN",
       "Hash": "7c89603d81793f0d5486d91ab1fc6f1d",
       "Requirements": []
-    },
-    "future": {
-      "Package": "future",
-      "Version": "1.24.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "5cc7addaa73372fbee0a7d06c880068e",
-      "Requirements": [
-        "digest",
-        "globals",
-        "listenv",
-        "parallelly"
-      ]
     },
     "generics": {
       "Package": "generics",
@@ -610,16 +597,6 @@
       "Repository": "CRAN",
       "Hash": "f3aefccc1cc50de6338146b62f115de8",
       "Requirements": []
-    },
-    "globals": {
-      "Package": "globals",
-      "Version": "0.14.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "eca8023ed5ca6372479ebb9b3207f5ae",
-      "Requirements": [
-        "codetools"
-      ]
     },
     "glue": {
       "Package": "glue",
@@ -913,14 +890,6 @@
         "rlang"
       ]
     },
-    "listenv": {
-      "Package": "listenv",
-      "Version": "0.8.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "0bde42ee282efb18c7c4e63822f5b4f7",
-      "Requirements": []
-    },
     "lubridate": {
       "Package": "lubridate",
       "Version": "1.8.0",
@@ -1010,14 +979,6 @@
       "Requirements": [
         "askpass"
       ]
-    },
-    "parallelly": {
-      "Package": "parallelly",
-      "Version": "1.31.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "ceef6586b2539fd15f4cdf87061bfa04",
-      "Requirements": []
     },
     "parsedate": {
       "Package": "parsedate",
@@ -1509,10 +1470,10 @@
     },
     "sf": {
       "Package": "sf",
-      "Version": "1.0-7",
+      "Version": "1.0-8",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "d237b77320537f7793c7a4f83267cf50",
+      "Hash": "153da622b27630793858f24436bc0871",
       "Requirements": [
         "DBI",
         "Rcpp",
@@ -1911,10 +1872,10 @@
     },
     "webshot": {
       "Package": "webshot",
-      "Version": "0.5.2",
+      "Version": "0.5.3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "e99d80ad34457a4853674e89d5e806de",
+      "Hash": "7261ab7f98e97c771217e6b87c085d6e",
       "Requirements": [
         "callr",
         "jsonlite",
