@@ -34,7 +34,7 @@ chart_heatmap <- function(
       plot.caption = element_text(face = 'italic', size = 6, colour = '#616E7C', hjust = 1, margin = margin(t = 0.5, unit = "cm")),
       # panel.grid.major = element_line(colour = "#E4E7EB", size = 0.2),
       # panel.grid.minor = element_line(colour = "#F5F7FA", size = 0.25),
-      axis.text.x  = element_text(colour = "#52606D", size = 7),
+      axis.text.x  = element_text(colour = "#52606D", size = 7, angle =45 ),
       axis.text.y  = element_text(colour = "#52606D", hjust = 1, margin = margin(r = 0.25, unit = "cm"), size = 7)
     ) +
     labs(
