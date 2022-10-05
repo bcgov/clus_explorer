@@ -174,29 +174,13 @@ if (nrow(selected_scenarios) > 1) {
     bty = "n", pch = 20 , col = c("#00AFBB", "#E7B800", "#FC4E07"),
     text.col = "black", cex = 0.5, pt.cex = 0.5, inset=c(0, 1)
   )
+  
+  
   par(op)
-  # ggradar::ggradar(
-  #   radar_data,
-  #   base.size = 5,
-  #   grid.min = -1.1, # min(params$radar_list_long$Ratio) * 0.9,
-  #   grid.max = 1.1, # max(params$radar_list_long$Ratio) * 1.1,
-  #   grid.label.size = 3,
-  #   gridline.min.colour = "#CBD2D9",
-  #   gridline.mid.colour = "#CBD2D9",
-  #   gridline.max.colour = "#CBD2D9",
-  #   group.point.size = 1.5,
-  #   group.line.width = 0.5,
-  #   background.circle.colour = "#F5F7FA",
-  #   axis.line.colour = "#CBD2D9",
-  #   axis.label.size = 3,
-  #   legend.title = "",
-  #   legend.position = "right",
-  #   legend.text.size = 6
-  # )
 }
 
-if (nrow(selected_scenarios) > 1) {
-  chart_heatmap(data = as.data.frame(params$radar_list_long), x = Herd, y = scenario.x, z = Ratio)
-}
+```
 
+```{r echo=FALSE, warning=FALSE, fig.height=4.5, dpi=300, results='asis'}
+chart_heatmap(data = as.data.frame(params$radar_list_long), x = Herd, y = scenario.x, z = Ratio)
 ```
