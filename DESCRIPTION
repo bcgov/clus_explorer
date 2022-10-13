@@ -40,7 +40,9 @@ URL: https://github.com/bcgov/clus_explorer
 BugReports: https://github.com/bcgov/clus_explorer/issues
 Suggests: 
     testthat,
-    spelling
+    spelling,
+    knitr
 Language: en-US
 Depends: 
     R (>= 2.10)
+VignetteBuilder: knitr

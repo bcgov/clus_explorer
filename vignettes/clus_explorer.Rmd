@@ -1,0 +1,124 @@
+---
+title: "clus_explorer"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{clus_explorer}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Modular Structure
+The CLUS Explorer app is initiated using `{golem}` package.
+
+This facilitates the following:
+
+- The app code and data are organized like a package. This means that all
+files in `/R` directory and all data objects in `/data` directory are automatically
+loaded into memory when the application is started.
+- The app can easily be organized into modules, making it easier to maintain and 
+understand the architecuture.
+
+The application is highly modularized, with each module being created in a separate file,
+and each file containing both `ui` and `server` Shiny functions. 
+
+All files containing the application logic are in `/R` directory.
+
+For easier organization, the "page" modules are prefixed with `mod_page_` prefix, 
+while reusable chart modules are prefixed with `mod_chart_` prefix. 
+
+There are also several files containing helper functions. They all contain `_utils_`
+in the file name.
+
+## Running the App and App Hierarchy
+
+The app is started by running the `/app.R` file in the repo root. It calls the `golem::run_dev` 
+function which loads the `app_ui` and `app_server` files, which in turn load Shiny `ui` 
+and `server` functions.
+
+Following is the hierarchy of the modules:
+
+`app.ui` - defines the Shiny Dashboard page, sidebar menu and tab items
+
+Tab items call the following UI modules:
+
+- mod_page_home_ui
+- mod_page_scenarios_ui
+- mod_page_dashboard_summary_ui
+- mod_page_dashboard_caribou_ui
+- mod_page_dashboard_forestry_ui
+- mod_page_dashboard_fire_ui
+- mod_page_dashboard_fisher_ui
+- mod_page_dashboard_grizzly_ui
+- mod_page_report_ui
+
+passing in the module ID as a string.
+
+`app_server` - Calls the following modules
+
+- mod_page_home_server
+- mod_page_scenarios_server
+
+It observes the changes in selected scenarios and recalculates `reportList`
+reactive value, which contains all data relevant for generating charts and reports.
+
+The server functions of remaining modules are invoked by passing in the `reportList`
+reactive value.
+
+- mod_page_dashboard_summary_server
+- mod_page_dashboard_caribou_server
+- mod_page_dashboard_grizzly_server
+- mod_page_dashboard_forestry_server
+- mod_page_dashboard_fisher_server
+- mod_page_dashboard_fire_server
+
+The report generation module `mod_page_report_server` is called by passing in 
+`reportList` reactive and a number of additional relevant variables required to generate the PDF, Word or
+PowerPoint reports.
+
+## Generating reports
+
+The app can generate reports in PDF and Microsoft Word or PowerPoint formats. 
+The prerequisites for generating the report are:
+
+- Selecting the area of interest and scenarios on the Scenarios page.
+- Baseline scenario on the Dashboard - Summary page.
+- At least one section on the Generate Report page.
+
+When the "Download report" button is clicked, the download handler function takes 
+all the relevant data objects that were passed in to the `mod_page_report` module 
+as parameters, and passes them as `params` list into the `rmarkdown::render` function.
+
+The rendering uses `inst/app/report.Rmd` markdown file as a template. The `report.Rmd` file
+accepts all parameters in `params` key of the `yaml` front matter.
+
+In the `yaml` front matter, it also sets `latex` and other variables used for rendering
+and loads the required R packages.
+
+Since generating the report allows the user to select the sections they want included,
+rendering is also broken down into individual markdown files for each of the sections.
+
+The evaluation of user selection which sections should be included, and inclusion of 
+individual markdown files corresponding to user selection happens in the code chunk 
+definitions in `inst/app/report.Rmd' markdown file. For example:
+
+```{r eval=FALSE}
+<!-- Summary -->
+{r, eval=('summary' %in% params$details), child=c('reports/summary.Rmd')}
+```
+
+These included individual markdown files run in the same environment as the main 
+`report.Rmd` file, so all variables and data objects are available for them at runtime.
+
+## Managing Dependencies
+
+The app uses `{renv}` package to manage dependencies and package versions. When the 
+containers are started, the first command that is executed is `renv::restore()`,
+which brings the environment up to date with the packages and versions
+recorded in `renv.lock` file in the repository root.

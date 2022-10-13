@@ -4,3 +4,4 @@
 .Ruserdata
 config.yml
 *.log
+inst/doc
